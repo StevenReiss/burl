@@ -1,0 +1,48 @@
+<BOOKS>
+   <FIELDS>
+      <FIELD NAME="LCCN" MARC="010a" OPENLIB="lccn" GOOGLE="lccn" />
+      <FIELD NAME="Personal Name" MARC="100a q b c d e" OPENLIB="author_name" GOOGLE="authors"
+		ALTNAMES="Primary,Primary Author" />
+      <FIELD NAME="Main Title" MARC="245a b c" OPENLIB="title" GOOGLE="title: subtitle"
+		ALTNAMES="Title" />
+      <FIELD NAME="Edition" MARC="250a b" />
+      <FIELD NAME="Imprint" MARC="260a b c+264a b c" OPENLIB="publisher : publish_year"
+		GOOGLE="publisher : publishedData" MULTIPLE="T" ALTNAME='Publisher' />
+      <FIELD NAME="Description" MARC="300a b c e" GOOGLE="description"
+		ALTNAME="Desc" />
+      <FIELD NAME="ISBN" ISBN="ORIGINAL" />
+      <FIELD NAME="All ISBNs" ISBN='ALL' MARC="020a" OPENLIB="isbn"
+	       GOOGLE="industryIdentifiers.identifier" MULTIPLE="T" ALTNAME="ISBNs" />
+      <FIELD NAME="LC Classification" MARC="050a b" OPENLIB="lcc" ALTNAMES="LCC" />
+      <FIELD NAME="Related Names" MARC="700a q b c d e" OPENLIB="author_name" GOOGLE="authors" MULTIPLE="T"
+		ALTNAME='Author,Authors' />
+      <FIELD NAME="Contents" MARC="505a" MULTIPLE='T' />
+      <FIELD NAME="Subjects" MARC="630a -- x -- v+650a -- x -- v+651a -- e -- g -- 4 -- v -- x -- y -- z"
+		OPENLIB="subject" GOOGLE="categories" MULTIPLE="T" ALTNAMES='Subject,subj' />
+      <FIELD NAME="Notes" MARC="504a" MULTIPLE="T" />
+      <FIELD NAME="Series" MARC="440a n v+490a x+830a v x" MULTIPLE="T" />
+      <FIELD NAME="Version" MARC="251a" />
+      <FIELD NAME="Dewey Class No." MARC="082a--2" OPENLIB="ddc" FIELDNAME="dewey"
+		ALTNAMES='Dewey,ddn' />
+      <FIELD NAME="OCLC" MARC="035a" OPENLIB="oclc" GOOGLE="oclc" />
+      <FIELD NAME="Copy" DEFAULT="1" />
+      <FIELD NAME="Shelf" />
+      <FIELD NAME="Status" />
+   </FIELDS>
+   <CSV QUOTE='"' SEPARATOR="," />
+   <MULTIPLE TEXT=" | " />
+</BOOKS>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

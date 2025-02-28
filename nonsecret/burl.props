@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<entry key="edu.brown.cs.ivy.file.dbmstype">POSTGRESQL or MYSQL</entry>
+<entry key="edu.brown.cs.ivy.file.dbmshost">DATABASE HOST</entry>
+<entry key="edu.brown.cs.ivy.file.dbmsuser">DATABASE USERspr</entry>
+<entry key="edu.brown.cs.ivy.file.dbmspassword">DATABASE PASSWORD</entry>
+<entry key="baseDirectory">BURL INSTALL DIRECTORY</entry>
+<entry key="dataDirectory">BURL DATA DIRECTORY</entry>
+<entry key="hostpfx">http://localhost OR HTTPS://YOURHOST</entry>
+<entry key="email.from">EMAIL FROM ADDRESS (gmail)</entry>
+<entry key="email.user">EMAIL FROM USER</entry>
+<entry key="email.password">EMAIL PASSWORD -- actually GOOGLE passphrase</entry>
+<entry key="email.replyto">YOUR EMAIL</entry>
+</properties>

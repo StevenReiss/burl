@@ -1,0 +1,81 @@
+<project name='burl' default='all'>
+
+   <property file='build.properties' />
+
+   <available file="./build.properties" type='file' property='setup.done' />
+   <path id='setuppath'>
+      <pathelement location='..' />
+   </path>
+   <path id='burlpath'>
+      <pathelement location='.' />
+   </path>
+   <property name='setupfile' refid='setuppath' />
+   <property name='burlfile' refid='burlpath' />
+   <property name='PRO' value='${setupfile}' />
+   <property name='BURL' value='${burlfile}' />
+
+   <target name='setup' unless='setup.done'>
+      <echo file='./build.properties' message="PRO=${setupfile}${line.separator}" />
+      <echo file='./build.properties' message='BURL=${burlfile}${line.separator}' append='true' />
+      <mkdir dir='./java/edu/brown/cs/burl' />
+      <property name='PRO' value='${setupfile}' />
+      <property name='BURL' value='${burlfile}' />
+   </target>
+
+
+   <available file='${PRO}/ivy' type="dir" property="ivy.present" />
+   <property name='IVYBIN' value='${BURLLIB}/ivy.jar' />
+   <property name='IVYLIB' value='${PRO}/ivy/lib' />
+
+   <property name='BURLLIB' value='${BURL}/lib' />
+   <path id='spr.classpath'>
+     <pathelement location='${BURL}/java' />
+     <pathelement location='${BURL}/javasrc' />
+     <pathelement location='${BURL}/resources' />
+     <fileset dir='${IVYLIB}' includes='ivy.jar' />
+     <fileset dir='${IVYLIB}' includes='json.jar' />
+     <fileset dir='${IVYLIB}' includes='slf4j-api.jar' />
+     <fileset dir='${IVYLIB}' includes='mongojava.jar' />
+     <fileset dir='${IVYLIB}' includes='postgresql.jar' />
+     <fileset dir='${IVYLIB}' includes='mysql.jar' />
+  </path>
+
+  <target name='all' depends='setup,compile,jar' />
+
+  <target name='compile' depends='setup'>
+     <javac srcdir='javasrc' destdir='${BURL}/java' debug='on' deprecation='on' includeantruntime='false'>
+	<classpath refid='spr.classpath' />
+     </javac>
+  </target>
+
+  <target name='jar' depends='compile'>
+     <jar destfile='burl.jar'>
+	<manifest>
+	   <attribute name='Main-Class' value='edu.brown.cs.burl.IQsignMain' />
+	</manifest>
+	<fileset dir='${BURL}/java' includes='**/*.class' />
+	<fileset dir='${BURL}/resources'>
+	   <include name="*.png" />
+	   <include name="*.props" />
+	   <include name="*.xml" />
+	</fileset>
+	<zipfileset src='${IVYLIB}/ivy.jar' includes='**/exec/*.class' />
+	<zipfileset src='${IVYLIB}/ivy.jar' includes='**/file/*.class' />
+	<zipfileset src='${IVYLIB}/ivy.jar' includes='**/xml/*.class' />
+	<zipfileset src='${IVYLIB}/ivy.jar' includes='**/bower/*.class' />
+	<zipfileset src='${IVYLIB}/json.jar' excludes='META-INF/*' />
+	<zipfileset src='${IVYLIB}/slf4j-api.jar' excludes='META-INF/*' />
+	<zipfileset src='${IVYLIB}/mongojava.jar' excludes='META-INF/*' />
+	<zipfileset src='${IVYLIB}/postgresql.jar' excludes='META-INF/*' />
+	<zipfileset src='${IVYLIB}/mysql.jar' excludes='META-INF/*' />
+     </jar>
+     <copy file='burl.jar' tofile='${BURL}/bin/burl.jar' />
+   </target>
+
+</project>
+
+
+
+
+
+
