@@ -19,6 +19,9 @@ package edu.brown.cs.burl.burl;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Map;
+
+import org.json.JSONObject;
 
 public interface BurlRepo extends BurlConstants
 {
@@ -36,6 +39,19 @@ Collection<BurlRepoColumn> getColumns();
 
 BurlRepoColumn getCountField();
 
+
+/**
+ *      Return the field containing the original ISBN
+ **/
+
+BurlRepoColumn getOriginalIsbnField();
+
+
+/**
+ *      Return the field containing the LCCN
+ **/
+
+BurlRepoColumn getLccnField();
 
 
 /**
@@ -78,7 +94,8 @@ BurlRepoColumn getColumn(String name);
  *      Compute an entry for this column to store in a row
  **/
 
-void computeEntry(BurlRepoRow row,String isbn,BurlBibEntry entry);
+void computeEntry(BurlRepoRow row,String isbn,BurlBibEntry entry,
+      BurlUpdateMode updmode,boolean count);
 
 
 /**
@@ -117,6 +134,20 @@ BurlRepoRow getRowForId(Number id);
 
 
 /**
+ *      Return the row for the given original ISBN
+ **/
+
+BurlRepoRow getRowForIsbn(String isbn);
+
+
+/**
+ *      Return the row for the given LCCN
+ **/
+
+BurlRepoRow getRowForLccn(String lccn);
+
+
+/**
  *      Setup the repository from file or database name
  **/
 
@@ -143,6 +174,31 @@ void closeRepository();
  **/
 
 boolean exportRepository(File otf,BurlExportFormat format,boolean external); 
+
+/**
+ *      Import header line from CSV
+ *
+ *      Returns errors, fills column map
+ *
+ **/
+
+String importCSVHeader(String hdr,Map<BurlRepoColumn,Integer> columnmap);
+
+
+/**
+ *      Import methods: add data from a CSV line
+ **/
+
+void importCSV(String csvline,BurlUpdateMode updmode,boolean count,
+      Map<BurlRepoColumn,Integer> columns);
+
+
+/**
+ *      Import data from a json line
+ **/
+
+void importJSON(JSONObject json,BurlUpdateMode updmode,boolean count);
+
 
 
 /**

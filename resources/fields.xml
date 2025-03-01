@@ -1,6 +1,6 @@
 <BOOKS>
    <FIELDS>
-      <FIELD NAME="LCCN" MARC="010a" OPENLIB="lccn" GOOGLE="lccn" />
+      <FIELD NAME="LCCN" MARC="010a" OPENLIB="lccn" GOOGLE="lccn" LCCN='T' />
       <FIELD NAME="Personal Name" MARC="100a q b c d e" OPENLIB="author_name" GOOGLE="authors"
 		ALTNAMES="Primary,Primary Author" />
       <FIELD NAME="Main Title" MARC="245a b c" OPENLIB="title" GOOGLE="title: subtitle"
@@ -32,17 +32,3 @@
    <CSV QUOTE='"' SEPARATOR="," />
    <MULTIPLE TEXT=" | " />
 </BOOKS>
-
-
-
-
-
-
-
-
-
-
-
-
-
-

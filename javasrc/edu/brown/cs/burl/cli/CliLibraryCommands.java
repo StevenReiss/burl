@@ -29,6 +29,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import edu.brown.cs.burl.burl.BurlUtil;
+import edu.brown.cs.ivy.file.IvyFile;
 import edu.brown.cs.ivy.file.IvyLog;
 
 class CliLibraryCommands implements CliConstants
@@ -316,6 +317,7 @@ void handleAddIsbns(List<String> args)
 {
    List<String> isbns = new ArrayList<>();
    BurlUpdateMode updmode = BurlUpdateMode.AUGMENT;
+   boolean count = false;
    
    for (int i = 0; i < args.size(); ++i) {
       String s = args.get(i);
@@ -329,8 +331,17 @@ void handleAddIsbns(List<String> args)
          else if (s.startsWith("-a")) {
              updmode = BurlUpdateMode.AUGMENT;
            }
+         else if (s.startsWith("-R")) {
+            updmode = BurlUpdateMode.REPLACE_FORCE;
+          }
+         else if (s.startsWith("-s")) {
+            updmode = BurlUpdateMode.SKIP;
+          }
          else if (s.startsWith("-c")) {
-            updmode = BurlUpdateMode.COUNT;
+            count = true;
+          }
+         else if (s.startsWith("-noc")) {
+            count = false;
           }
          else badAddIsbnArgs();
        }
@@ -342,6 +353,7 @@ void handleAddIsbns(List<String> args)
    JSONArray jarr = new JSONArray(isbns);
    JSONObject data = BurlUtil.buildJson("library",cli_main.getLibraryId(),
          "mode",updmode.toString(),
+         "count",count,
          "isbns",jarr);
    JSONObject rslt = cli_main.createHttpPost("addisbns",data);
    if (cli_main.checkResponse(rslt,"adding isbns")) {
@@ -378,7 +390,122 @@ void addFileIsbns(String fnm,List<String> isbns)
 private void badAddIsbnArgs()
 {
    IvyLog.logI("BURLCLI",
-         "add [-f <file>] [ -replace | -augment | -count ] [isbn ...]");
+         "add [-f <file>] [ -replace | -augment | -Replace | -skip ] [ [no]count ]  [isbn|lccn ...]");
+}
+
+
+/********************************************************************************/
+/*                                                                              */
+/*      Handle import file command                                              */
+/*                                                                              */
+/********************************************************************************/
+
+void handleImport(List<String> args)
+{
+   BurlExportFormat format = null;
+   File file = null;
+   BurlUpdateMode updmode = BurlUpdateMode.REPLACE;
+   boolean docounts = false;
+   
+   for (int i = 0; i < args.size(); ++i) {
+      String s = args.get(i);
+      if (s.startsWith("-")) {
+         if (s.startsWith("-count")) {
+            docounts = true;
+          } 
+         else if (s.startsWith("-c")) {                         // -csv
+            format = BurlExportFormat.CSV;
+          }
+         else if (s.startsWith("-j")) {                         // -json
+            format = BurlExportFormat.JSON;                     
+          }
+         else if (s.startsWith("-s")) {                         // -skip
+            updmode = BurlUpdateMode.SKIP;
+          }
+         else if (s.startsWith("-r")) {                         // -replace
+            updmode = BurlUpdateMode.REPLACE;
+          }
+         else if (s.startsWith("-f")) {                         // -force
+            updmode = BurlUpdateMode.SKIP;
+          }
+         else if (s.startsWith("-a")) {                         // -augment
+            updmode = BurlUpdateMode.SKIP;
+          }
+        
+         else if (s.startsWith("-f") && i+1 < args.size()) {    // -file <file>
+            if (file != null) {
+               badImportArgs();
+               return;
+             }
+            file = new File(args.get(++i));
+          }
+       }
+      else if (file == null) {
+         file = new File(s);
+       }
+      else badImportArgs();
+    }
+   
+   if (file == null) {
+      badImportArgs();
+      return;
+    }
+   
+   if (format == null) {
+      String fnm = file.getName();
+      if (fnm.endsWith(".json") || fnm.endsWith(".JSON")) {
+         format = BurlExportFormat.JSON;
+       }
+      else if (fnm.endsWith(".csv") || fnm.endsWith(".CSV")) {
+         format = BurlExportFormat.CSV;
+       }
+      else badImportArgs();
+    }
+   
+   JSONObject data = BurlUtil.buildJson("library",cli_main.getLibraryId(),
+         "update",updmode,"count",docounts);
+   
+   if (format == BurlExportFormat.CSV) {
+      JSONArray arr = new JSONArray();
+      try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+         for ( ; ; ) {
+            String line = br.readLine();
+            if (line == null) break;
+            if (line.isBlank()) continue;
+            arr.put(line);
+          }
+         data.put("cvsdata",arr);
+       }
+      catch (IOException e) {
+         IvyLog.logI("BURLCLI","Problem reading file " + file);
+         return;
+       }
+    }
+   else if (format == BurlExportFormat.JSON) {
+      try {
+         String cnts = IvyFile.loadFile(file);
+         JSONObject json = new JSONObject(cnts);
+         data.put("jsondata",json);
+       }
+      catch (Exception e) {
+         IvyLog.logI("BURLCLI","Problem reading file " + file);
+         return;
+       }
+    }
+   
+   JSONObject rslt = cli_main.createHttpPost("import",data);
+   if (cli_main.checkResponse(rslt,"import")) {
+      IvyLog.logI("BURLCLI","Import successful");
+    }
+}
+
+
+
+
+private void badImportArgs()
+{
+   IvyLog.logI("BURLCLI","import [ -csv | -json ] " +
+         "[ -skip | -replace | -force | -augment ] <file>");
 }
 
 

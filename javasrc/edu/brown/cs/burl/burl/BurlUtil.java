@@ -27,6 +27,8 @@ import java.security.MessageDigest;
 import java.util.Base64;
 import java.util.Properties;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -47,6 +49,7 @@ public abstract class BurlUtil implements BurlConstants
 private static File base_directory = null;
 private static Random rand_gen = new Random();
 private static final String RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+private static Pattern LCCN_PATTERN = Pattern.compile("[a-z]{0,2}[0-9]{8,10}");
 
 
 
@@ -211,27 +214,33 @@ public static JSONArray buildJsonArray(Object... val)
 /*                                                                              */
 /********************************************************************************/
 
-public static boolean isValidISBN(String s)
+public static String getValidISBN(String s0)
 {
-   if (s.length() != 10 && s.length() != 13) return false;
+   String s = s0;
    
-   if (!s.matches("[0-9X]+")) return false;
+   if (s.length() == 9) s0 = "0" + s;
+   
+   if (s.length() != 10 && s.length() != 13) return null;
+   
+   if (!s.matches("[0-9]+X?")) return null;
    
    String s1 = computeAlternativeISBN(s);
    if (s1 != null) {
       String s2 = computeAlternativeISBN(s1);
       if (s2 != null && !s2.equals(s)) {
          IvyLog.logW("ISBN check digit");
+         return null;
        }
     }
    
-   // could check check digit
-   return true;
+   return s;
 }
 
 
 public static String computeAlternativeISBN(String isbn)
 {
+   if (isbn.length() == 9) isbn = "0"+isbn;
+   
    if (isbn.length() == 10) {
       int sum = 9*1 + 7*3 + 8*1;
       for (int i = 0; i < 9; ++i) {
@@ -266,6 +275,34 @@ public static String computeAlternativeISBN(String isbn)
    return null;
 }
 
+
+
+/********************************************************************************/
+/*                                                                              */
+/*      LCCN methods                                                            */
+/*                                                                              */
+/********************************************************************************/
+
+public static String getValidLCCN(String lccn)
+{
+   if (lccn == null) return null;
+   
+   String lccn1 = lccn.replace(" ","");
+   int idx = lccn1.indexOf("-");
+   if (idx >= 0) {
+      String pfx = lccn1.substring(0,idx);
+      String sfx = lccn1.substring(idx+1);
+      while (sfx.length() < 6) {
+         sfx = "0" + sfx;
+       }
+      lccn1 = pfx + sfx;
+    }
+   
+   Matcher matcher = LCCN_PATTERN.matcher(lccn1);
+   if (matcher.matches()) return lccn1;
+   
+   return null;
+}
 
 
 /********************************************************************************/

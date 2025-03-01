@@ -277,10 +277,11 @@ private class EntityFilter implements BurlFilter {
     } 
    
    private boolean matchItem(String data,Object keyobj) {
+      data = data.toLowerCase();
       if (keyobj instanceof String) {
          String key = keyobj.toString();
          for (StringTokenizer tok = new StringTokenizer(key); tok.hasMoreTokens(); ) {
-            String t = tok.nextToken();
+            String t = tok.nextToken().toLowerCase();
             if (data.contains(t)) return true;
           }
          return false;
@@ -289,7 +290,7 @@ private class EntityFilter implements BurlFilter {
          JSONArray arr = (JSONArray) keyobj;
          boolean match = false;
          for (int i = 0; i< arr.length(); ++i) {
-            String s = arr.getString(i);
+            String s = arr.getString(i).toLowerCase();
             if (matchItem(data,s)) {
                match = true;
                break;

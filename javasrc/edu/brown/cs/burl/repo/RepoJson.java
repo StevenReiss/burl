@@ -211,6 +211,16 @@ private class JsonRow extends RepoRowBase {
    
    
    @Override public void setData(BurlRepoColumn rc,String v) {
+      if (rc.isOriginalIsbnField()) {
+         // Might want to do this for all ISBN fields
+         String ov = row_data.get(rc);
+         noteIsbnChange(ov,v,row_index);
+       }
+      else if (rc.isLccnField()) {
+         String ov = row_data.get(rc);
+         noteLccnChange(ov,v,row_index);
+       }
+      
       if (v == null || v.isEmpty()) row_data.remove(rc);
       else row_data.put(rc,v);
     }

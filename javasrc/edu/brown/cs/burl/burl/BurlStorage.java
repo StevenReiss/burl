@@ -19,6 +19,7 @@ package edu.brown.cs.burl.burl;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import org.json.JSONObject;
 
@@ -163,6 +164,13 @@ boolean createDataTable(BurlRepo repo);
  **/
 
 void removeDataTable(BurlRepo repo);
+
+
+/*
+ *      Look for all ids where the field has a given value
+ **/
+
+List<Number> dataFieldSearch(BurlRepo repo,String field,String value);
 
 
 /**

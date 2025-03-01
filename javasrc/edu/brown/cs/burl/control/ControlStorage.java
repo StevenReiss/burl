@@ -409,7 +409,7 @@ ControlSession checkSession(BowerSessionStore<ControlSession> bss,String sid)
 {
    if (sid == null || sid.isEmpty()) return null;
    
-   String q = "SELECT * BurlSession WHERE session = $1";
+   String q = "SELECT * FROM BurlSession WHERE session = $1";
    
    JSONObject json = sqlQuery1(q,sid);
    if (json != null) {
@@ -458,20 +458,46 @@ ControlSession checkSession(BowerSessionStore<ControlSession> bss,String sid)
        }
       q2 += ")";
       String q3 = "INSERT INTO BurlRepoStores ( name, fields ) VALUES ( $1, $2 )";
-      
       int ct = sqlUpdate(q2); 
       if (ct < 0) return false;
       sqlUpdate(q3,kname,flds);
+      BurlRepoColumn isbnfld = repo.getOriginalIsbnField();
+      if (isbnfld != null) {
+         String q4 = "CREATE INDEX rname " + "Isbn ON " + rname + " ( " + isbnfld.getFieldName() + " )";
+         sqlUpdate(q4);
+       }
+      BurlRepoColumn lccnfld = repo.getLccnField();
+      if (lccnfld != null) {
+         String q5 = "CREATE INDEX rname " + "Lccn ON " + rname + " ( " + lccnfld.getFieldName() + " )";
+         sqlUpdate(q5);
+       }
     }
          
    return true;
 }
 
+
+@Override public List<Number> dataFieldSearch(BurlRepo repo,String fld,String val)
+{
+   List<Number> ids = new ArrayList<>();
+   String kname = repo.getNameKey(); 
+   String rname = "BurlRepo_" + kname;
+   String q1 = "SELECT burl_id FROM " + rname + " WHERE " + fld + " = $1";
+   
+   List<JSONObject> rslts = sqlQueryN(q1,val);
+   for (JSONObject rslt : rslts) {
+      ids.add(rslt.getNumber("burl_id"));
+    }
+   return ids;
+}
+
+
+
 @Override public void removeDataTable(BurlRepo repo)
 {
    String kname = repo.getNameKey();
    String rname = "BurlRepo_" + repo.getNameKey();
-   String q1 = "DROP TABLE IF EXISTS " + rname;
+   String q1 = "DROP TABLE IF EXISTS " + rname + " CASCADE";
    String q2 = "DELETE FROM BurlRepoStores WHERE name = $1";
    
    sqlUpdate(q1);

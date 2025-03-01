@@ -67,7 +67,7 @@ enum BurlIsbnType {
    ISBN10,         // 10 digit ISBN
    ISBN13,         // 13 digit ISBN
    ORIGINAL,       // given ISBN for the book
-   ALL             // all ISBNs for the book
+   ALL,            // all ISBNs for the book
 }
 
 
@@ -117,7 +117,7 @@ enum BurlUpdateMode {
    REPLACE,             // replace old data with new
    REPLACE_FORCE,       // replace old data even if new is empty
    AUGMENT,             // only replace if old is empty
-   COUNT,               // augment, but increase book count
+   SKIP,                // keep old entry
 }
 
 

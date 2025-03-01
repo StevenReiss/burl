@@ -20,13 +20,18 @@ package edu.brown.cs.burl.control;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.XML;
 
 import com.sun.net.httpserver.HttpExchange;
 
@@ -37,6 +42,7 @@ import edu.brown.cs.ivy.file.IvyLog;
 import edu.brown.cs.burl.burl.BurlException;
 import edu.brown.cs.burl.burl.BurlLibrary;
 import edu.brown.cs.burl.burl.BurlRepo;
+import edu.brown.cs.burl.burl.BurlRepoColumn;
 import edu.brown.cs.ivy.bower.BowerCORS;
 import edu.brown.cs.ivy.bower.BowerRouter;
 
@@ -135,6 +141,8 @@ BowerRouter<ControlSession> setupRouter()
    br.addRoute("GET","/rest/validate",burl_auth::handleValidationRequest);
    br.addRoute("ALL","/rest/forgotpassword",burl_auth::handleForgotPassword);
    
+   br.addRoute("ALL","/rest/fielddata",this::handleFieldData);
+   
    br.addRoute("USE",burl_auth::handleAuthentication);
    
    br.addRoute("POST","/rest/addlibraryuser",this::handleAddLibraryUser);
@@ -151,7 +159,6 @@ BowerRouter<ControlSession> setupRouter()
    br.addRoute("POST","/rest/editentry",entry_manager::handleEditEntry); 
    
 // br.addRoute("POST","/rest/removeentry",this::handleRemoveEntry);
-
    
    br.addRoute("POST","/rest/changepassword",burl_auth::handleChangePassword);
    br.addRoute("POST","/rest/removeuser",burl_auth::handleRemoveUser); 
@@ -373,6 +380,7 @@ String handleAddIsbns(HttpExchange he,ControlSession session)
     }
    List<String> isbns = BowerRouter.getParameterList(he,"isbns");
    BurlUpdateMode upd = getEnumParameter(he,"mode",BurlUpdateMode.AUGMENT);
+   boolean count = BowerRouter.getBooleanParameter(he,"count",true);
    
    BurlUserAccess acc = validateLibrary(session,lid);
    switch (acc) {
@@ -391,7 +399,7 @@ String handleAddIsbns(HttpExchange he,ControlSession session)
       return BowerRouter.errorResponse(he,session,400,"Bad library");
     }
    
-   work_thread.addTask(lid,isbns,upd);
+   work_thread.addTask(lid,isbns,upd,count);
    
    return BowerRouter.jsonOKResponse(session);
 }
@@ -404,9 +412,65 @@ String handleImport(HttpExchange he,ControlSession session)
    if (lid == null) {
       return BowerRouter.errorResponse(he,session,400,"No library given");
     }
-   // get import data and do import (ala CSV read)
+   ControlLibrary lib = burl_store.findLibraryById(lid);
+   if (lib == null) {
+      return BowerRouter.errorResponse(he,session,400,"Bad library id");
+    }
+   BurlUpdateMode updmode = getEnumParameter(he,"update",burl_main.getUpdateMode());
+   boolean docount = BowerRouter.getBooleanParameter(he,"count",false);
+   
+   BurlRepo repo =  lib.getRepository();
+   
+   JSONObject cindata = BowerRouter.getJson(he,"csvdata");
+   if (cindata != null) {
+      JSONArray dataarr = cindata.getJSONArray("rows");
+      Map<BurlRepoColumn,Integer> colmap = null;
+      for (int i = 0; i < dataarr.length(); ++i) {
+         String row = dataarr.getString(i);
+         if (colmap == null) {
+            colmap = new HashMap<>();
+            String err = repo.importCSVHeader(row,colmap);
+            if (err != null) {
+               return BowerRouter.errorResponse(he,session,400,err);
+             }
+          }
+         repo.importCSV(row,updmode,docount,colmap);
+       }
+    }
+   
+   JSONObject jindata = BowerRouter.getJson(he,"jsondata");
+   if (jindata != null) {
+      JSONArray dataarr = jindata.getJSONArray("rows");
+      for (int i = 0; i < dataarr.length(); ++i) {
+         JSONObject row = dataarr.getJSONObject(i);
+         repo.importJSON(row,updmode,docount);  
+       }
+    }
    
    return BowerRouter.errorResponse(he,session,500,"Not implemented");
+}
+
+
+
+/********************************************************************************/
+/*                                                                              */
+/*      Info requests                                                           */
+/*                                                                              */
+/********************************************************************************/
+
+String handleFieldData(HttpExchange he,ControlSession session)
+{
+   JSONObject data = null;
+   try (InputStream ins = getClass().getClassLoader().getResourceAsStream("fields.xml")) {
+      Reader rdr = new InputStreamReader(ins);
+      data = XML.toJSONObject(rdr,true);
+    }
+   catch (Exception e) {
+      IvyLog.logE("BOOKS","Problem reading field data",e);
+      System.exit(1);
+    }
+   
+   return BowerRouter.jsonOKResponse(session,"data",data);
 }
 
 
@@ -519,17 +583,19 @@ private final class WorkItem implements Runnable {
    private Number library_id;
    private List<String> add_isbns;
    private BurlUpdateMode update_mode;
+   private boolean do_count;
    
-   WorkItem(Number lid,List<String> isbns,BurlUpdateMode upd) {
+   WorkItem(Number lid,List<String> isbns,BurlUpdateMode upd,boolean count) {
       library_id = lid;
       add_isbns = isbns;
       update_mode = upd;
+      do_count = count;
     }
    
    @Override public void run() {
       ControlLibrary lib = burl_store.findLibraryById(library_id);
       if (lib == null) return;
-      lib.addToLibrary(add_isbns,update_mode);
+      lib.addToLibrary(add_isbns,update_mode,do_count);
     }
    
 }       // end of inner class WorkItem
@@ -544,8 +610,8 @@ private final class WorkThread extends Thread {
       work_queue = new LinkedBlockingQueue<>();
     }
    
-   void addTask(Number lid,List<String> isbns,BurlUpdateMode mode) {
-      WorkItem wi = new WorkItem(lid,isbns,mode);
+   void addTask(Number lid,List<String> isbns,BurlUpdateMode mode,boolean count) {
+      WorkItem wi = new WorkItem(lid,isbns,mode,count);
       work_queue.add(wi);
     }
    

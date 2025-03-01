@@ -98,6 +98,21 @@ String getOtherIsbn();
 
 boolean isCountField();
 
+
+/**
+ *      Specify wheter this is the original ISBN field
+ **/
+
+boolean isOriginalIsbnField();
+
+
+/**
+ *      Specify whether this is the LCCN field
+ **/
+
+boolean isLccnField();
+
+
 /**
  *      Get access level needed for field
  **/

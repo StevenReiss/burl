@@ -124,7 +124,7 @@ private void inputRepoFromFile()
             havehdr = true;
             
           }
-         else {
+         else { 
             BurlRepoRow brr = newRow();
             for (int i = 0; i < cnts.size(); ++i) {
                BurlRepoColumn brc = cols.get(i);
@@ -144,68 +144,7 @@ private void inputRepoFromFile()
 } 
 
 
-private List<String> splitCsv(PushbackReader fr)
-{
-   List<String> items = new ArrayList<>();
-   
-   boolean quoted = false;
-   StringBuffer buf = new StringBuffer();
-   char quote = getCSVQuote().charAt(0);
-   char sep = getCSVSeparator().charAt(0);
-   
-   try {
-      for ( ; ; ) {
-         int ch = fr.read();
-         if (ch < 0) return null;
-         if (ch != '\r' && ch != '\n') {
-            fr.unread(ch);
-            break;
-          }
-       }
-      
-      for ( ; ; ) {
-         int ch = fr.read();
-         if (ch < 0) break;
-         if (ch == quote) {
-            if (quoted) {
-               int nextch = fr.read();
-               if (nextch == quote) {
-                  buf.append((char) ch);
-                  continue;
-                }
-               else if (nextch == sep || nextch == '\n' || nextch == '\r') {
-                  quoted = false;
-                }
-               fr.unread(nextch);
-             }
-            else if (buf.length() == 0) {
-               quoted = true;
-             }
-            else {
-               buf.append((char) ch);
-             }
-          }
-         else if (ch == sep && !quoted) {
-            items.add(buf.toString());
-            buf.setLength(0);
-          }
-         else if (ch == '\r' || ch == '\n') {
-            break;
-          }
-         else {
-            buf.append((char) ch);
-          }
-       }
-    }
-   catch (IOException e) {
-      IvyLog.logE("BOOKS","Problem reading CSV input file",e);
-      System.exit(1);
-    }
-   
-   items.add(buf.toString());
-   
-   return items;
-}
+
 
 
 
@@ -264,6 +203,16 @@ private class CsvRow extends RepoRowBase {
    
    
    @Override public void setData(BurlRepoColumn rc,String v) {
+      if (rc.isOriginalIsbnField()) {
+         // Might want to do this for all ISBN fields
+         String ov = row_data.get(rc);
+         noteIsbnChange(ov,v,row_index);
+       }
+      else if (rc.isLccnField()) {
+         String ov = row_data.get(rc);
+         noteLccnChange(ov,v,row_index);
+       }
+      
       if (v == null || v.isEmpty()) row_data.remove(rc);
       else row_data.put(rc,v);
     }

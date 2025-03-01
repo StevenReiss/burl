@@ -48,6 +48,8 @@ private Map<String,Element> field_map;
 private List<String> field_names;
 private List<String> isbn_fields;
 private String count_field;
+private String isbn_field;
+private String lccn_field;
 private String multiple_string;
 private Element csv_data;
 
@@ -66,6 +68,8 @@ public BurlFieldData()
    isbn_fields = new ArrayList<>();
    field_names = new ArrayList<>();
    count_field = null;
+   isbn_field = null;
+   lccn_field = null;
    
    Element xmldata = null;
    try (InputStream ins = getClass().getClassLoader().getResourceAsStream("fields.xml")) {
@@ -87,11 +91,16 @@ public BurlFieldData()
          field_map.put(snm.toLowerCase(),fldelt);
        }
       
-      if (IvyXml.getAttrPresent(fldelt,"ISBN")) {
+      BurlIsbnType isbntype = IvyXml.getAttrEnum(fldelt,"ISBN",BurlIsbnType.NONE);
+      if (isbntype != BurlIsbnType.NONE) {
          isbn_fields.add(nm);
+         if (isbntype == BurlIsbnType.ORIGINAL) isbn_field = nm;
        }
       if (IvyXml.getAttrBool(fldelt,"COUNT")) {
          count_field = nm; 
+       }
+      if (IvyXml.getAttrBool(fldelt,"LCCN")) {
+         lccn_field = nm; 
        }
     }
    
@@ -164,6 +173,16 @@ public BurlUserAccess getAccessLevel(String nm)
 public String getCountField()
 {
    return count_field;
+}
+
+public String getOriginalIsbnField()
+{
+   return isbn_field;
+}
+
+public String getLccnField()
+{
+   return lccn_field;
 }
 
 public List<String> getIsbnFields()

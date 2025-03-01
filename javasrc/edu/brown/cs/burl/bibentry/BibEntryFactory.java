@@ -75,25 +75,33 @@ public BibEntryFactory(BurlControl bc)
 /*                                                                              */
 /********************************************************************************/
 
-public BurlBibEntry findBibEntry(String isbn)
+public BurlBibEntry findBibEntry(String idno)
 {
-   BibEntryBase bibentry = null;
+   String isbn = BurlUtil.getValidISBN(idno);
    String altisbn = BurlUtil.computeAlternativeISBN(isbn);
-   bibentry = congressSearch(isbn);
+   String lccn = BurlUtil.getValidLCCN(idno);
+   
+   BibEntryBase bibentry = null;
+   if (bibentry == null&& isbn != null) {
+      bibentry = congressSearch(isbn);
+    }
    if (bibentry == null && altisbn != null) {
       bibentry = congressSearch(altisbn);
     }
-   if (bibentry == null) {
+   if (bibentry == null && isbn != null) {
       bibentry = openLibrarySearch(isbn);
     }
    if (bibentry == null && altisbn != null) {
       bibentry = openLibrarySearch(altisbn);
     }
-   if (bibentry == null) {
+   if (bibentry == null && isbn != null) {
       bibentry = googleSearch(isbn);
     }
    if (bibentry == null && altisbn != null) {
       bibentry = googleSearch(altisbn);
+    }
+   if (bibentry == null && lccn != null) {
+      bibentry = congressSearch(lccn);
     }
    
    return bibentry;

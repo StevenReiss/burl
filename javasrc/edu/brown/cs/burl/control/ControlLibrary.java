@@ -17,11 +17,7 @@
 
 package edu.brown.cs.burl.control;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import org.json.JSONObject;
 
@@ -128,45 +124,20 @@ ControlLibrary(ControlMain bm,JSONObject data)
 
 
 
-@Override public void addToLibrary(Collection<String> isbns,BurlUpdateMode mode)
+@Override public void addToLibrary(Collection<String> isbns, 
+      BurlUpdateMode mode,boolean count)
 {
    BurlRepo repo = getRepository();
-   
-   Map<String,BurlRepoRow> knownisbns = new HashMap<>();
-   List<BurlRepoColumn> isbncols = new ArrayList<>(repo.getIsbnFields());
-   for (BurlRepoRow row : repo.getRows()) {
-      for (BurlRepoColumn isbncol : isbncols) { 
-         String ib = row.getData(isbncol);
-         if (ib == null || ib.isEmpty()) continue;
-         if (isbncol.isMultiple()) {
-            String [] isb = ib.split(isbncol.getMultiplePattern());
-            for (String s : isb) {
-               knownisbns.put(s,row);
-             }
-          }
-         else {
-            knownisbns.put(ib,row);
-          }
-       }
-    }
+   if (repo.getCountField() == null) count = false;
    
    for (String isbn : isbns) {
-      if (!BurlUtil.isValidISBN(isbn)) {
-         IvyLog.logW("BURL","Invalid ISBN: " + isbn + ", ignored");
-         continue;
-       }
-      
-      BurlRepoRow row = knownisbns.get(isbn);
+      BurlRepoRow row = findOldRow(repo,isbn);
       if (row != null) {
-         switch (mode) {
-            case AUGMENT :
-               continue;
-            case COUNT :
-                incrementCount(row);
-                break;
-            case REPLACE :
-            case REPLACE_FORCE :
-               break;
+         if (mode == BurlUpdateMode.SKIP) {
+            if (count) {
+               incrementCount(row);
+             }
+            continue;
           }
        }
       
@@ -178,7 +149,7 @@ ControlLibrary(ControlMain bm,JSONObject data)
          row = repo.newRow();
          repo.setInitialValues(row,isbn);
        }
-      repo.computeEntry(row,isbn,bibentry);
+      repo.computeEntry(row,isbn,bibentry,mode,count);
       
       if (bibentry != null) {
          IvyLog.logD("BURL","Computed BIB ENTRY for " + isbn);
@@ -189,6 +160,24 @@ ControlLibrary(ControlMain bm,JSONObject data)
                "Can't find any information on " + isbn + " " + altisbn);
        }
     }
+}
+
+
+
+BurlRepoRow findOldRow(BurlRepo repo,String isbn)
+{
+   BurlRepoRow row = null;
+   
+   String s0 = BurlUtil.getValidISBN(isbn);
+   String s1 = BurlUtil.getValidLCCN(isbn);
+   if (s0 != null) { 
+      row = repo.getRowForIsbn(s0);
+    }
+   else if (s1 != null) {
+      row = repo.getRowForLccn(s1);
+    }
+   
+   return row;
 }
 
 

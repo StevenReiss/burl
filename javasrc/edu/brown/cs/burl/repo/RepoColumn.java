@@ -96,6 +96,16 @@ RepoColumn(String name,int no,BurlFieldData fd)
    return column_name.equals(field_data.getCountField());
 }
 
+@Override public boolean isOriginalIsbnField() 
+{
+   return column_name.equals(field_data.getOriginalIsbnField());
+}
+
+@Override public boolean isLccnField() 
+{
+   return column_name.equals(field_data.getLccnField());
+}
+
 @Override public BurlIsbnType getIsbnType()
 {
    return field_data.getIsbnType(column_name);

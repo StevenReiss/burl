@@ -68,6 +68,7 @@ private File            base_directory;
 private ControlRepoManager repo_manager;
 private BurlRepoFactory repo_factory;
 private BurlUpdateMode  update_mode;
+private boolean         do_counts;
 private BibEntryFactory bibentry_factory;
 private Map<Number,BurlRepo> repo_map;
 private String          url_prefix;
@@ -169,6 +170,8 @@ String getUrlPrefix()                           { return url_prefix; }
    return update_mode; 
 }
 
+@Override public boolean getDoCount()           { return do_counts; }
+ 
 @Override public File getDataDirectory() 
 {
    String dd = base_properties.getProperty("dataDirectory");
@@ -196,6 +199,7 @@ private void setupProperties()
 {
    base_properties = new Properties();
    base_properties.setProperty("updateMode","replace");
+   base_properties.setProperty("doCounts","F");
    InputStream ins = getClass().getClassLoader().getResourceAsStream("burl.props");
    if (ins != null) {
       try {
@@ -235,7 +239,7 @@ private void setupProperties()
       base_properties.setProperty("dataDirectory",fd.getPath());
     }
    
-   setUpdateMode(base_properties.getProperty("updateMode"));
+   setUpdateMode();
    
    String hostpfx = base_properties.getProperty("hostpfx");
    String host = base_properties.getProperty("host");
@@ -251,9 +255,11 @@ private void setupProperties()
 
 
 
-private boolean setUpdateMode(String md)
+private boolean setUpdateMode()
 {
-   if (md == null || md.isEmpty()) return false;
+   boolean rslt = true;
+   String md = base_properties.getProperty("updateMode");
+   if (md == null || md.isEmpty()) md = "r";
    char c = Character.toLowerCase(md.charAt(0));
    switch (c) {
       case 'r' :                       
@@ -265,14 +271,21 @@ private boolean setUpdateMode(String md)
       case 'a' :
          update_mode = BurlUpdateMode.AUGMENT;
          break;
-      case 'c' :
-         update_mode = BurlUpdateMode.COUNT;
+      case 's' :
+         update_mode = BurlUpdateMode.SKIP;
          break;
       default :
-         return false;
+         IvyLog.logW("BURL","Bad update mode");
+         rslt = false;
+         break;
     }
    
-   return true;
+   String cnt = base_properties.getProperty("doCounts");
+   if (cnt == null || cnt.isEmpty()) cnt = "Fburl";
+   if ("nN0fF".indexOf(cnt.charAt(0)) >= 0) do_counts = false;
+   else do_counts = true;
+   
+   return rslt;
 }
 
 

@@ -26,3 +26,5 @@ nonsecret directory can be edited and moved to ~/.config/burl (without the confi
 to let users customize some parts of the system.
 
 Documentation might be forthcoming.
+
+To build BURL, you will need IVY (our utility library, available from the same GITHUB repo.)

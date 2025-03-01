@@ -20,6 +20,8 @@ package edu.brown.cs.burl.repo;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.PushbackReader;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -58,6 +60,7 @@ private BurlControl     burl_main;
 private BurlLibrary     for_library;
 private Set<BurlRepoColumn> repo_columns;
 private Map<String,RepoColumn> column_names;
+private Map<String,Number> isbn_lccn_map;
 
 private static BurlFieldData field_data;
 
@@ -80,6 +83,8 @@ RepoBase(BurlControl bc,BurlLibrary lib)
     }
    repo_columns = new TreeSet<>();
    column_names = new HashMap<>();
+   
+   isbn_lccn_map = null;
    
    for (String fieldname : field_data.getAllFields()) {
       addHeader(fieldname);
@@ -106,6 +111,7 @@ RepoBase(BurlControl bc,BurlLibrary lib)
 @Override public abstract Iterable<BurlRepoRow> getRows();
 
 @Override public abstract BurlRepoRow getRowForId(Number id);
+
 
 
 
@@ -157,6 +163,48 @@ BurlLibrary getLibrary()
 
 /********************************************************************************/
 /*                                                                              */
+/*      Row lookup methods                                                      */
+/*                                                                              */
+/********************************************************************************/
+
+@Override public BurlRepoRow getRowForIsbn(String isbn)
+{
+   if (isbn_lccn_map == null) return null;
+   Number id = isbn_lccn_map.get(isbn);
+   if (id == null) return null;
+   return getRowForId(id);
+}
+
+
+@Override public BurlRepoRow getRowForLccn(String lccn)
+{
+   if (isbn_lccn_map == null) return null;
+   Number id = isbn_lccn_map.get(lccn);
+   if (id == null) return null;
+   return getRowForId(id);
+}
+
+
+protected void noteIsbnChange(String oldval,String val,Number idx)
+{
+   if (isbn_lccn_map == null) isbn_lccn_map = new HashMap<>();
+   
+   if (oldval != null && !oldval.equals(val)) {
+      isbn_lccn_map.remove(oldval);
+    }
+   if (val != null) {
+      isbn_lccn_map.put(val,idx);
+    }
+}
+
+protected void noteLccnChange(String oldval,String val,Number idx)
+{
+   noteIsbnChange(oldval,val,idx);
+}
+
+
+/********************************************************************************/
+/*                                                                              */
 /*      Column methods                                                          */
 /*                                                                              */
 /********************************************************************************/
@@ -188,6 +236,16 @@ private void addHeader(String name)
 @Override public RepoColumn getCountField()
 {
    return getColumn(field_data.getCountField());
+}
+
+@Override public RepoColumn getOriginalIsbnField()
+{
+   return getColumn(field_data.getOriginalIsbnField());
+}
+
+@Override public RepoColumn getLccnField()
+{
+   return getColumn(field_data.getLccnField());
 }
 
 
@@ -223,20 +281,20 @@ protected static String getMultiplePattern()
 /*                                                                              */
 /********************************************************************************/
 
-@Override public void computeEntry(BurlRepoRow brr,String isbn,BurlBibEntry bib)
+@Override public void computeEntry(BurlRepoRow brr,String isbn, 
+      BurlBibEntry bib,BurlUpdateMode updmode,boolean count)
 {
-   BurlUpdateMode updmode = burl_main.getUpdateMode(); 
-   RepoColumn countcol = getCountField();
+   if (updmode == BurlUpdateMode.SKIP) return;
    
    for (BurlRepoColumn brc : repo_columns) {
       String v = brr.getData(brc);
-      BurlIsbnType isbntype = field_data.getIsbnType(brc.getName());
+      BurlIsbnType isbntype = brc.getIsbnType();
       if (isbntype == BurlIsbnType.ORIGINAL) {
          if (v == null || v.isEmpty()) brr.setData(brc,isbn);
        }
-      else if (brc == countcol) {
+      else if (brc.isCountField()) {
          if (v == null || v.isEmpty()) brr.setData(brc,"1");
-         else if (updmode == BurlUpdateMode.COUNT) {
+         else if (count) {
             try {
                int ct = Integer.parseInt(v);
                ct += 1;
@@ -248,7 +306,6 @@ protected static String getMultiplePattern()
       else if (bib != null) {
          switch (updmode) {
             case AUGMENT :
-            case COUNT :
                if (isbntype == BurlIsbnType.NONE) {
                   if (v != null && !v.isEmpty()) continue; 
                 }
@@ -260,7 +317,6 @@ protected static String getMultiplePattern()
          switch (updmode) {
             case REPLACE :
             case AUGMENT :
-            case COUNT :
                if (nv == null || nv.isEmpty()) continue;
                break;
           }
@@ -325,10 +381,16 @@ protected String fixIsbnField(BurlRepoColumn brc,String isbn,String oldv,String 
 private void addIsbn(String isbn,int len,Set<String> rslt)
 {
    if (isbn == null) return;
-   if (!BurlUtil.isValidISBN(isbn)) return; 
+   if (BurlUtil.getValidISBN(isbn) == null) return; 
+ 
+   if ((len == 0 || len == 10) && isbn.length() == 9) {
+      isbn = "0" + isbn;
+    }
+   
    if (len == 0 || isbn.length() == len) {
       rslt.add(isbn);
     }
+   
    String isbn1 = BurlUtil.computeAlternativeISBN(isbn);
    if (isbn1 != null) {
       if (len == 0 || isbn1.length() == len) {
@@ -338,18 +400,23 @@ private void addIsbn(String isbn,int len,Set<String> rslt)
 }
 
 
-@Override public void setInitialValues(BurlRepoRow brr,String isbn)
+@Override public void setInitialValues(BurlRepoRow brr,String idno)
 {
    if (brr == null) return;
    
+   String isbn = BurlUtil.getValidISBN(idno);
+   String lccn = BurlUtil.getValidLCCN(idno);
+   
    for (BurlRepoColumn brc : getColumns()) {
-      BurlIsbnType isbntype = brc.getIsbnType();
       String dflt = brc.getDefault();
-      if (isbntype == BurlIsbnType.ORIGINAL) {
+      if (brc.isOriginalIsbnField() && isbn != null) {
          brr.setData(brc,isbn);
        }
       else if (brc.isCountField()) {
          brr.setData(brc,"0");
+       }
+      else if (brc.isLccnField() && lccn != null) {
+         brr.setData(brc,lccn);
        }
       else if (dflt != null && !dflt.equals("NULL")) {
          brr.setData(brc,dflt);
@@ -492,6 +559,242 @@ JSONObject getJsonForRow(BurlRepoRow rr,boolean external)
    
    return result;
 }
+
+
+
+/********************************************************************************/
+/*                                                                              */
+/*      Import methods : CSV                                                    */
+/*                                                                              */
+/********************************************************************************/
+ 
+@Override public String importCSVHeader(String hdr,Map<BurlRepoColumn,Integer> columns)
+{
+   if (columns == null) return "No column map"; 
+   
+   String error = null;
+   
+   try (PushbackReader pr = new PushbackReader(new StringReader(hdr))) {
+      List<String> flds = splitCsv(pr);
+      for (int i = 0; i < flds.size(); ++i) {
+         String fld = flds.get(i);
+         BurlRepoColumn brc = getColumn(fld);
+         if (brc == null) {
+            if (error == null) error = fld;
+            else error += ", " + fld;
+          }
+         else {
+            columns.put(brc,i);
+          }
+       }
+    }
+   catch (IOException e) {      
+      IvyLog.logE("REPO","Problem reading CSV header row");
+    }
+   
+   if (error == null) return null;
+   
+   return "Unknown columns: " + error; 
+
+}
+
+
+
+@Override public void importCSV(String row,BurlUpdateMode updmode,boolean count,
+      Map<BurlRepoColumn,Integer> colmap)
+{
+   try (PushbackReader pr = new PushbackReader(new StringReader(row))) {
+      List<String> items = splitCsv(pr);
+      if (items == null) return;
+      String isbn = null;
+      String lccn = null;
+      BurlRepoColumn brc1 = getOriginalIsbnField();
+      isbn = getCSVEntry(brc1,items,colmap);
+      BurlRepoColumn brc2 = getLccnField();
+      lccn = getCSVEntry(brc2,items,colmap);
+      String idno = isbn;
+      if (idno == null) idno = lccn;
+      if (idno == null) return;
+      BurlRepoRow dbrow = null;
+      if (isbn != null) { 
+         dbrow = getRowForIsbn(isbn);
+       }
+      else if (lccn != null) {
+         dbrow = getRowForLccn(lccn);
+       }
+      if (dbrow == null) {
+         dbrow = newRow();
+         setInitialValues(dbrow,idno);
+       }
+      ImportCsvEntry cent = new ImportCsvEntry(items,colmap);
+      computeEntry(dbrow,idno,cent,updmode,count);
+      // if isbn is known then get the original row given id
+      // else create a new row
+      // then call compute entry with an import bib entry that just returns the map result
+    }
+   catch (IOException e) {   
+      IvyLog.logE("REPO","Problem reading CSV row");
+    }
+}
+
+
+private String getCSVEntry(BurlRepoColumn brc,List<String> data,Map<BurlRepoColumn,Integer> colmap)
+{
+   if (brc == null) return null;
+   
+   Integer idx = colmap.get(brc);
+   if (idx == null) return null;
+   int id = idx.intValue();
+   if (id < 0 || id >= data.size()) return null;
+   
+   return data.get(id);
+}
+
+
+private class ImportCsvEntry implements BurlBibEntry {
+   
+   private Map<BurlRepoColumn,Integer> column_map;
+   private List<String> data_values;
+   
+   ImportCsvEntry(List<String> data,Map<BurlRepoColumn,Integer> colmap) {
+      column_map = colmap;
+      data_values = data;
+    }
+   
+   @Override public String computeEntry(BurlRepoColumn brc) {
+      return getCSVEntry(brc,data_values,column_map);  
+    }
+   
+}       // end of inner class ImportCsvEntry
+
+
+
+String parseCsvHeader(String hdr,Map<Integer,BurlRepoColumn> columns)
+{
+   return null;
+}
+
+
+
+protected List<String> splitCsv(PushbackReader fr)
+{
+   List<String> items = new ArrayList<>();
+   
+   boolean quoted = false;
+   StringBuffer buf = new StringBuffer();
+   char quote = getCSVQuote().charAt(0);
+   char sep = getCSVSeparator().charAt(0);
+   
+   try {
+      for ( ; ; ) {
+         int ch = fr.read();
+         if (ch < 0) return null;
+         if (ch != '\r' && ch != '\n') {
+            fr.unread(ch);
+            break;
+          }
+       }
+      
+      for ( ; ; ) {
+         int ch = fr.read();
+         if (ch < 0) break;
+         if (ch == quote) {
+            if (quoted) {
+               int nextch = fr.read();
+               if (nextch == quote) {
+                  buf.append((char) ch);
+                  continue;
+                }
+               else if (nextch == sep || nextch == '\n' || nextch == '\r') {
+                  quoted = false;
+                }
+               fr.unread(nextch);
+             }
+            else if (buf.length() == 0) {
+               quoted = true;
+             }
+            else {
+               buf.append((char) ch);
+             }
+          }
+         else if (ch == sep && !quoted) {
+            items.add(buf.toString());
+            buf.setLength(0);
+          }
+         else if (ch == '\r' || ch == '\n') {
+            break;
+          }
+         else {
+            buf.append((char) ch); 
+          }
+       }
+    }
+   catch (IOException e) {
+      IvyLog.logE("BOOKS","Problem reading CSV input file",e);
+      System.exit(1);
+    }
+   
+   items.add(buf.toString());
+   
+   return items;
+}
+
+
+
+
+/********************************************************************************/
+/*                                                                              */
+/*      Import methods: JSON                                                    */
+/*                                                                              */
+/********************************************************************************/
+
+@Override public void importJSON(JSONObject row,BurlUpdateMode updmode,boolean count)
+{
+   String isbn = null;
+   String lccn = null;
+   BurlRepoColumn brc1 = getOriginalIsbnField();
+   isbn = getJsonEntry(brc1,row);
+   BurlRepoColumn brc2 = getLccnField();
+   lccn = getJsonEntry(brc2,row);
+   String idno = isbn;
+   if (idno == null) idno = lccn;
+   if (idno == null) return;
+   BurlRepoRow dbrow = null;
+   if (isbn != null) { 
+      dbrow = getRowForIsbn(isbn);
+    }
+   else if (lccn != null) {
+      dbrow = getRowForLccn(lccn);
+    }
+   if (dbrow == null) {
+      dbrow = newRow();
+      setInitialValues(dbrow,idno);
+    }
+   ImportJsonEntry jent = new ImportJsonEntry(row);
+   computeEntry(dbrow,idno,jent,updmode,count);
+}
+
+
+private String getJsonEntry(BurlRepoColumn brc,JSONObject data)
+{
+   if (brc == null) return null;
+   return data.optString(brc.getName(),null);
+}
+
+
+private class ImportJsonEntry implements BurlBibEntry {
+   
+   private JSONObject row_data;
+   
+   ImportJsonEntry(JSONObject row) {
+      row_data = row;
+    }
+   
+   @Override public String computeEntry(BurlRepoColumn brc) {
+      return getJsonEntry(brc,row_data);
+    }
+   
+}       // end of inner class ImportJsonEntry
 
 
 

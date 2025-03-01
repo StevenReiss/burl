@@ -18,6 +18,7 @@
 package edu.brown.cs.burl.repo;
 
 import java.util.Iterator;
+import java.util.List;
 
 import org.json.JSONObject;
 
@@ -111,6 +112,33 @@ RepoDatabase(BurlControl bc,BurlLibrary lib)
    if (id == null) return null;
    
    return new DatabaseRow(id);
+}
+
+@Override public BurlRepoRow getRowForIsbn(String isbn)
+{
+   if (isbn == null) return null;
+   
+   BurlRepoColumn fld = getOriginalIsbnField();
+   if (fld == null) return null;
+   
+   List<Number> ids = burl_store.dataFieldSearch(this,fld.getFieldName(), isbn);
+   if (ids.isEmpty()) return null;
+   
+   return getRowForId(ids.get(0));
+}
+
+
+@Override public BurlRepoRow getRowForLccn(String lccn)
+{
+   if (lccn == null) return null;
+   
+   BurlRepoColumn fld = getLccnField();
+   if (fld == null) return null;
+   
+   List<Number> ids = burl_store.dataFieldSearch(this,fld.getFieldName(), lccn);
+   if (ids.isEmpty()) return null;
+   
+   return getRowForId(ids.get(0));
 }
 
 
