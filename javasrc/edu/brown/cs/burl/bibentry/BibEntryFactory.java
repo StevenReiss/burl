@@ -80,6 +80,7 @@ public BurlBibEntry findBibEntry(String idno)
    String isbn = BurlUtil.getValidISBN(idno);
    String altisbn = BurlUtil.computeAlternativeISBN(isbn);
    String lccn = BurlUtil.getValidLCCN(idno);
+   if (lccn.equals(isbn)) lccn = null;
    
    BibEntryBase bibentry = null;
    if (bibentry == null&& isbn != null) {
@@ -146,11 +147,11 @@ private BibEntryLOCResult searchForLOCInfo(String isbn)
       String body = resp.body();
       int vcode = resp.statusCode();
       if (vcode == 429) {
-         IvyLog.logE("BOOKS","RATE LIMITED");
+         IvyLog.logE("BIBENTRY","RATE LIMITED");
          return null;
        }
       else if (vcode >= 400) {
-         IvyLog.logE("BOOKS","Problem doing LOC search for " + req.uri() +
+         IvyLog.logE("BIBENTRY","Problem doing LOC search for " + req.uri() +
                ": " + vcode + " " + body);
          return null;
        }
@@ -160,10 +161,10 @@ private BibEntryLOCResult searchForLOCInfo(String isbn)
       return new BibEntryLOCResult(rslt0); 
     }
    catch (InterruptedException e) { 
-      IvyLog.logE("BOOKS","HTTP interrupted searching Library of Congress",e);
+      IvyLog.logE("BIBENTRY","HTTP interrupted searching Library of Congress",e);
     }
    catch (IOException e) {
-      IvyLog.logE("BOOKS","HTTP Error searching Library of Congress",e); 
+      IvyLog.logE("BIBENTRY","HTTP Error searching Library of Congress",e); 
     }
    finally {
       waitFor(2);
@@ -217,7 +218,7 @@ private BibEntryOpenLibItem searchInOpenLibrary(String isbn)
          String body = resp.body();
          int vcode = resp.statusCode();
          if (vcode >= 400) {
-            IvyLog.logE("BOOKS","Problem doing OpenLib search for " + req.uri() +
+            IvyLog.logE("BIBENTRY","Problem doing OpenLib search for " + req.uri() +
                   ": " + vcode + " " + body);
             if (vcode == 503) {
                // retry on server unavailable
@@ -232,10 +233,10 @@ private BibEntryOpenLibItem searchInOpenLibrary(String isbn)
          return new BibEntryOpenLibItem(rslt0);   
        }
       catch (InterruptedException e) { 
-         IvyLog.logE("BOOKS","HTTP interrupted searching Library of Congress",e);
+         IvyLog.logE("BIBENTRY","HTTP interrupted searching Library of Congress",e);
        }
       catch (IOException e) {
-         IvyLog.logE("BOOKS","HTTP Error searching Library of Congress",e); 
+         IvyLog.logE("BIBENTRY","HTTP Error searching Library of Congress",e); 
        }
       finally {
          waitFor(1);
@@ -303,10 +304,10 @@ private BibEntryGoogleItem searchForGoogleItem(String isbn,boolean pfx)
       return new BibEntryGoogleItem(rslt0);
     }
    catch (InterruptedException e) { 
-      IvyLog.logE("BOOKS","HTTP interrupted searching googlebooks",e);
+      IvyLog.logE("BIBENTRY","HTTP interrupted searching googlebooks",e);
     }
    catch (IOException e) {
-      IvyLog.logE("BOOKS","HTTP Error searching googlebooks",e); 
+      IvyLog.logE("BIBENTRY","HTTP Error searching googlebooks",e); 
     }
    finally {
       waitFor(1);
@@ -337,7 +338,7 @@ private BibEntryBase searchForMarcItemXml(String isbn,String url)
          int rcode = resp.statusCode();
          if (rcode >= 400) return null;
          if (body.contains("<!DOCTYPE html>")) {
-            IvyLog.logD("BOOKS","Waiting for MARC server");
+            IvyLog.logD("BIBENTRY","Waiting for MARC server");
             waitFor(60);
             continue;
           }
@@ -346,10 +347,10 @@ private BibEntryBase searchForMarcItemXml(String isbn,String url)
          return new BibEntryMarc(xml);
        } 
       catch (InterruptedException e) { 
-         IvyLog.logE("BOOKS","HTTP interrupted getting marc XML",e);
+         IvyLog.logE("BIBENTRY","HTTP interrupted getting marc XML",e);
        }
       catch (IOException e) {
-         IvyLog.logE("BOOKS","HTTP error getting marc XML",e);
+         IvyLog.logE("BIBENTRY","HTTP error getting marc XML",e);
        }
       finally {
          waitFor(5);
@@ -387,14 +388,14 @@ private HttpRequest.Builder createHttpBuilder(String url,String... query)
       uri = new URI(url);
     }
    catch (URISyntaxException e) {
-      IvyLog.logE("BOOKS","Problem with URL",e);
+      IvyLog.logE("BIBENTRY","Problem with URL",e);
     }
    if (uri == null) return null;
    
    HttpRequest.Builder bldr = HttpRequest.newBuilder();
    bldr.uri(uri);
    bldr.header("Content-Type","application/json; charset=utf-8");
-   bldr.header("Accept","application/json,application/xml");     
+   bldr.header("Accept","application/json,application/xml");    
    bldr.headers("User-Agent","BooksLibrary");
    
    return bldr;

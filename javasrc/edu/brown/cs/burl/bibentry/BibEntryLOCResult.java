@@ -59,15 +59,13 @@ BibEntryLOCResult(JSONObject jobj)
 String getIdURL(String isbn)
 {
    if (results_data.length() == 0) return null;
-   else if (results_data.length() == 1) {
-      JSONObject r1 = results_data.getJSONObject(0);
-      return r1.getString("id");
+   if (results_data.length() > 1) {
+      IvyLog.logD("BIBENTRY","Need to check which result is correct for " + isbn);
+      IvyLog.logD("BIBENTRY",results_data.toString(2));
     }
-   else {
-      IvyLog.logD("BOOKS","Need to check which result is correct for " + isbn);
-      IvyLog.logD("BOOKS",results_data.toString(2));
-    }
-   return null;
+   
+   JSONObject r1 = results_data.getJSONObject(0);
+   return r1.getString("id");
 }
 
 

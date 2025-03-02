@@ -21,6 +21,7 @@ import java.io.File;
 import java.util.Collection;
 import java.util.Map;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 public interface BurlRepo extends BurlConstants
@@ -173,7 +174,7 @@ void closeRepository();
  *      Export the repository
  **/
 
-boolean exportRepository(File otf,BurlExportFormat format,boolean external); 
+boolean exportRepository(File otf,BurlExportFormat format,JSONArray items,boolean external); 
 
 /**
  *      Import header line from CSV

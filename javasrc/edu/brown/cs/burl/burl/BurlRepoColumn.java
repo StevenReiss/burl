@@ -147,6 +147,19 @@ boolean isInternal();
 
 
 /**
+ *      Get the type of field value checking and fixing for this field.
+ **/
+
+BurlFixType getFixType();
+
+/**
+ *      Handle corrections based on field type
+ **/
+
+String fixFieldValue(String val);
+
+
+/**
  *      Comparison method that is needed
  **/
 

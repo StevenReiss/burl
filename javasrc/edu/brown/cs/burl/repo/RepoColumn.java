@@ -19,6 +19,7 @@ package edu.brown.cs.burl.repo;
 
 import edu.brown.cs.burl.burl.BurlFieldData;
 import edu.brown.cs.burl.burl.BurlRepoColumn;
+import edu.brown.cs.burl.burl.BurlUtil;
 
 class RepoColumn implements BurlRepoColumn, RepoConstants
 {
@@ -141,6 +142,106 @@ RepoColumn(String name,int no,BurlFieldData fd)
 {
    return field_data.isInternal(column_name);
 }
+
+@Override public BurlFixType getFixType()
+{
+   return field_data.getFixType(column_name);
+}
+
+
+/********************************************************************************/
+/*                                                                              */
+/*      Field value fix methods                                                 */
+/*                                                                              */
+/********************************************************************************/
+
+@Override public String fixFieldValue(String val) 
+{
+   BurlFixType fixtype = getFixType();
+   String nval = val;
+   
+   switch (fixtype) {
+      default :
+      case NONE :
+         break;
+      case LCCN :
+         nval = BurlUtil.getValidLCCN(val);
+         break;
+      case ISBN : 
+         nval = BurlUtil.getValidISBN(val);
+         break;
+      case LCC_CODE :
+         nval = fixLccCode(val);
+         break;
+      case LAST_FIRST :
+         nval = fixFirstLast(val);
+         break;
+    }
+   
+   if (nval != null) return nval;
+   
+   return val;
+}
+
+
+
+private String fixLccCode(String code)
+{
+   if (code == null) return null;
+   
+   if (!code.endsWith("0")) return code;
+   code = code.replace("-","");
+   int idx2 = -1;
+   for (int i = 0; i < code.length(); ++i) {
+      if (code.charAt(i) == '0') {
+         if (idx2 < 0) idx2 = i;
+       }
+      else {
+         if (idx2 >= 0) {
+            String ncode = code.substring(0,idx2);
+            ncode += code.substring(i);
+            code = ncode;
+            int len = (i-idx2);
+            i -= len;
+          }
+         idx2 = -1;
+       }
+    }
+   
+   return code;
+}
+
+
+private String fixFirstLast(String val)
+{
+   if (val.contains(",")) return val;
+   
+   String [] names = val.split("\\s");
+   if (names.length == 1) return val;
+   if (names.length == 2) {
+      return names[1] + ", " + names[0];
+    }
+   String check = names[names.length-2];
+   int llen = 1;
+   if (check.equalsIgnoreCase("van") ||
+         check.equalsIgnoreCase("von") ||
+         check.equalsIgnoreCase("mac") ||
+         check.equalsIgnoreCase("mc")) {
+       llen = 2;
+    }
+   StringBuffer buf = new StringBuffer();  
+   for (int i = names.length-llen; i < names.length; ++i) {
+      if (!buf.isEmpty()) buf.append(" ");
+      buf.append(names[i]);
+    }
+   buf.append(",");
+   for (int i = 0; i < names.length-llen; ++i) {
+      buf.append(" ");
+      buf.append(names[i]);
+    }
+   return buf.toString();      
+}
+
 
 
 }       // end of class RepoColumn

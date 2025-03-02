@@ -239,6 +239,8 @@ public static String getValidISBN(String s0)
 
 public static String computeAlternativeISBN(String isbn)
 {
+   if (isbn == null) return null;
+   
    if (isbn.length() == 9) isbn = "0"+isbn;
    
    if (isbn.length() == 10) {

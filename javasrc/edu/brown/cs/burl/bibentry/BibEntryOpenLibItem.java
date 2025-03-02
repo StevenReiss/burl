@@ -77,10 +77,6 @@ BibEntryBase getBibEntry()
       JSONObject r1 = results_data.getJSONObject(0);
       return new BibEntryOpenLib(r1); 
     }
-   else {
-//    IvyLog.logD("BOOKS","Need to check which result is correct for " + isbn);
-//    IvyLog.logD("BOOKS",results_data.toString(2));
-    }
    
    return null;   
 }

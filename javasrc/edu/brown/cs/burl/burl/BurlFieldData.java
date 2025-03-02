@@ -34,6 +34,7 @@ import edu.brown.cs.ivy.xml.IvyXml;
 
 
 
+
 public class BurlFieldData implements BurlConstants
 {
 
@@ -76,7 +77,7 @@ public BurlFieldData()
       xmldata = IvyXml.loadXmlFromStream(ins); 
     }
    catch (Exception e) {
-      IvyLog.logE("BOOKS","Problem reading field data",e);
+      IvyLog.logE("BIBENTRY","Problem reading field data",e);
       System.exit(1);
     }
    
@@ -228,6 +229,12 @@ public boolean isInternal(String nm)
    if (IvyXml.getAttrBool(felt,"INTERNAL")) return true;
    if (getLabel(nm).equals("*")) return true;
    return false;
+}
+
+public BurlFixType getFixType(String nm)
+{
+   Element felt = field_map.get(nm);
+   return IvyXml.getAttrEnum(felt,"FIX",BurlFixType.NONE); 
 }
 
 

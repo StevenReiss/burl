@@ -59,19 +59,17 @@ BibEntryGoogleItem(JSONObject jo)
 String getIdURL(String isbn)
 {
    if (results_data == null || results_data.length() == 0) return null;
-   else if (results_data.length() == 1) {
-      JSONObject r1 = results_data.getJSONObject(0);
-      String r2 = r1.optString("lccn",null);
-      if (r2 !=  null && !r2.isEmpty()) {
-         return "https://lccn.loc.gov/" + r2;
-       }
-      else {
-         IvyLog.logD("BOOKS","No lccn given for google " + isbn);
-       }
+   if (results_data.length() > 1) {
+      IvyLog.logD("BIBENTRY","Need to check which result is correct for " + isbn);
+    }
+   
+   JSONObject r1 = results_data.getJSONObject(0);
+   String r2 = r1.optString("lccn",null);
+   if (r2 !=  null && !r2.isEmpty()) {
+      return "https://lccn.loc.gov/" + r2;
     }
    else {
-      IvyLog.logD("BOOKS","Need to check which result is correct for " + isbn);
-      IvyLog.logD("BOOKS",results_data.toString(2));
+      IvyLog.logD("BIBENTRY","No lccn given for google " + isbn);
     }
    
    return null;
@@ -82,16 +80,12 @@ String getIdURL(String isbn)
 BibEntryBase getBibEntry()
 {
    if (results_data == null || results_data.length() == 0) return null;
-   else if (results_data.length() == 1) {
-      JSONObject r1 = results_data.getJSONObject(0);
-      return new BibEntryGoogle(r1); 
-    }
-   else {
-//    IvyLog.logD("BOOKS","Need to check which result is correct for " + isbn);
-//    IvyLog.logD("BOOKS",results_data.toString(2));
+   if (results_data.length() > 1) {
+      IvyLog.logE("BIBENTRY","Recieved " + results_data.length() + " results");
     }
    
-   return null;   
+   JSONObject r1 = results_data.getJSONObject(0);
+   return new BibEntryGoogle(r1); 
 }
 
 

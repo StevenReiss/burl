@@ -140,6 +140,13 @@ ControlLibrary(ControlMain bm,JSONObject data)
             continue;
           }
        }
+      else {
+         if (BurlUtil.getValidISBN(isbn) == null && 
+               BurlUtil.getValidLCCN(isbn) == null) {
+            IvyLog.logE("CONTROL","ISBN/LCCN " + isbn + " IS INVALID -- IGNORED");
+            continue;
+          }
+       }
       
       BurlBibEntry bibentry = burl_control.findBibEntry(isbn);
       

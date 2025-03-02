@@ -45,7 +45,7 @@ BibEntryGoogle(JSONObject google)
 {
    google_data = google;
    
-   IvyLog.logD("BOOKS",
+   IvyLog.logD("BIBENTRY",
          "Use google information " + google_data.toString(2));
 }
 

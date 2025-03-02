@@ -326,9 +326,9 @@ protected static String getMultiplePattern()
 }
 
 
-protected String fixIsbnField(BurlRepoColumn brc,String isbn,String oldv,String newv)
+protected static String fixIsbnField(BurlRepoColumn brc,String isbn,String oldv,String newv)
 {
-   BurlIsbnType isbntype = field_data.getIsbnType(brc.getName());
+   BurlIsbnType isbntype = brc.getIsbnType();
    int len = 0;
    
    switch (isbntype) {
@@ -378,7 +378,7 @@ protected String fixIsbnField(BurlRepoColumn brc,String isbn,String oldv,String 
 
 
 
-private void addIsbn(String isbn,int len,Set<String> rslt)
+private static void addIsbn(String isbn,int len,Set<String> rslt)
 {
    if (isbn == null) return;
    if (BurlUtil.getValidISBN(isbn) == null) return; 
@@ -425,14 +425,14 @@ private void addIsbn(String isbn,int len,Set<String> rslt)
 }
 
 
-
 /********************************************************************************/
 /*                                                                              */
 /*      Export methods                                                          */
 /*                                                                              */
 /********************************************************************************/
 
-@Override public boolean exportRepository(File otf,BurlExportFormat format,boolean external)
+@Override public boolean exportRepository(File otf,BurlExportFormat format,
+      JSONArray items,boolean external)
 {
    try (PrintWriter pw = new PrintWriter(otf)) { 
       switch (format) {
@@ -442,7 +442,7 @@ private void addIsbn(String isbn,int len,Set<String> rslt)
                pw.println(getCSVForRow(brr,external));
              }
             break;
-         case JSON :
+         case JSON : 
             JSONArray rslt = new JSONArray();
             for (BurlRepoRow brr : getRows()) {
                JSONObject jo = getJsonForRow(brr,external);
@@ -730,7 +730,7 @@ protected List<String> splitCsv(PushbackReader fr)
        }
     }
    catch (IOException e) {
-      IvyLog.logE("BOOKS","Problem reading CSV input file",e);
+      IvyLog.logE("REPO","Problem reading CSV input file",e);
       System.exit(1);
     }
    

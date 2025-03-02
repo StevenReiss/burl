@@ -340,7 +340,20 @@ String handleExportLibrary(HttpExchange he,ControlSession session)
          break; 
     }
    boolean internalfmt = BowerRouter.getBooleanParameter(he,"internal",false);
-  String sfx = (exp == BurlExportFormat.CSV ? ".csv" : ".json");
+   String sfx = null;
+   switch (exp) {
+      case CSV :
+         sfx = ".csv";
+         break;
+      case JSON :
+         sfx = ".json";
+      case LABELS :
+         sfx = ".docx";
+         break;
+      default :
+         sfx = ".txt";
+         break;
+    }
    File f1 = null;
    try {
       f1 = File.createTempFile("Burl_" + lib.getName(),sfx);
@@ -348,15 +361,20 @@ String handleExportLibrary(HttpExchange he,ControlSession session)
    catch (IOException e) {
       return BowerRouter.errorResponse(he,session,500,"Problem with temp file");
     }
+   JSONArray items = null;
+   JSONObject select = BowerRouter.getJson(he,"selection");
+   if (select != null) {
+      items = select.optJSONArray("items");
+    }
    
    BurlRepo repo = lib.getRepository();
    if (repo == null) { 
       return BowerRouter.errorResponse(he,session,400,"Bad repository");
     }  
    
-   repo.exportRepository(f1,exp,!internalfmt);
+   repo.exportRepository(f1,exp,items,!internalfmt); 
    
-   String resp = BowerRouter.sendFileResponse(he,f1);
+   String resp = BowerRouter.sendFileResponse(he,f1); 
    
    f1.delete();
    
@@ -462,11 +480,11 @@ String handleFieldData(HttpExchange he,ControlSession session)
 {
    JSONObject data = null;
    try (InputStream ins = getClass().getClassLoader().getResourceAsStream("fields.xml")) {
-      Reader rdr = new InputStreamReader(ins);
+      Reader rdr = new InputStreamReader(ins,"UTF-8");
       data = XML.toJSONObject(rdr,true);
     }
    catch (Exception e) {
-      IvyLog.logE("BOOKS","Problem reading field data",e);
+      IvyLog.logE("BURLCLI","Problem reading field data",e);
       System.exit(1);
     }
    

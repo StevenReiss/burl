@@ -436,7 +436,7 @@ ControlSession checkSession(BowerSessionStore<ControlSession> bss,String sid)
 {
    String kname = repo.getNameKey();
    String rname = "BurlRepo_" + repo.getNameKey();
-   String q1 = "SELECT * from BurlRepoStores WHERE name = $1";
+   String q1 = "SELECT * FROM BurlRepoStores WHERE name = $1";
    
    JSONObject tbl = sqlQuery1(q1,kname);
    if (tbl != null) {
@@ -460,15 +460,15 @@ ControlSession checkSession(BowerSessionStore<ControlSession> bss,String sid)
       String q3 = "INSERT INTO BurlRepoStores ( name, fields ) VALUES ( $1, $2 )";
       int ct = sqlUpdate(q2); 
       if (ct < 0) return false;
-      sqlUpdate(q3,kname,flds);
+      sqlUpdate(q3,kname,flds.toString());
       BurlRepoColumn isbnfld = repo.getOriginalIsbnField();
       if (isbnfld != null) {
-         String q4 = "CREATE INDEX rname " + "Isbn ON " + rname + " ( " + isbnfld.getFieldName() + " )";
+         String q4 = "CREATE INDEX " + rname + "Isbn ON " + rname + " ( " + isbnfld.getFieldName() + " )";
          sqlUpdate(q4);
        }
       BurlRepoColumn lccnfld = repo.getLccnField();
       if (lccnfld != null) {
-         String q5 = "CREATE INDEX rname " + "Lccn ON " + rname + " ( " + lccnfld.getFieldName() + " )";
+         String q5 = "CREATE INDEX " + rname + "Lccn ON " + rname + " ( " + lccnfld.getFieldName() + " )";
          sqlUpdate(q5);
        }
     }

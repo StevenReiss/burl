@@ -121,6 +121,18 @@ enum BurlUpdateMode {
 }
 
 
+/**
+ *      Possible fixes for various fields
+ **/
+
+enum BurlFixType {
+   NONE,
+   LAST_FIRST,          // first last => last, first
+   LCC_CODE,            // remove excess zeros from LC classifcation
+   LCCN,                // normalize the LCCN
+   ISBN,                // adjust iand normalize isbnsbn
+}
+   
 
 
 }	// end of interface BurlConstants

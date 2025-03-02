@@ -162,6 +162,7 @@ String handleFindEntries(HttpExchange he,ControlSession session)
             break;
           }
        }
+      if (!known_filters.containsKey(filterid)) filterid = null;
     }
    else {
       filterid = null;

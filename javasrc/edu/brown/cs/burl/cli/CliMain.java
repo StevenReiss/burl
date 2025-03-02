@@ -667,7 +667,7 @@ JSONObject createHttpGet(String urlcmd,String... query)
       uri = new URI(url);
     }
    catch (URISyntaxException e) {
-      IvyLog.logE("BOOKS","Problem with URL",e);
+      IvyLog.logE("BURLCLI","Problem with URL",e);
     }
    if (uri == null) return null;
    
@@ -687,7 +687,7 @@ JSONObject createHttpGet(String urlcmd,String... query)
       return rslt;
     }
    catch (Exception e) {
-      IvyLog.logE("Problem communicationg with server",e);
+      IvyLog.logE("BURLCLI","Problem communicationg with server",e);
     }
    
    return null;
@@ -709,7 +709,7 @@ JSONObject createHttpPost(String urlcmd,JSONObject json,File file)
       uri = new URI(url);
     }
    catch (URISyntaxException e) {
-      IvyLog.logE("BOOKS","Problem with URL",e);
+      IvyLog.logE("BURLCLI","Problem with URL",e);
     }
    if (uri == null) return null;
    
@@ -752,7 +752,7 @@ JSONObject createHttpPost(String urlcmd,JSONObject json,File file)
        }
     }
    catch (Exception e) {
-      IvyLog.logE("Problem communicationg with server",e);
+      IvyLog.logE("BURLCLI","Problem communicationg with server",e);
     }
    
    return null;

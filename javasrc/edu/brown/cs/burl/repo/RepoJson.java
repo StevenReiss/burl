@@ -92,7 +92,7 @@ RepoJson(BurlControl bc,BurlLibrary lib)
 @Override public void outputRepository()
 {
    // might want to handle backups
-   exportRepository(repo_file,BurlExportFormat.CSV,false);
+   exportRepository(repo_file,BurlExportFormat.CSV,null,false);
 }
 
 
@@ -142,7 +142,7 @@ private void inputRepoFromFile()
        }
     }
    catch (IOException e) {
-      IvyLog.logE("BOOKS","Problem reading JSON input file",e);
+      IvyLog.logE("REPO","Problem reading JSON input file",e);
       System.exit(1);
     }
 }
@@ -221,6 +221,7 @@ private class JsonRow extends RepoRowBase {
          noteLccnChange(ov,v,row_index);
        }
       
+      v = rc.fixFieldValue(v);
       if (v == null || v.isEmpty()) row_data.remove(rc);
       else row_data.put(rc,v);
     }

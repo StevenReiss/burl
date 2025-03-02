@@ -380,7 +380,7 @@ void addFileIsbns(String fnm,List<String> isbns)
        }
     }
    catch (IOException e) {
-      IvyLog.logE("BOOKS","Problem reading ISBN File",e);
+      IvyLog.logE("BURLCLI","Problem reading ISBN File",e);
       System.exit(1);
     }
 }

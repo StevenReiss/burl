@@ -209,6 +209,7 @@ private class DatabaseRow extends RepoRowBase {
     }
    
    @Override public void setData(BurlRepoColumn rc,String v) {
+      v = rc.fixFieldValue(v);
       burl_store.updateDataRow(RepoDatabase.this,row_index,rc.getFieldName(),v);
       if (row_data != null) {
          row_data.put(rc.getFieldName(),v);
