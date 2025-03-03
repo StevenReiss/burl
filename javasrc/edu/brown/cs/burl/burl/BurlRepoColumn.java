@@ -99,6 +99,7 @@ String getOtherIsbn();
 boolean isCountField();
 
 
+
 /**
  *      Specify wheter this is the original ISBN field
  **/

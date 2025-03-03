@@ -510,7 +510,7 @@ ControlSession checkSession(BowerSessionStore<ControlSession> bss,String sid)
 {
    String kname = repo.getNameKey();
    String rname = "BurlRepo_" + kname;
-   String q1 = "SELECT * FROM " + rname;
+   String q1 = "SELECT * FROM " + rname + " ORDER BY burl_id";
    try {
       ResultSet rs = executeQueryStatement(q1);
       return new ResultSetIterator(rs); 
@@ -562,6 +562,15 @@ ControlSession checkSession(BowerSessionStore<ControlSession> bss,String sid)
    String rname = "BurlRepo_" + kname;
    String q1 = "UPDATE " + rname + " SET " + fld + " = $1 WHERE burl_id = $2";
    sqlUpdate(q1,val,rid);
+}
+
+
+@Override public void removeDataRow(BurlRepo repo,Number rid)
+{
+   String kname = repo.getNameKey(); 
+   String rname = "BurlRepo_" + kname;
+   String q1 = "DELETE FROM " + rname + " WHERE burl_id = $1";
+   sqlUpdate(q1,rid);
 }
 
 

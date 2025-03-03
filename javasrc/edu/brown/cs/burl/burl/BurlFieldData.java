@@ -51,8 +51,10 @@ private List<String> isbn_fields;
 private String count_field;
 private String isbn_field;
 private String lccn_field;
+private String labeled_field;
 private String multiple_string;
 private Element csv_data;
+private Element label_data;
 
 
 
@@ -71,6 +73,7 @@ public BurlFieldData()
    count_field = null;
    isbn_field = null;
    lccn_field = null;
+   labeled_field = null;
    
    Element xmldata = null;
    try (InputStream ins = getClass().getClassLoader().getResourceAsStream("fields.xml")) {
@@ -103,11 +106,16 @@ public BurlFieldData()
       if (IvyXml.getAttrBool(fldelt,"LCCN")) {
          lccn_field = nm; 
        }
+      if (IvyXml.getAttrBool(fldelt,"LABELED")) {
+         labeled_field = nm; 
+       }
     }
    
    csv_data = IvyXml.getChild(xmldata,"CSV");
    Element mult = IvyXml.getChild(xmldata,"MULTIPLE");
    multiple_string = IvyXml.getAttrString(mult,"TEXT"," | ");
+   
+   label_data = IvyXml.getChild(xmldata,"LABEL");
 }
 
 
@@ -174,6 +182,12 @@ public BurlUserAccess getAccessLevel(String nm)
 public String getCountField()
 {
    return count_field;
+}
+
+
+public String getLabeledField()
+{ 
+   return labeled_field;
 }
 
 public String getOriginalIsbnField()
@@ -256,6 +270,12 @@ public String getCSVSeparator()
 public String getCSVQuote()        
 {
    return IvyXml.getAttrString(csv_data,"QUOTE","\"");
+}
+
+
+public Element getLabelData()
+{
+   return label_data;
 }
 
 

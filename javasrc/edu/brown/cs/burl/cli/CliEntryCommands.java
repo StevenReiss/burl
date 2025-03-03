@@ -339,7 +339,65 @@ private void badEditEntryArgs()
 
 
 
+/********************************************************************************/
+/*                                                                              */
+/*      Remove entry                                                            */
+/*                                                                              */
+/********************************************************************************/
 
+void handleRemoveEntry(List<String> args)
+{
+   Number entid = null;
+   for (String s : args) {
+      if (s.startsWith("-")) {
+         badSetEntryArgs();
+         return;
+       }
+      else if (s.matches("[0-9]+") && entid == null) {
+         entid = Integer.parseInt(s);
+       }
+      else {
+         badRemoveEntryArgs();
+         return;
+       }
+    }
+   
+   if (entid == null) {
+      entid = cli_main.getEntryId();
+      if (entid == null) {
+         badRemoveEntryArgs();
+         return;
+       }
+    }
+   if (entid.intValue() == 0) entid = null;
+   
+   Number libid = cli_main.getLibraryId();
+   if (libid == null) {
+      badRemoveEntryArgs();
+      return;
+    }
+         
+   
+   if (!setEntry(entid) && entid != null) {
+      IvyLog.logI("BURLCLI","Bad entry number");
+      return;
+    }
+   
+   if (entid == null) return;
+   
+   JSONObject data = BurlUtil.buildJson("library",libid,"entry",entid);
+   JSONObject rslt = cli_main.createHttpPost("editentry",data);
+   if (cli_main.checkResponse(rslt,"edit")) {
+      cli_main.setEntryId(null);
+      IvyLog.logI("BURLCLI","Entry removed");
+    } 
+}
+
+
+private void badRemoveEntryArgs()
+{
+   IvyLog.logI("BURLCLI","removeentry [<id>]");
+}
 
 /********************************************************************************/
 /*                                                                              */

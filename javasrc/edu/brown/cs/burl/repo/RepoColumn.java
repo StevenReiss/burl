@@ -174,8 +174,11 @@ RepoColumn(String name,int no,BurlFieldData fd)
          nval = fixLccCode(val);
          break;
       case LAST_FIRST :
-         nval = fixFirstLast(val);
+         nval = BurlUtil.fixFirstLast(val); 
          break;
+      case YES_NO :
+         nval = fixYesNo(val);
+         break; 
     }
    
    if (nval != null) return nval;
@@ -212,34 +215,15 @@ private String fixLccCode(String code)
 }
 
 
-private String fixFirstLast(String val)
+private String fixYesNo(String val)
 {
-   if (val.contains(",")) return val;
+   if (val == null || val.isBlank()) return "no";
    
-   String [] names = val.split("\\s");
-   if (names.length == 1) return val;
-   if (names.length == 2) {
-      return names[1] + ", " + names[0];
-    }
-   String check = names[names.length-2];
-   int llen = 1;
-   if (check.equalsIgnoreCase("van") ||
-         check.equalsIgnoreCase("von") ||
-         check.equalsIgnoreCase("mac") ||
-         check.equalsIgnoreCase("mc")) {
-       llen = 2;
-    }
-   StringBuffer buf = new StringBuffer();  
-   for (int i = names.length-llen; i < names.length; ++i) {
-      if (!buf.isEmpty()) buf.append(" ");
-      buf.append(names[i]);
-    }
-   buf.append(",");
-   for (int i = 0; i < names.length-llen; ++i) {
-      buf.append(" ");
-      buf.append(names[i]);
-    }
-   return buf.toString();      
+   val = val.trim();
+   char c = val.charAt(0);
+   if ("yY1tT".indexOf(c) >= 0) return "yes";
+   
+   return "no";
 }
 
 

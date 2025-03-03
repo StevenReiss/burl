@@ -233,6 +233,47 @@ private Boolean canEdit(BurlUserAccess acc,BurlRepoColumn brc)
 }
 
 
+
+/********************************************************************************/
+/*                                                                              */
+/*      Remove entry command                                                    */
+/*                                                                              */
+/********************************************************************************/
+
+String handleRemoveEntry(HttpExchange he,ControlSession session)
+{
+   BurlUser user = session.getUser();
+   Number libid = burl_server.getIdParameter(he,"library");
+   BurlLibrary lib = burl_store.findLibraryById(libid);
+   if (lib == null) {
+      return BowerRouter.errorResponse(he,session,400,"Bad library");
+    }
+   BurlRepo repo = lib.getRepository();
+   Number entid = burl_server.getIdParameter(he,"entry");
+   BurlRepoRow row = repo.getRowForId(entid);
+   if (row == null) {
+      return BowerRouter.errorResponse(he,session,400,"Bad entity");
+    }
+   BurlUserAccess acc = burl_store.getUserAccess(user.getEmail(),libid);
+   switch (acc) {
+      case ADMIN :
+      case LIBRARIAN :
+      case OWNER :
+         break;
+      case EDITOR :
+      case NONE :
+      case SENIOR :
+      case VIEWER :
+         return BowerRouter.errorResponse(he,session,402,"Unauthorized");
+    }
+   
+// repo.removeRow(entid);
+   
+   return BowerRouter.jsonOKResponse(session);
+}
+
+
+
 /********************************************************************************/
 /*                                                                              */
 /*      Filter implementation                                                   */

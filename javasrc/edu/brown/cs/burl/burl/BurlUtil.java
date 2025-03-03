@@ -218,6 +218,8 @@ public static String getValidISBN(String s0)
 {
    String s = s0;
    
+   s = s.toUpperCase();
+   
    if (s.length() == 9) s0 = "0" + s;
    
    if (s.length() != 10 && s.length() != 13) return null;
@@ -228,7 +230,6 @@ public static String getValidISBN(String s0)
    if (s1 != null) {
       String s2 = computeAlternativeISBN(s1);
       if (s2 != null && !s2.equals(s)) {
-         IvyLog.logW("ISBN check digit");
          return null;
        }
     }
@@ -305,6 +306,47 @@ public static String getValidLCCN(String lccn)
    
    return null;
 }
+
+
+
+/********************************************************************************/
+/*                                                                              */
+/*      Normalize author to last, first                                         */
+/*                                                                              */
+/********************************************************************************/
+
+public static String fixFirstLast(String val)
+{
+   // might want to split on | first and do each component individually
+   
+   if (val.contains(",")) return val;
+   
+   String [] names = val.split("\\s");
+   if (names.length == 1) return val;
+   if (names.length == 2) {
+      return names[1] + ", " + names[0];
+    }
+   String check = names[names.length-2];
+   int llen = 1;
+   if (check.equalsIgnoreCase("van") ||
+         check.equalsIgnoreCase("von") ||
+         check.equalsIgnoreCase("mac") ||
+         check.equalsIgnoreCase("mc")) {
+      llen = 2;
+    }
+   StringBuffer buf = new StringBuffer();  
+   for (int i = names.length-llen; i < names.length; ++i) {
+      if (!buf.isEmpty()) buf.append(" ");
+      buf.append(names[i]);
+    }
+   buf.append(",");
+   for (int i = 0; i < names.length-llen; ++i) {
+      buf.append(" ");
+      buf.append(names[i]);
+    }
+   return buf.toString();      
+}
+
 
 
 /********************************************************************************/

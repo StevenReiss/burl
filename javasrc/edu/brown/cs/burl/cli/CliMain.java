@@ -491,9 +491,15 @@ private void processCommand(String cmd,List<String> args)
             lib_commands.handleExportLibrary(args);
           }
          break;
+      case "labels" :
+      case "label" :
+         if (checkLibrary(cmd)) {
+            lib_commands.handlePrintLabels(args); 
+          }
+         break;
       case "removelibrary" :
          if (checkLibrary(cmd)) {
-            // lib_commands.handleRemoveLibrary(args);
+            lib_commands.handleRemoveLibrary(args);
           }
          break;
       case "addisbns" :
@@ -504,7 +510,7 @@ private void processCommand(String cmd,List<String> args)
          break;
       case "import" :
          if (checkLibrary(cmd)) {
-            // lib_commands.handleImport(args);
+            lib_commands.handleImport(args);
           }
          break;
          
@@ -525,7 +531,7 @@ private void processCommand(String cmd,List<String> args)
          break;
       case "removeentry" :
          if (checkEntry(cmd)) {
-            // entry_commands.handleRemoveEntry();
+            entry_commands.handleRemoveEntry(args);
           }
          break;
          

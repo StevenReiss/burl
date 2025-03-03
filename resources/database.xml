@@ -1,0 +1,56 @@
+<BURLDB>
+   <TABLE NAME="BurlUsers">
+      <FIELD NAME="id" TYPE="IDDEFTYPE" NOTNULL="T" KEY="T" />
+      <FIELD NAME="email" TYPE="text" NOTNULL="T" />
+      <FIELD NAME="password" TYPE="text" NOTNULL="T" />
+      <FIELD NAME="salt" TYPE="text" NOTNULL="T" />
+      <FIELD NAME="temp_password" TYPE="text" DEFAULT="NULL" />
+      <FIELD NAME="valid" TYPE="bool" NOTNULL="T" DEFAULT="false" />
+      <INDEX NAME="UsersEmail" FIELDS="email" />
+   </TABLE>
+
+   <TABLE NAME="BurlValidator">
+      <FIELD NAME="id" TYPE="IDDEFTYPE" NOTNULL="T" KEY="T" />
+      <FIELD NAME="userid" TYPE="IDTYPE" NOTNULL="T" />
+      <FIELD NAME="validator" TYPE="text" NOTNULL="T" />
+      <FIELD NAME="timeout" TYPE="DATETIME" NOTNULL="T" />
+      <FOREIGNKEY NAME="userid" TABLE="BurlUsers" FIELD="id" />
+      <INDEX NAME="ValidUser" FIELDS="userid" />
+   </TABLE>
+
+   <TABLE NAME="BurlLibraries">
+      <FIELD NAME="id" TYPE="IDDEFTYPE" NOTNULL="T" KEY="T" />
+      <FIELD NAME="name" TYPE="text" NOTNULL="T" />
+      <FIELD NAME="namekey" TYPE="text" NOTNULL="T" />
+      <FIELD NAME="repo_type" TYPE="int" DEFAULT="0" />
+      <UNIQUE FIELDS="namekey" />
+      <INDEX NAME="LibrariesNamekey" FIELDS="namekey" />
+   </TABLE>
+
+   <TABLE NAME="BurlUserAccess">
+      <FIELD NAME="email" TYPE="text" NOTNULL="T" />
+      <FIELD NAME="libraryid" TYPE="IDTYPE" NOTNULL="T" />
+      <FIELD NAME="access_level" TYPE="int" DEFAULT="0" />
+      <UNIQUE FIELDS="email,libraryid" />
+      <FOREIGNKEY NAME="userid" TABLE="BurlUsers" FIELD="id" />
+      <INDEX NAME="AccessUsers" FIELDS="email" />
+      <INDEX NAME="AccessLibraries" FIELDS="libraryid" />
+      <INDEX NAME="AccessPerms" FIELDS="email,libraryid" />
+   </TABLE>
+
+   <TABLE NAME="BurlSession">
+      <FIELD NAME="session" TYPE="text" NOTNULL="T" KEY="T" />
+      <FIELD NAME="userid" TYPE="IDTYPE" DEFAULT="NULL" />
+      <FIELD NAME="libraryid" TYPE="IDTYPE" DEFAULT="NULL" />
+      <FIELD NAME="code" TYPE="text" />
+      <FIELD NAME="creation_time" TYPE="DATETIME" DEFAULT="CURRENT_TIMESTAMP" />
+      <FIELD NAME="last_user" TYPE="DATETIME" DEFAULT="CURRENT_TIMESTAMP" />
+      <FOREIGNKEY NAME="userid" TABLE="BurlUsers" FIELD="id" />
+   </TABLE>
+
+   <TABLE NAME="BurlRepoStores">
+      <FIELD NAME="name" TYPE="text" NOTNULL="T" KEY="T" />
+      <FIELD NAME="fields" TYPE="text" />
+   </TABLE>
+
+<BURLDB>

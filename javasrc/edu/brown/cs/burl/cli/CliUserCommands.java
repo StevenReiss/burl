@@ -240,10 +240,44 @@ void handleLogout(List<String> args)
 }
 
 
+
 private void badLogoutArgs()
 {
    IvyLog.logI("BURLCLI","logout");
 }
+
+
+
+
+/********************************************************************************/
+/*                                                                              */
+/*      Remove user                                                             */
+/*                                                                              */
+/********************************************************************************/
+
+void handleRemoveUser(List<String> args)
+{
+   if (!cli_main.isLoggedIn()) return;
+   
+   if (args.size() > 0) {
+      badRemoveUserArgs();
+      return;
+    }
+   
+   JSONObject rslt = cli_main.createHttpPost("logout",null);
+   if (cli_main.checkResponse(rslt,"removeuser")) {
+      IvyLog.logI("BURLCLI","User removed; logged out");
+      cli_main.setLoggedIn(false);
+    }
+}
+
+
+
+private void badRemoveUserArgs()
+{
+   IvyLog.logI("BURLCLI","removeuser");
+}
+
 
 
 

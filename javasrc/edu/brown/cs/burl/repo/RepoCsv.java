@@ -35,7 +35,7 @@ import edu.brown.cs.burl.burl.BurlRepoRow;
 import edu.brown.cs.ivy.file.IvyLog;
 
 class RepoCsv extends RepoBase  
-{
+{ 
 
 
 /********************************************************************************/
@@ -91,7 +91,7 @@ RepoCsv(BurlControl bc,BurlLibrary lib)
 @Override public void outputRepository()
 {
    // might want to handle backups
-   exportRepository(repo_file,BurlExportFormat.CSV,null,false);
+   exportRepository(repo_file,BurlExportFormat.CSV,false);
 }
 
 
@@ -178,6 +178,13 @@ private void inputRepoFromFile()
    return repo_data.get(id);
 }
 
+
+@Override public void removeRow(Number id)
+{
+   if (id == null) return;
+   
+   repo_data.remove(id);
+}
 
 
 /********************************************************************************/

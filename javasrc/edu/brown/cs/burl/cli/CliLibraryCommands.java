@@ -531,9 +531,6 @@ void handleExportLibrary(List<String> args)
          else if (s.startsWith("-j")) {                         // -json
             format = BurlExportFormat.JSON;                     
           }
-         else if (s.startsWith("-l")) {                         // -labels
-            format = BurlExportFormat.LABELS;                     
-          }
          else if (s.startsWith("-i")) {                         // -internal
             internal = true;
           }
@@ -579,8 +576,93 @@ void handleExportLibrary(List<String> args)
 
 private void badExportArgs()
 {
-   IvyLog.logI("BURLCLI","export [-csv | -json | -labels] [-internal] <file>");
+   IvyLog.logI("BURLCLI","export [-csv | -json ] [-internal] <file>");
 }
+
+
+/********************************************************************************/
+/*                                                                              */
+/*      Export library command                                                  */
+/*                                                                              */
+/********************************************************************************/
+
+void handlePrintLabels(List<String> args)
+{
+   File file = null;
+   
+   for (int i = 0; i < args.size(); ++i) {
+      String s = args.get(i);
+      if (s.startsWith("-")) {
+         if (s.startsWith("-f") && i+1 < args.size()) {    // -file <file>
+            if (file != null) {
+               badExportArgs();
+               return;
+             }
+            file = new File(args.get(++i));
+          }
+       }
+      else if (file == null) {
+         file = new File(s);
+       }
+      else badPrintLabelsArgs();
+    }
+   
+   if (file == null) {
+      badPrintLabelsArgs();
+      return;
+    }
+   
+   JSONObject data = BurlUtil.buildJson("library",cli_main.getLibraryId());
+   
+   JSONObject rslt = cli_main.createHttpPost("labels",data,file);
+   if (cli_main.checkResponse(rslt,"labels")) {
+      IvyLog.logI("BURLCLI","Library labels available in " + file);
+      // Possibly tell if more labels can be printed
+    }
+}
+
+
+private void badPrintLabelsArgs()
+{
+   IvyLog.logI("BURLCLI","labels <file>");
+}
+
+
+
+/********************************************************************************/
+/*                                                                              */
+/*      Handle remove library                                                   */
+/*                                                                              */
+/********************************************************************************/
+
+void handleRemoveLibrary(List<String> args)
+{
+   if (args.size() > 0) {
+      badRemoveLibraryArgs();
+      return;
+    }
+   
+   Number libid = cli_main.getLibraryId();
+   if (libid == null) {
+      badRemoveLibraryArgs();
+      return;
+    }
+   
+   JSONObject data = BurlUtil.buildJson("library",libid);
+   JSONObject rslt = cli_main.createHttpPost("removelibrary",data);
+   
+   if (cli_main.checkResponse(rslt,"removelibrary")) {
+      cli_main.setLibraryId(null);
+      cli_main.setDefaultLibrary(null);
+    }
+}
+
+
+private void badRemoveLibraryArgs()
+{
+   IvyLog.logI("BURLCLI","removelibrary");
+}
+
 
 
 }       // end of class CliLibraryCommands

@@ -200,6 +200,13 @@ Number addDataRow(BurlRepo repo);
 void updateDataRow(BurlRepo repo,Number id,String fld,String val);
 
 
+/**
+ *      Remove a data row
+ **/
+
+void removeDataRow(BurlRepo repo,Number id);
+
+
 
 }       // end of interface BurlStorage
 

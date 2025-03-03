@@ -19,9 +19,9 @@ package edu.brown.cs.burl.burl;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 public interface BurlRepo extends BurlConstants
@@ -53,6 +53,13 @@ BurlRepoColumn getOriginalIsbnField();
  **/
 
 BurlRepoColumn getLccnField();
+
+
+/**
+ *      Return the field containing labeled flag
+ **/
+
+BurlRepoColumn getLabeledField();
 
 
 /**
@@ -147,6 +154,12 @@ BurlRepoRow getRowForIsbn(String isbn);
 
 BurlRepoRow getRowForLccn(String lccn);
 
+/**
+ *      remove a row from the repository
+ **/
+
+void removeRow(Number id);
+
 
 /**
  *      Setup the repository from file or database name
@@ -174,8 +187,15 @@ void closeRepository();
  *      Export the repository
  **/
 
-boolean exportRepository(File otf,BurlExportFormat format,JSONArray items,boolean external); 
+boolean exportRepository(File otf,BurlExportFormat format,boolean external); 
 
+
+/**
+ *      Print labels for a set of entries
+ **/
+
+boolean printLabels(File otf,List<Number> ids);
+ 
 /**
  *      Import header line from CSV
  *

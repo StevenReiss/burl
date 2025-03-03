@@ -150,6 +150,7 @@ BowerRouter<ControlSession> setupRouter()
    br.addRoute("POST","/rest/findlibraries",this::handleFindAllLibraries);
    br.addRoute("POST","/rest/removelibrary",this::handleRemoveLibrary);
    br.addRoute("POST","/rest/exportlibrary",this::handleExportLibrary); 
+   br.addRoute("POST","/rest/labels",this::handlePrintLabels);
    
    br.addRoute("POST","/rest/addisbns",this::handleAddIsbns);
    br.addRoute("POST","/rest/import",this::handleImport);
@@ -157,6 +158,7 @@ BowerRouter<ControlSession> setupRouter()
    br.addRoute("POST","/rest/getentry",entry_manager::handleGetEntry);
    br.addRoute("POST","/rest/entries",entry_manager::handleFindEntries); 
    br.addRoute("POST","/rest/editentry",entry_manager::handleEditEntry); 
+   br.addRoute("POST","/rest/removeentry",entry_manager::handleRemoveEntry); 
    
 // br.addRoute("POST","/rest/removeentry",this::handleRemoveEntry);
    
@@ -342,15 +344,12 @@ String handleExportLibrary(HttpExchange he,ControlSession session)
    boolean internalfmt = BowerRouter.getBooleanParameter(he,"internal",false);
    String sfx = null;
    switch (exp) {
+      default :
       case CSV :
          sfx = ".csv";
          break;
       case JSON :
          sfx = ".json";
-      case LABELS :
-         sfx = ".docx";
-         break;
-      default :
          sfx = ".txt";
          break;
     }
@@ -361,18 +360,57 @@ String handleExportLibrary(HttpExchange he,ControlSession session)
    catch (IOException e) {
       return BowerRouter.errorResponse(he,session,500,"Problem with temp file");
     }
-   JSONArray items = null;
-   JSONObject select = BowerRouter.getJson(he,"selection");
-   if (select != null) {
-      items = select.optJSONArray("items");
-    }
    
    BurlRepo repo = lib.getRepository();
    if (repo == null) { 
       return BowerRouter.errorResponse(he,session,400,"Bad repository");
     }  
    
-   repo.exportRepository(f1,exp,items,!internalfmt); 
+   repo.exportRepository(f1,exp,!internalfmt);  
+   
+   String resp = BowerRouter.sendFileResponse(he,f1); 
+   
+   f1.delete();
+   
+   return resp;
+}
+
+
+
+String handlePrintLabels(HttpExchange he,ControlSession session)
+{
+   Number uid = session.getUserId();
+   if (uid == null) {
+      return BowerRouter.errorResponse(he,session,400,"Bad user");
+    }
+   Number lid = getIdParameter(he,"library");
+   if (lid == null) lid = session.getLibraryId();
+   if (lid == null) {
+      return BowerRouter.errorResponse(he,session,400,"No library given");
+    }
+   ControlLibrary lib = burl_store.findLibraryById(lid);
+   if (lib == null) {
+      return BowerRouter.errorResponse(he,session,400,"No library given");
+    }
+   BurlRepo repo = lib.getRepository();
+   if (repo == null) { 
+      return BowerRouter.errorResponse(he,session,400,"Bad repository");
+    }  
+   BurlRepoColumn brc = repo.getLabeledField();
+   if (brc == null) {
+      return BowerRouter.errorResponse(he,session,400,"No labeled field");
+    }
+   List<Number> todo = burl_store.dataFieldSearch(repo,brc.getFieldName(),"no");
+   
+   File f1 = null;
+   try {
+      f1 = File.createTempFile("Burl_" + lib.getName(),".rtf");
+    }
+   catch (IOException e) {
+      return BowerRouter.errorResponse(he,session,500,"Problem with temp file");
+    }
+   
+   repo.printLabels(f1,todo); 
    
    String resp = BowerRouter.sendFileResponse(he,f1); 
    

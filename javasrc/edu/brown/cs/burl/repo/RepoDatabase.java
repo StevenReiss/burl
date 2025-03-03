@@ -53,7 +53,7 @@ RepoDatabase(BurlControl bc,BurlLibrary lib)
    burl_store = bc.getStorage();
 }
 
-
+ 
 
 /********************************************************************************/
 /*                                                                              */
@@ -112,6 +112,14 @@ RepoDatabase(BurlControl bc,BurlLibrary lib)
    if (id == null) return null;
    
    return new DatabaseRow(id);
+}
+
+
+@Override public void removeRow(Number id)
+{
+   if (id == null) return;
+   
+   burl_store.removeDataRow(RepoDatabase.this,id);
 }
 
 @Override public BurlRepoRow getRowForIsbn(String isbn)

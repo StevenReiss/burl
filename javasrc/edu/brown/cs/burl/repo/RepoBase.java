@@ -18,7 +18,9 @@
 package edu.brown.cs.burl.repo;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.PushbackReader;
 import java.io.StringReader;
@@ -34,6 +36,7 @@ import java.util.TreeSet;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.w3c.dom.Element;
 
 import edu.brown.cs.burl.burl.BurlBibEntry;
 import edu.brown.cs.burl.burl.BurlControl;
@@ -44,7 +47,9 @@ import edu.brown.cs.burl.burl.BurlRepo;
 import edu.brown.cs.burl.burl.BurlRepoColumn;
 import edu.brown.cs.burl.burl.BurlRepoRow;
 import edu.brown.cs.burl.burl.BurlUtil;
+import edu.brown.cs.ivy.file.IvyFile;
 import edu.brown.cs.ivy.file.IvyLog;
+import edu.brown.cs.ivy.xml.IvyXml;
 
 abstract class RepoBase implements BurlRepo, RepoConstants
 {
@@ -111,6 +116,8 @@ RepoBase(BurlControl bc,BurlLibrary lib)
 @Override public abstract Iterable<BurlRepoRow> getRows();
 
 @Override public abstract BurlRepoRow getRowForId(Number id);
+
+@Override public abstract void removeRow(Number id);
 
 
 
@@ -249,6 +256,12 @@ private void addHeader(String name)
 }
 
 
+@Override public RepoColumn getLabeledField()
+{
+   return getColumn(field_data.getLabeledField());
+}
+
+
 @Override public Collection<BurlRepoColumn> getIsbnFields()
 {
    List<BurlRepoColumn> rslt = new ArrayList<>();
@@ -286,11 +299,16 @@ protected static String getMultiplePattern()
 {
    if (updmode == BurlUpdateMode.SKIP) return;
    
+   String visbn = BurlUtil.getValidISBN(isbn);
+   
    for (BurlRepoColumn brc : repo_columns) {
       String v = brr.getData(brc);
       BurlIsbnType isbntype = brc.getIsbnType();
       if (isbntype == BurlIsbnType.ORIGINAL) {
-         if (v == null || v.isEmpty()) brr.setData(brc,isbn);
+         if (visbn != null && (v == null || v.isEmpty())) {
+            brr.setData(brc,visbn);
+          }
+         else visbn = v;
        }
       else if (brc.isCountField()) {
          if (v == null || v.isEmpty()) brr.setData(brc,"1");
@@ -323,10 +341,43 @@ protected static String getMultiplePattern()
          brr.setData(brc,nv);
        }
     }
+   
+   if (visbn == null) {
+      BurlRepoColumn orig = getOriginalIsbnField();
+      if (orig != null) {
+         visbn = findIsbn(brr);
+         brr.setData(orig,visbn);
+       }
+    }
 }
 
 
-protected static String fixIsbnField(BurlRepoColumn brc,String isbn,String oldv,String newv)
+private String findIsbn(BurlRepoRow brr)
+{
+   for (BurlRepoColumn brc : repo_columns) {
+      BurlIsbnType isbntype = brc.getIsbnType();
+      switch (isbntype) {
+         case ALL :
+         case ISBN10 :
+         case ISBN13 :
+             break;
+         case ORIGINAL :
+         case NONE :
+            continue;
+       }
+      
+      String v = brr.getData(brc);
+      String [] split = v.split(field_data.getMultiplePattern());
+      if (split.length > 0) {
+         return split[0].trim();
+       }
+    }
+   
+   return null;
+}
+
+
+protected String fixIsbnField(BurlRepoColumn brc,String isbn,String oldv,String newv)
 {
    BurlIsbnType isbntype = brc.getIsbnType();
    int len = 0;
@@ -431,8 +482,7 @@ private static void addIsbn(String isbn,int len,Set<String> rslt)
 /*                                                                              */
 /********************************************************************************/
 
-@Override public boolean exportRepository(File otf,BurlExportFormat format,
-      JSONArray items,boolean external)
+@Override public boolean exportRepository(File otf,BurlExportFormat format,boolean external)
 {
    try (PrintWriter pw = new PrintWriter(otf)) { 
       switch (format) {
@@ -452,9 +502,6 @@ private static void addIsbn(String isbn,int len,Set<String> rslt)
                   "nameKey",getNameKey(),
                   "data",rslt);
             pw.println(jobj.toString(2));
-            break;
-         case LABELS :
-            // TODO: need to export labels here
             break;
        }
       return true;
@@ -795,6 +842,142 @@ private class ImportJsonEntry implements BurlBibEntry {
     }
    
 }       // end of inner class ImportJsonEntry
+
+
+
+/********************************************************************************/
+/*                                                                              */
+/*      Print labels                                                            */
+/*                                                                              */
+/********************************************************************************/
+
+@Override public boolean printLabels(File otf,List<Number> ids)
+{
+   Element lbldata = field_data.getLabelData();
+   if (lbldata == null) {
+      IvyLog.logE("Missing label data");
+      return false;
+    }
+   
+   String cntstr = null;
+   try (InputStream ins = getClass().getClassLoader().getResourceAsStream("labelout.rtf")) {
+      cntstr = IvyFile.loadFile(ins);
+    } 
+   catch (IOException e) {
+      IvyLog.logE("Problem reading label template",e);
+      return false;
+    }
+   
+   BurlRepoColumn lbld = getLabeledField();
+   
+   StringBuffer cnts = new StringBuffer(cntstr);
+   int cntidx = 0;
+   boolean more = false;
+   List<Number> done = new ArrayList<>();
+   
+   for (Number id : ids) {
+      BurlRepoRow brr = getRowForId(id);
+      if (brr == null) continue;
+      String flg = brr.getData(lbld);
+      if (flg != null && flg.equals("yes")) continue;
+       
+      String code = findLabelData(lbldata,"CODE",brr);
+      String author = findLabelData(lbldata,"AUTHOR",brr);
+      if (code == null) {
+         IvyLog.logI("REPO","Missing code field: no label printed");
+         continue;
+       }
+      
+      if (author == null) author = "";
+      int idx = author.indexOf(field_data.getMultiple());
+      if (idx >= 0) {
+         author = author.substring(0,idx);
+       }
+      idx = author.indexOf(",");
+      if (idx > 0) author = author.substring(0,idx);
+      author = author.trim();
+      idx = author.indexOf(" ");
+      if (idx > 0) author = author.substring(idx+1).trim();
+      if (author.length() > 3) author = author.substring(0,3);
+      
+      String code1 = code;
+      String code2 = "";
+      int len = code.length();
+      if (len > 12) {
+         int idx1 = code.lastIndexOf(" ",12);
+         int idx2 = code.lastIndexOf(".",12);
+         int idx3 = code.lastIndexOf("-",12);
+         int sidx = 0;
+         if (idx1 > 0 && idx1 > sidx) sidx = idx1;
+         if (idx2 > 0 && idx2 > sidx) sidx = idx2;
+         if (idx3 > 0 && idx3 > sidx) sidx = idx3;
+         code1 = code.substring(0,sidx);
+         code2 = code.substring(sidx+1).trim();
+         if (code2.length() > 12) code2 = code2.substring(0,12);
+       }
+      
+      cntidx = insertLabelText(cnts,cntidx,"aaaaaaaaaaaa",code1);
+      if (cntidx < 0) {
+         more = true;
+         break;
+       }
+      cntidx = insertLabelText(cnts,cntidx,"bbbbbbbbbbbb",code2);
+      cntidx = insertLabelText(cnts,cntidx,"CCC",author);
+      done.add(id);
+    }
+   
+   if (!more) {
+      for ( ; ; ) {
+         cntidx = insertLabelText(cnts,cntidx,"aaaaaaaaaaaa","");
+         if (cntidx < 0) break;
+         cntidx = insertLabelText(cnts,cntidx,"bbbbbbbbbbbb","");
+         cntidx = insertLabelText(cnts,cntidx,"CCC","");
+       }
+    }
+   
+   try (FileWriter fw = new FileWriter(otf)) {
+      fw.write(cnts.toString());
+    }
+   catch (IOException e) {
+      IvyLog.logE("Problem writing temp label file",e);
+      return false;
+    }
+   
+  
+   for (Number id : done) {
+      BurlRepoRow rr = getRowForId(id);
+      rr.setData(lbld,"yes");
+    }
+
+   return more;
+}
+
+
+private String findLabelData(Element lbldata,String key,BurlRepoRow brr)
+{
+   String flds = IvyXml.getAttrString(lbldata,key);
+   String [] alts = flds.split("\\,");
+   for (String fldnm : alts) {
+      BurlRepoColumn brc = getColumn(fldnm);
+      if (brc == null) continue;
+      String data = brr.getData(brc); 
+      if (data != null && !data.isEmpty()) return data;
+    }
+   
+   return null;
+}
+
+
+private int insertLabelText(StringBuffer buf,int start,String pat,String rep)
+{
+   int idx = buf.indexOf(pat,start);
+   if (idx < 0) return -1;
+   
+   int len = pat.length();
+   buf.replace(start,start+len,rep);
+   
+   return start + rep.length() - 1;
+}
 
 
 

@@ -28,9 +28,11 @@
       <FIELD NAME="Copy" DEFAULT="1" />
       <FIELD NAME="Shelf" />
       <FIELD NAME="Status" />
+      <FIELD NAME="Labeled" LABELED="T" FIX="YES_NO" DEFAULT="no" />
    </FIELDS>
    <CSV QUOTE='"' SEPARATOR="," />
    <MULTIPLE TEXT=" | " />
+   <LABEL CODE='LC Classification' AUTHOR='Personal Name,Related Names' />
 </BOOKS>
 
 

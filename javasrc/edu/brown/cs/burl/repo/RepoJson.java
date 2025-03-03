@@ -36,7 +36,7 @@ import edu.brown.cs.ivy.file.IvyFile;
 import edu.brown.cs.ivy.file.IvyLog;
 
 class RepoJson extends RepoBase
-{
+{ 
 
 
 /********************************************************************************/
@@ -92,7 +92,7 @@ RepoJson(BurlControl bc,BurlLibrary lib)
 @Override public void outputRepository()
 {
    // might want to handle backups
-   exportRepository(repo_file,BurlExportFormat.CSV,null,false);
+   exportRepository(repo_file,BurlExportFormat.CSV,false);
 }
 
 
@@ -180,10 +180,16 @@ private BurlRepoRow newRow(int idx)
 @Override public BurlRepoRow getRowForId(Number id)
 {
    if (id == null) return null;
-   int idx = id.intValue();
-   if (idx < 0 || idx >= repo_data.size()) return null;
    
-   return repo_data.get(idx);
+   return repo_data.get(id);
+}
+
+
+@Override public void removeRow(Number id)
+{
+   if (id == null) return;
+   
+   repo_data.remove(id);
 }
 
 

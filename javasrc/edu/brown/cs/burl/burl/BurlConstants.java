@@ -79,7 +79,6 @@ enum BurlIsbnType {
 enum BurlExportFormat {
    CSV,                 // as a CSV file
    JSON,                // as a JSON file
-   LABELS,              // as label sheets
 }
 
 
@@ -130,7 +129,8 @@ enum BurlFixType {
    LAST_FIRST,          // first last => last, first
    LCC_CODE,            // remove excess zeros from LC classifcation
    LCCN,                // normalize the LCCN
-   ISBN,                // adjust iand normalize isbnsbn
+   ISBN,                // adjust iand normalize isbn
+   YES_NO,              // yes or no are the only valid values
 }
    
 
