@@ -19,7 +19,9 @@ package edu.brown.cs.burl.control;
 
 import org.json.JSONObject;
 
-class ControlAccess implements ControlConstants
+import edu.brown.cs.burl.burl.BurlLibraryAccess;
+
+class ControlAccess implements BurlLibraryAccess, ControlConstants
 {
 
 
@@ -50,13 +52,13 @@ ControlAccess(JSONObject data)
 /*										*/
 /********************************************************************************/
 
-Number getUserId()		{ return access_data.getNumber("userid"); }
+@Override public String getUserEmail()		{ return access_data.getString("email"); } 
 
 
-Number getLibraryId()		{ return access_data.getNumber("libraryid"); }
+@Override public Number getLibraryId()		{ return access_data.getNumber("libraryid"); }
 
 
-BurlUserAccess getAccessLevel()
+@Override public BurlUserAccess getAccessLevel()
 {
    int lvl = access_data.getInt("access_level");
    return BurlUserAccess.values()[lvl];

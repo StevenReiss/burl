@@ -37,6 +37,7 @@ import org.json.JSONObject;
 
 import edu.brown.cs.burl.burl.BurlException;
 import edu.brown.cs.burl.burl.BurlLibrary;
+import edu.brown.cs.burl.burl.BurlLibraryAccess;
 import edu.brown.cs.burl.burl.BurlRepo;
 import edu.brown.cs.burl.burl.BurlRepoColumn;
 import edu.brown.cs.burl.burl.BurlStorage;
@@ -342,7 +343,6 @@ ControlStorage(ControlMain ctrl)
 }
 
 
- 
 
 /********************************************************************************/
 /*                                                                              */
@@ -373,6 +373,25 @@ ControlStorage(ControlMain ctrl)
       sqlUpdate(q2,email,lid,acc);
     }
 }
+
+
+
+@Override public List<BurlLibraryAccess> getLibraryAccess(Number lid)
+{
+   String q1 = "SELECT * FROM BurlUserAccess WHERE libraryid = $1 AND access_level = $2";
+   List<JSONObject> accs = sqlQueryN(q1,lid,BurlUserAccess.OWNER.ordinal());
+   
+   List<BurlLibraryAccess> rslt = new ArrayList<>();
+   for (JSONObject obj : accs) {
+      ControlAccess acc = new ControlAccess(obj);
+      if (acc.getAccessLevel() != BurlUserAccess.NONE) {
+         rslt.add(acc);
+       }
+    }
+   
+   return rslt;
+}
+
 
 
 

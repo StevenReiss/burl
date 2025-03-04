@@ -126,6 +126,13 @@ void setUserAccess(String email,Number lid,BurlUserAccess access);
 
 
 /**
+ *      Get the users that can access a library
+ **/
+ 
+List<BurlLibraryAccess> getLibraryAccess(Number lid);
+
+
+/**
  *      Save web session information
  **/
 

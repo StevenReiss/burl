@@ -32,6 +32,7 @@ class ControlUser implements ControlConstants, BurlUser
 /********************************************************************************/
 
 private JSONObject	user_data;
+private boolean         temp_used;
 
 
 
@@ -44,6 +45,7 @@ private JSONObject	user_data;
 ControlUser(JSONObject data)
 {
    user_data = data;
+   temp_used = false;
 }
 
 
@@ -82,6 +84,17 @@ String getTempPassword()
    return user_data.optString("temp_password");
 }
 
+
+void noteTempUsed()
+{
+   user_data.put("temp_password",(String) null);
+   temp_used = true;
+}
+
+boolean isTempUsed()
+{
+   return temp_used;
+}
 
 boolean isValid()
 {

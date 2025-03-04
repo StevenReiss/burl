@@ -108,6 +108,10 @@ String handleLogin(HttpExchange he,ControlSession session)
    session.setUser(user);
    session_store.updateSession(session);
    
+   if (user.isTempUsed()) {
+      return BowerRouter.jsonOKResponse(session,"TEMPORARY",true);
+    }
+   
    return BowerRouter.jsonOKResponse(session);
 }
 

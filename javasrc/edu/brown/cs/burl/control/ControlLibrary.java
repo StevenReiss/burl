@@ -18,11 +18,13 @@
 package edu.brown.cs.burl.control;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.json.JSONObject;
 
 import edu.brown.cs.burl.burl.BurlBibEntry;
 import edu.brown.cs.burl.burl.BurlLibrary;
+import edu.brown.cs.burl.burl.BurlLibraryAccess;
 import edu.brown.cs.burl.burl.BurlRepo;
 import edu.brown.cs.burl.burl.BurlRepoColumn;
 import edu.brown.cs.burl.burl.BurlRepoRow;
@@ -59,7 +61,6 @@ ControlLibrary(ControlMain bm,JSONObject data)
 
 
 
-
 /********************************************************************************/
 /*										*/
 /*	Access methods								*/
@@ -92,14 +93,31 @@ ControlLibrary(ControlMain bm,JSONObject data)
 
 @Override public JSONObject toJson(BurlUser user)
 {
-   JSONObject jobj = new JSONObject(lib_data,"id","name","namekey","repotype");
+   JSONObject jobj = new JSONObject(lib_data,"id","name","namekey");
+   jobj.put("repo_type",getRepoType().toString());
    if (user != null) {
       BurlUserAccess acc = getUserAccess(user.getEmail());
       if (acc == BurlUserAccess.NONE) return null;
       jobj.put("access",acc.toString());
     }
+   ControlStorage store = burl_control.getStorage();
+   List<BurlLibraryAccess> acclist = store.getLibraryAccess(getId());
+   jobj.put("owner",getUsers(BurlUserAccess.OWNER,acclist));
 
    return jobj;
+}
+
+
+private String getUsers(BurlUserAccess level,List<BurlLibraryAccess> acclst) 
+{
+   StringBuffer buf = new StringBuffer();
+   for (BurlLibraryAccess acc : acclst) {
+      if (acc.getAccessLevel() == level) {
+         if (!buf.isEmpty()) buf.append(" ");
+         buf.append(acc.getUserEmail());
+       }
+    }
+   return buf.toString();
 }
 
 @Override public BurlRepoType getRepoType()

@@ -251,12 +251,13 @@ String handleCreateLibrary(HttpExchange he,ControlSession session)
    BurlRepoType repotype = getEnumParameter(he,"repotype",BurlRepoType.DATABASE);
    BurlLibrary lib = burl_main.createLibrary(name,session.getUser(),repotype);
    
-   if (lib == null){
-      return BowerRouter.errorResponse(he,session,500,"Unable to create library");
+   if (lib == null) {
+      return BowerRouter.errorResponse(he,session,400,"Unable to create library");
     }
    
-   return BowerRouter.jsonOKResponse(session,"id",lib.getId(),
-         "name",lib.getName(),"namekey",lib.getNameKey());
+   JSONObject jo = lib.toJson(session.getUser());
+   
+   return BowerRouter.jsonOKResponse(session,jo);
 }
 
 
