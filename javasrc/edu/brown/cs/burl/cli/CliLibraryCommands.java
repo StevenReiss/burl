@@ -19,8 +19,10 @@ package edu.brown.cs.burl.cli;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -466,15 +468,19 @@ void handleImport(List<String> args)
          "update",updmode,"count",docounts);
    
    if (format == BurlExportFormat.CSV) {
-      JSONArray arr = new JSONArray();
-      try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+      List<String> lines = new ArrayList<>();
+      try (FileInputStream fis = new FileInputStream(file)) {
+         InputStreamReader insr = new InputStreamReader(fis,"UTF-8");
+         BufferedReader br = new BufferedReader(insr);
          for ( ; ; ) {
             String line = br.readLine();
             if (line == null) break;
             if (line.isBlank()) continue;
-            arr.put(line);
+            lines.add(line);
           }
-         data.put("cvsdata",arr);
+         JSONArray arr = new JSONArray(lines);
+         JSONObject jdata = BurlUtil.buildJson("rows",arr);
+         data.put("cvsdata",jdata);
        }
       catch (IOException e) {
          IvyLog.logI("BURLCLI","Problem reading file " + file);

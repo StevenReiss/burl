@@ -34,10 +34,9 @@ import edu.brown.cs.burl.burl.BurlRepoColumn;
 import edu.brown.cs.burl.burl.BurlRepoRow;
 import edu.brown.cs.burl.burl.BurlUser;
 import edu.brown.cs.burl.burl.BurlUtil;
-import edu.brown.cs.burl.burl.BurlConstants.BurlUserAccess;
 import edu.brown.cs.ivy.bower.BowerRouter;
 
-class ControlEntries
+class ControlEntries implements ControlConstants
 {
 
 
@@ -51,7 +50,7 @@ private ControlServer   burl_server;
 private ControlStorage  burl_store;
 private ControlMain     burl_main;
 
-private Map<String,Iterable<BurlRepoRow>> known_filters;
+private Map<String,BurlRowIter> known_filters;
 
 
 
@@ -101,8 +100,47 @@ String handleGetEntry(HttpExchange he,ControlSession session)
       return BowerRouter.errorResponse(he,session,400,"Bad entry id");
     }
    
-   JSONObject jobj = brr.toJson(true);
+   JSONObject jobj = brr.toJson();
    
+   return BowerRouter.jsonOKResponse(session,"entry",jobj);
+}
+
+
+
+/********************************************************************************/
+/*                                                                              */
+/*      Handle add entry command to add an empty entry                          */
+/*                                                                              */
+/********************************************************************************/
+
+String handleAddEntry(HttpExchange he,ControlSession session)
+{
+   Number libid = burl_server.getIdParameter(he,"library");
+   BurlLibrary lib = burl_store.findLibraryById(libid);
+   if (lib == null) {
+      return BowerRouter.errorResponse(he,session,402,"Bad library");
+    }
+   
+   BurlUserAccess acc = burl_server.validateLibrary(session,libid);
+   switch (acc) {
+      case NONE :
+      case VIEWER :
+      case EDITOR :
+      case SENIOR : 
+         return BowerRouter.errorResponse(he,session,400,"Not authorized");
+      case ADMIN :
+      case OWNER :
+      case LIBRARIAN :
+         break;
+    }
+   
+   BurlRepo repo = lib.getRepository();
+   BurlRepoRow row = repo.newRow();
+   if (row == null) {
+      return BowerRouter.errorResponse(he,session,402,"Problem adding row");
+    }
+   
+   JSONObject jobj = BurlUtil.buildJson("entityid",row.getRowId());
    return BowerRouter.jsonOKResponse(session,"entry",jobj);
 }
 
@@ -120,15 +158,29 @@ String handleFindEntries(HttpExchange he,ControlSession session)
    int count = BowerRouter.getIntParameter(he,"count",20);
    String filterstr = BowerRouter.getParameter(he,"filter");
    String filterid = BowerRouter.getParameter(he,"filterid");
+   
    BurlLibrary lib = burl_store.findLibraryById(libid);
    if (lib == null) {
       return BowerRouter.errorResponse(he,session,402,"Bad library");
     }
    BurlRepo repo = lib.getRepository();
    
-   Iterable<BurlRepoRow> iter = null;
+   String orderby = BowerRouter.getParameter(he,"orderby");
+   boolean invert = BowerRouter.getBooleanParameter(he,"invert",false);
+   BurlRepoColumn sortfld = null;
+   if (orderby != null && !orderby.isBlank()) {
+      sortfld = repo.getColumn(orderby);
+      if (sortfld == null) {
+         return BowerRouter.errorResponse(he,session,400,"Bad sort field");
+       }
+    } 
+   
+   BurlRowIter iter = null; 
    if (filterid != null) {
       iter = known_filters.remove(filterid);
+      if (count < 0) {
+         return BowerRouter.jsonOKResponse(session);
+       }
     }
    
    if (iter == null && filterstr != null) {
@@ -139,11 +191,11 @@ String handleFindEntries(HttpExchange he,ControlSession session)
       else {
          jsonfilter = BurlUtil.buildJson("any",filterstr);
        }
-      EntityFilter filter = new EntityFilter(jsonfilter,repo);
+      EntityFilter filter = new EntityFilter(jsonfilter,repo,sortfld,invert);
       iter = repo.getRows(filter);
     }
    else if (iter == null) {
-      iter = repo.getRows();
+      iter = repo.getRows();  
     }
    JSONArray results = new JSONArray();
    
@@ -152,10 +204,10 @@ String handleFindEntries(HttpExchange he,ControlSession session)
    if (filterid == null) {
       filterid = BurlUtil.randomString(12);
     }
-   if (count >= 0) {
+   if (count >= 0 && iter != null) {
       for (Iterator<BurlRepoRow> it = iter.iterator(); it.hasNext(); ) {
          BurlRepoRow br = it.next();
-         results.put(br.toJson(true));
+         results.put(br.toJson());
          ++ct;
          if (count > 0 && ct == count) {
             known_filters.put(filterid,iter); 
@@ -168,7 +220,10 @@ String handleFindEntries(HttpExchange he,ControlSession session)
       filterid = null;
     }
    
-   return BowerRouter.jsonOKResponse(session,"data",results,"filterid",filterid);
+   int itcnt = (iter == null ? 0 : iter.getRowCount());
+   
+   return BowerRouter.jsonOKResponse(session,"count",itcnt,
+         "data",results,"filterid",filterid);
 }
 
 
@@ -221,7 +276,7 @@ String handleEditEntry(HttpExchange he,ControlSession session)
       row.setData(ent.getKey(),ent.getValue());
     }
    
-   return BowerRouter.jsonOKResponse(session,"entry",row.toJson(true));
+   return BowerRouter.jsonOKResponse(session,"entry",row.toJson());
 }
 
 
@@ -284,12 +339,16 @@ private class EntityFilter implements BurlFilter {
    
    private JSONObject filter_data;
    private BurlRepo for_repo;
+   private BurlRepoColumn sort_field;
+   private boolean invert_sort;
    
-   EntityFilter(JSONObject data,BurlRepo repo) {
+   EntityFilter(JSONObject data,BurlRepo repo,BurlRepoColumn sort,boolean invert) {
       filter_data = data;
       for_repo = repo;
+      sort_field = sort;
+      invert_sort = invert;
     } 
-   
+    
    @Override public boolean matches(BurlRepoRow row) {
       Object all = filter_data.opt("all");
       if (all != null) {
@@ -341,6 +400,14 @@ private class EntityFilter implements BurlFilter {
          return match;
        }
       return false;
+    }
+   
+   @Override public BurlRepoColumn getSortField() {
+      return sort_field;
+    }
+   
+   @Override public boolean invertSort() {
+      return invert_sort;
     }
    
 }       // end of inner class EntityFilter

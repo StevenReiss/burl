@@ -121,7 +121,9 @@ class _BurlHomePageState extends State<BurlHomePage> {
         style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
       ),
       subtitle: Text(ld.getOwner(), style: const TextStyle(fontSize: 14)),
-      trailing: Text("Access: ${ld.getUserAccess()}, RepoType: ${ld.getRepoType()}"),
+      trailing: Text(
+        "Access: ${ld.getUserAccess()}, RepoType: ${ld.getRepoType()}",
+      ),
       onTap: () => {_gotoLibraryPage(ld)},
     );
   }
@@ -150,8 +152,12 @@ class _BurlHomePageState extends State<BurlHomePage> {
   }
 
   Future<bool> _handleLogout() async {
+    BuildContext dcontext = context;
     await util.postJsonOnly("/rest/logout");
     globals.burlSession = null;
+    if (dcontext.mounted) {
+      widgets.gotoDirect(dcontext, BurlLogin());
+    }
     return true;
   }
 

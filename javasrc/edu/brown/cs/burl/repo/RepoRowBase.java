@@ -78,15 +78,15 @@ RepoRowBase(RepoBase repo)
 /*                                                                              */
 /********************************************************************************/
 
-@Override public String toCSV(boolean external)
+@Override public String toCSV()
 {
-   return for_repo.getCSVForRow(this,external);
+   return for_repo.getCSVForRow(this);
 }
 
 
-@Override public JSONObject toJson(boolean external)
+@Override public JSONObject toJson() 
 {
-   return for_repo.getJsonForRow(this,external); 
+   return for_repo.getJsonForRow(this); 
 }
 
 

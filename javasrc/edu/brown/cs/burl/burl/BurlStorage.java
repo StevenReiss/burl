@@ -18,7 +18,6 @@
 package edu.brown.cs.burl.burl;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 import org.json.JSONObject;
@@ -184,7 +183,7 @@ List<Number> dataFieldSearch(BurlRepo repo,String field,String value);
  *      Return a result set for iterating over data rows
  **/
 
-Iterator<JSONObject> getAllDataRows(BurlRepo repo);
+BurlCountIter<JSONObject> getAllDataRows(BurlRepo repo,BurlRepoColumn sort,boolean invert);
 
 
 /**

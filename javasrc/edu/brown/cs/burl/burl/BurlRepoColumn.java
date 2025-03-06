@@ -140,11 +140,7 @@ String getMultiplePattern();
 String getLabel();
 
 
-/**
- *      Check if the row is for internal use only
- **/
 
-boolean isInternal();
 
 
 /**

@@ -29,7 +29,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
@@ -525,14 +524,21 @@ ControlSession checkSession(BowerSessionStore<ControlSession> bss,String sid)
 
 
 
-@Override public Iterator<JSONObject> getAllDataRows(BurlRepo repo)
+@Override public BurlCountIter<JSONObject> getAllDataRows(BurlRepo repo,
+      BurlRepoColumn sort,boolean invert)
 {
+   String orderby = (sort == null ? "burl_id" : sort.getFieldName());
+   String desc = " DESC";
    String kname = repo.getNameKey();
    String rname = "BurlRepo_" + kname;
-   String q1 = "SELECT * FROM " + rname + " ORDER BY burl_id";
+   String q1 = "SELECT * FROM " + rname + " ORDER BY " + orderby + desc;
+   String q2 = "SELECT COUNT(burl_id) FROM " + rname;
+
    try {
       ResultSet rs = executeQueryStatement(q1);
-      return new ResultSetIterator(rs); 
+      JSONObject cntj = sqlQuery1(q2);
+      int cnt = cntj.getInt("count");
+      return new ResultSetIterator(rs,cnt); 
     }
    catch (SQLException e) {
       IvyLog.logE("BURL","SQL problem",e);
@@ -558,8 +564,10 @@ ControlSession checkSession(BowerSessionStore<ControlSession> bss,String sid)
 {
    String fld = null;
    for (BurlRepoColumn brc : repo.getColumns()) {
-      fld = brc.getFieldName();
-      break;
+      if (brc.getDefault() == null || brc.getDefault().equals("NULL")) {
+         fld = brc.getFieldName();
+         break;
+       }
     }
    String kname = repo.getNameKey();
    String rname = "BurlRepo_" + kname;
@@ -780,14 +788,16 @@ private JSONObject getJsonFromResultSet(ResultSet rs)
 /*                                                                              */
 /********************************************************************************/
 
-private class ResultSetIterator implements Iterator<JSONObject> {
+private class ResultSetIterator implements BurlCountIter<JSONObject> {
    
    private ResultSet result_set;
    private boolean next_done;
+   private int row_count;
    
-   ResultSetIterator(ResultSet rs) {
+   ResultSetIterator(ResultSet rs,int ct) {
       result_set = rs;
       next_done = false;
+      row_count = ct;
     }
    
    @Override public boolean hasNext() {
@@ -811,6 +821,9 @@ private class ResultSetIterator implements Iterator<JSONObject> {
       
       return getJsonFromResultSet(result_set);
     }
+   
+   
+   @Override public int getRowCount()           { return row_count; }
    
 }       // end of inner class ResulSetIterator
 

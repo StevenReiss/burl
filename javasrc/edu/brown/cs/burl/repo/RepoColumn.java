@@ -138,10 +138,7 @@ RepoColumn(String name,int no,BurlFieldData fd)
 }
 
 
-@Override public boolean isInternal()
-{
-   return field_data.isInternal(column_name);
-}
+
 
 @Override public BurlFixType getFixType()
 {

@@ -237,13 +237,7 @@ public String getLabel(String nm)
 }
 
 
-public boolean isInternal(String nm)
-{
-   Element felt = field_map.get(nm);
-   if (IvyXml.getAttrBool(felt,"INTERNAL")) return true;
-   if (getLabel(nm).equals("*")) return true;
-   return false;
-}
+
 
 public BurlFixType getFixType(String nm)
 {

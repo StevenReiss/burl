@@ -80,7 +80,7 @@ public BurlBibEntry findBibEntry(String idno)
    String isbn = BurlUtil.getValidISBN(idno);
    String altisbn = BurlUtil.computeAlternativeISBN(isbn);
    String lccn = BurlUtil.getValidLCCN(idno);
-   if (lccn.equals(isbn)) lccn = null;
+   if (lccn != null && lccn.equals(isbn)) lccn = null;
    
    BibEntryBase bibentry = null;
    if (bibentry == null&& isbn != null) {

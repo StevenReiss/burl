@@ -154,9 +154,11 @@ private void inputRepoFromFile()
 /*                                                                              */
 /********************************************************************************/
 
-@Override public Iterable<BurlRepoRow> getRows()
+@Override public BurlRowIter getRows(BurlRepoColumn sort,boolean invert)
 {   
-   return repo_data.values();
+   // might need to sort here
+   
+   return new RowIter(repo_data.values());   
 }
 
 

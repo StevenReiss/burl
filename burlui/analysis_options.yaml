@@ -10,6 +10,7 @@
 analyzer:
   errors:
     slash_for_doc_comments: ignore
+
 include: package:flutter_lints/flutter.yaml
 
 linter:
@@ -32,27 +33,6 @@ linter:
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

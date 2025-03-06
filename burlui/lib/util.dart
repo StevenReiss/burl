@@ -55,7 +55,10 @@ Uri getServerUri(String path, [Map<String, dynamic>? query]) {
   return Uri.https("sherpa.cs.brown.edu:6737", p1, query);
 }
 
-Future<Map<String, dynamic>> postJson(String url, {dynamic body}) async {
+Future<Map<String, dynamic>> postJson(
+  String url, {
+  Map<String, String?>? body,
+}) async {
   Uri u = getServerUri(url);
   Map<String, String> headers = {};
   headers["accept"] = "application/json";
@@ -72,7 +75,7 @@ Future<Map<String, dynamic>> postJson(String url, {dynamic body}) async {
   return js;
 }
 
-Future<void> postJsonOnly(String url, {dynamic body}) async {
+Future<void> postJsonOnly(String url, {Map<String, String?>? body}) async {
   Uri u = getServerUri(url);
   Map<String, String> headers = {"accept": "application/json"};
   if (globals.burlSession != null) {
@@ -85,7 +88,10 @@ Future<void> postJsonOnly(String url, {dynamic body}) async {
   await http.post(u, body: body, headers: headers);
 }
 
-Future<Map<String, dynamic>> getJson(String url, {dynamic body}) async {
+Future<Map<String, dynamic>> getJson(
+  String url, {
+  Map<String, String?>? body,
+}) async {
   Map<String, String>? headers = {"accept": "application/json"};
   if (globals.burlSession != null) {
     if (body == null) {

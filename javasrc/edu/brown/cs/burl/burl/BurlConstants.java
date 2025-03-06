@@ -18,6 +18,7 @@
 
 package edu.brown.cs.burl.burl;
 
+import java.util.Iterator;
 
 public interface BurlConstants {
 
@@ -133,6 +134,29 @@ enum BurlFixType {
    YES_NO,              // yes or no are the only valid values
 }
    
+
+
+/**
+ *      Generic iterator that knows its count
+ **/
+
+interface BurlCountIter<T> extends Iterator<T> {
+
+   int getRowCount();
+
+}       // end of interface BurlCountIter
+
+
+
+/**
+ *      Count iterator for Repository rows
+ **/
+
+interface BurlRowIter extends BurlCountIter<BurlRepoRow>, Iterable<BurlRepoRow> {
+   
+   int getRowCount(); 
+   
+}       // end of interface BurlRowIter
 
 
 }	// end of interface BurlConstants

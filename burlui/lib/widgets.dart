@@ -35,6 +35,7 @@ Widget textFormField({
   VoidCallback? onEditingComplete,
   ValueChanged<String>? onSubmitted,
   String? Function(String?)? onSaved,
+  TextInputAction? textInputAction,
   GestureTapCallback? onTap,
   String? Function(String?)? validator,
   bool? showCursor,
@@ -63,6 +64,7 @@ Widget textFormField({
     onFieldSubmitted: onSubmitted,
     onSaved: onSaved,
     onTap: onTap,
+    textInputAction: textInputAction,
     showCursor: showCursor,
     maxLines: maxLines,
     obscureText: obscureText,
@@ -104,7 +106,8 @@ Widget textField({
   label ??= hint;
   hint ??= label;
   maxLines ??= 1;
-  keyboardType ??= (maxLines == 1 ? TextInputType.text : TextInputType.multiline);
+  keyboardType ??=
+      (maxLines == 1 ? TextInputType.text : TextInputType.multiline);
 
   Widget w = TextField(
     controller: controller,
@@ -260,7 +263,11 @@ Widget submitButton(
   return w;
 }
 
-Widget textButton(String label, void Function()? action, {String tooltip = ""}) {
+Widget textButton(
+  String label,
+  void Function()? action, {
+  String tooltip = "",
+}) {
   Widget w = TextButton(
     style: TextButton.styleFrom(
       textStyle: const TextStyle(fontSize: laf.buttonFontSize),
@@ -465,7 +472,10 @@ Widget booleanField({
     mainAxisSize: MainAxisSize.min,
     mainAxisAlignment: MainAxisAlignment.center,
     crossAxisAlignment: CrossAxisAlignment.center,
-    children: <Widget>[Checkbox(value: value, onChanged: onChanged), Text(label)],
+    children: <Widget>[
+      Checkbox(value: value, onChanged: onChanged),
+      Text(label),
+    ],
   );
   return tooltipWidget(tooltip, w);
 }
@@ -880,7 +890,10 @@ Widget numberField({
   sd = sd.copyWith(showValueIndicator: ShowValueIndicator.always);
   Widget w3 = SliderTheme(data: sd, child: w2);
   Widget w4 = Row(
-    children: <Widget>[Expanded(flex: 3, child: w1), Expanded(flex: 10, child: w3)],
+    children: <Widget>[
+      Expanded(flex: 3, child: w1),
+      Expanded(flex: 10, child: w3),
+    ],
   );
 
   w4 = tooltipWidget(tooltip, w4);
@@ -964,7 +977,11 @@ Widget circularProgressIndicator() {
 ///                                                                             */
 ///******************************************************************************/
 
-Widget topLevelPage(BuildContext context, Widget child, [bool scrollable = false]) {
+Widget topLevelPage(
+  BuildContext context,
+  Widget child, [
+  bool scrollable = false,
+]) {
   return LayoutBuilder(
     builder: (BuildContext context, BoxConstraints cnst) {
       return _topLevelPageBuilder(context, cnst, child, scrollable);
@@ -1035,7 +1052,9 @@ Widget topLevelNSPage(BuildContext context, Widget child) {
 ///******************************************************************************/
 
 ThemeData getTheme() {
-  return ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: laf.themeSeedColor));
+  return ThemeData(
+    colorScheme: ColorScheme.fromSeed(seedColor: laf.themeSeedColor),
+  );
 }
 
 InputDecoration getDecoration({
@@ -1058,7 +1077,10 @@ InputDecoration getDecoration({
     border: const OutlineInputBorder(
       borderSide: BorderSide(width: 2, color: laf.decorationInputColor),
     ),
-    contentPadding: EdgeInsets.symmetric(horizontal: hPadding, vertical: vPadding),
+    contentPadding: EdgeInsets.symmetric(
+      horizontal: hPadding,
+      vertical: vPadding,
+    ),
   );
 }
 

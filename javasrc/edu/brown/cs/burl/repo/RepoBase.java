@@ -113,7 +113,8 @@ RepoBase(BurlControl bc,BurlLibrary lib)
 
 @Override public abstract void deleteRepository();
 
-@Override public abstract Iterable<BurlRepoRow> getRows();
+@Override
+public abstract BurlRowIter getRows(BurlRepoColumn sort,boolean invert);
 
 @Override public abstract BurlRepoRow getRowForId(Number id);
 
@@ -488,14 +489,14 @@ private static void addIsbn(String isbn,int len,Set<String> rslt)
       switch (format) {
          case CSV :
             pw.println(getCSVHeader(external));
-            for (BurlRepoRow brr : getRows()) {
-               pw.println(getCSVForRow(brr,external));
+            for (BurlRepoRow brr : getRows()) { 
+               pw.println(getCSVForRow(brr));
              }
             break;
          case JSON : 
             JSONArray rslt = new JSONArray();
             for (BurlRepoRow brr : getRows()) {
-               JSONObject jo = getJsonForRow(brr,external);
+               JSONObject jo = getJsonForRow(brr);
                rslt.put(jo);
              }
             JSONObject jobj = BurlUtil.buildJson("name",getName(),
@@ -529,8 +530,7 @@ private String getCSVHeader(boolean external)
    for (BurlRepoColumn brc : getColumns()) {
       String lbl = null;
       if (external) {
-         if (brc.isInternal()) continue;
-         else lbl = brc.getLabel();
+        lbl = brc.getLabel();
        }
       else {
          lbl = brc.getName();
@@ -547,7 +547,7 @@ private String getCSVHeader(boolean external)
 
 
 
-String getCSVForRow(BurlRepoRow rr,boolean external)
+String getCSVForRow(BurlRepoRow rr)
 {
    String sep = field_data.getCSVSeparator();
    String quote = field_data.getCSVQuote();
@@ -555,7 +555,6 @@ String getCSVForRow(BurlRepoRow rr,boolean external)
    StringBuffer buf = new StringBuffer();
    boolean sepneeded = false;
    for (BurlRepoColumn brc : getColumns()) {
-      if (external && brc.isInternal()) continue;
       if (sepneeded) buf.append(sep);
       String v = rr.getData(brc);
       if (v == null) v = "";
@@ -575,33 +574,28 @@ String getCSVForRow(BurlRepoRow rr,boolean external)
 }
 
 
-JSONObject getJsonForRow(BurlRepoRow rr,boolean external)
+JSONObject getJsonForRow(BurlRepoRow rr)
 {
    JSONObject result = new JSONObject();
    result.put("burl_id",rr.getRowId());
    for (BurlRepoColumn brc : getColumns()) {
-      if (external && brc.isInternal()) continue;
-       String v = rr.getData(brc);
-       Object value = v;
-       if (brc == getCountField()) {
-          try {
-             value = Integer.valueOf(v);
-           }
-          catch (NumberFormatException e) {
-             value = Integer.valueOf(0);
-           }
-        }
-       else if (brc.isMultiple()) {
-          String [] items = v.split(field_data.getMultiplePattern());
-          JSONArray arr = new JSONArray();
-          arr.putAll(items);
-          value = arr;
-        }
-       if (external) {
-          value = BurlUtil.buildJson("label",brc.getLabel(),
-                "value",value);
-        }
-       result.put(brc.getName(),value);
+      String v = rr.getData(brc);
+      Object value = v;
+      if (brc == getCountField()) {
+         try {
+            value = Integer.valueOf(v);
+          }
+         catch (NumberFormatException e) {
+            value = Integer.valueOf(0);
+          }
+       }
+      else if (brc.isMultiple()) {
+         String [] items = v.split(field_data.getMultiplePattern());
+         JSONArray arr = new JSONArray();
+         arr.putAll(items);
+         value = arr;
+       }
+      result.put(brc.getName(),value);
     }
    
    return result;
@@ -772,6 +766,7 @@ protected List<String> splitCsv(PushbackReader fr)
             break;
           }
          else {
+            if (quoted && buf.isEmpty() && ch == '\t') continue;
             buf.append((char) ch); 
           }
        }
@@ -987,27 +982,51 @@ private int insertLabelText(StringBuffer buf,int start,String pat,String rep)
 /*                                                                              */
 /********************************************************************************/
 
-@Override public Iterable<BurlRepoRow> getRows(BurlFilter filter)
+@Override public BurlRowIter getRows(BurlFilter filter)
 {
    if (filter == null) return getRows();
    
-   return new FilterIter(getRows().iterator(),filter);
+   return new FilterIter(getRows(filter.getSortField(),
+         filter.invertSort()),filter);
 }
 
 
-private class FilterIter implements Iterable<BurlRepoRow>, Iterator<BurlRepoRow> {
+protected static class RowIter implements BurlRowIter {
+   
+   private Iterator<BurlRepoRow> row_iter;
+   private int row_count;
+   
+   protected RowIter(Collection<BurlRepoRow> data) {
+      row_iter = data.iterator();
+      row_count = data.size();
+    }
+   
+   @Override public Iterator<BurlRepoRow> iterator()    { return this; }
+   
+   @Override public boolean hasNext()            { return row_iter.hasNext(); }
+   @Override public BurlRepoRow next()           { return row_iter.next(); }
+   @Override public int getRowCount()            { return row_count; }
+   
+}       // end of inner class BurlRowIter
+
+
+
+  
+private class FilterIter implements Iterable<BurlRepoRow>, BurlRowIter {
    
    private BurlFilter item_filter;
-   private Iterator<BurlRepoRow> base_iter;
+   private BurlRowIter base_iter;
    private BurlRepoRow next_item;
    
-   FilterIter(Iterator<BurlRepoRow> base,BurlFilter filter) {
+   FilterIter(BurlRowIter base,BurlFilter filter) {
       item_filter = filter;
       base_iter = base;
       next_item = null;
     }
    
    @Override public Iterator<BurlRepoRow> iterator()            { return this; }
+   
+   @Override public int getRowCount()                           { return base_iter.getRowCount(); }
    
    @Override public boolean hasNext() {
       if (next_item != null) return true;

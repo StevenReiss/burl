@@ -148,7 +148,10 @@ class _BurlLoginWidgetState extends State<BurlLoginWidget> {
                     ),
                     widgets.errorField(_loginError),
                     Container(
-                      constraints: const BoxConstraints(minWidth: 150, maxWidth: 350),
+                      constraints: const BoxConstraints(
+                        minWidth: 150,
+                        maxWidth: 350,
+                      ),
                       width: MediaQuery.of(context).size.width * 0.4,
                       child: widgets.submitButton("Login", _handleLogin),
                     ),
@@ -157,7 +160,10 @@ class _BurlLoginWidgetState extends State<BurlLoginWidget> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
-                        Checkbox(value: _rememberMe, onChanged: _handleRememberMe),
+                        Checkbox(
+                          value: _rememberMe,
+                          onChanged: _handleRememberMe,
+                        ),
                         const Text("Remember Me"),
                       ],
                     ),
@@ -181,7 +187,10 @@ class _BurlLoginWidgetState extends State<BurlLoginWidget> {
     });
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      _HandleLogin login = _HandleLogin(_curUser as String, _curPassword as String);
+      _HandleLogin login = _HandleLogin(
+        _curUser as String,
+        _curPassword as String,
+      );
       String? rslt = await login.authUser();
       if (rslt == 'TEMPORARY') {
         _loginValid = true;
@@ -266,7 +275,7 @@ class _HandleLogin {
   _HandleLogin(this._curUser, this._curPassword);
 
   Future _prelogin() async {
-    Map<String, dynamic> data = {"email": _curUser.toLowerCase()};
+    Map<String, String?> data = {"email": _curUser.toLowerCase()};
     Map<String, dynamic> js = await util.getJson("login", body: data);
     _curPadding = js['code'];
     _curSession = js['session'];
@@ -286,7 +295,12 @@ class _HandleLogin {
     String p2 = util.hasher(p1 + salt);
     String p3 = util.hasher(p2 + pad);
 
-    var body = {'session': _curSession, 'email': usr, 'padding': pad, 'password': p3};
+    var body = {
+      'session': _curSession,
+      'email': usr,
+      'padding': pad,
+      'password': p3,
+    };
     Map<String, dynamic> jresp = await util.postJson("login", body: body);
     if (jresp['status'] == "OK") {
       globals.burlSession = jresp['session'];

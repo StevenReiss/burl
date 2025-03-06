@@ -69,14 +69,14 @@ Number getRowId();
  *      Get the JSON for a row
  **/
 
-JSONObject toJson(boolean external);
+JSONObject toJson();
 
 
 /**
  *      Get the CSV for a row
  **/
 
-String toCSV(boolean external);
+String toCSV();
 
 
 

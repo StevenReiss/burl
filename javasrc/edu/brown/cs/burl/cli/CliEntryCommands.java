@@ -69,13 +69,27 @@ void handleFindEntries(List<String> args)
 {
    JSONObject filters = new JSONObject();
    
-   for (String s : args) {
+   String sortby = null;
+   boolean invert = false;
+   
+   for (int i = 0; i < args.size(); ++i) {
+      String s = args.get(i);
       String key = null;
       String value = null;
       
       if (s.startsWith("-")) {
-         badFindEntriesArgs();
-         return;
+         if (s.startsWith("-o") && i+1 < args.size()) {         // -o <sort field>
+            sortby = args.get(++i);
+            invert = false;
+          }
+         else if (s.startsWith("-i") && i+1 < args.size()) {    // -o <sort field> 
+            sortby = args.get(++i);
+            invert = false;
+          }
+         else {
+            badFindEntriesArgs();
+            return;
+          }
        }
       else if (s.contains(":") || s.contains("=")) {
          int idx1 = s.indexOf(":");
@@ -116,6 +130,11 @@ void handleFindEntries(List<String> args)
    Number libid = cli_main.getLibraryId();
    JSONObject data = BurlUtil.buildJson("library",libid,
          "count",4,"filter",filters);
+   if (sortby != null) {
+      data.put("orderby",sortby);
+      data.put("invert",invert);
+    }
+   
    JSONObject rslt = cli_main.createHttpPost("entries",data);
    
    if (!cli_main.checkResponse(rslt,"find")) {
@@ -473,16 +492,15 @@ private void entryDisplay(JSONObject entry,Collection<String> fields,Number pref
 
 private String getEntryValue(JSONObject entry,String fld,String split)
 {
-   JSONObject valobj = entry.optJSONObject(fld);
-   if (valobj == null) {
-      valobj = entry.optJSONObject(field_data.getBaseName(fld));
+   Object valset = entry.opt(fld);
+   if (valset == null) {
+      valset = entry.opt(field_data.getBaseName(fld));
     }
-   if (valobj == null) {
-      valobj = entry.optJSONObject(field_data.getLabel(fld));
+   if (valset == null) {
+      valset = entry.opt(field_data.getLabel(fld));
     }
    String val = null;
-   if (valobj != null) {
-      Object valset = valobj.opt("value");
+   if (valset!= null) {
       if (valset instanceof String) {
          val = valset.toString();
        }

@@ -150,19 +150,19 @@ RepoDatabase(BurlControl bc,BurlLibrary lib)
 }
 
 
-@Override public Iterable<BurlRepoRow> getRows()
+@Override public BurlRowIter getRows(BurlRepoColumn sort,boolean invert)
 {
-   Iterator<JSONObject> objiter = burl_store.getAllDataRows(this);
+   BurlCountIter<JSONObject> objiter = burl_store.getAllDataRows(this,sort,invert); 
    
    return new RowIterator(objiter);
-}
+} 
 
 
-private class RowIterator implements Iterable<BurlRepoRow>, Iterator<BurlRepoRow> {
+private class RowIterator implements Iterable<BurlRepoRow>, BurlRowIter {
    
-   private Iterator<JSONObject> object_iter;
+   private BurlCountIter<JSONObject> object_iter;
    
-   RowIterator(Iterator<JSONObject> oiter) {
+   RowIterator(BurlCountIter<JSONObject> oiter) {
       object_iter = oiter;
     }
    
@@ -178,6 +178,10 @@ private class RowIterator implements Iterable<BurlRepoRow>, Iterator<BurlRepoRow
       JSONObject jo = object_iter.next();
       if (jo == null) return null;
       return new DatabaseRow(jo);
+    }
+   
+   @Override public int getRowCount() {
+      return object_iter.getRowCount();
     }
    
 }       // end of inner class RowIterator

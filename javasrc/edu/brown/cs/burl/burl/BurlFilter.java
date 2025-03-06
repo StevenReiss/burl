@@ -28,6 +28,20 @@ public interface BurlFilter extends BurlConstants
 
 boolean matches(BurlRepoRow row);
 
+/**
+ *      Indicate sort field (default is burl_id
+ **/
+
+BurlRepoColumn getSortField();
+
+
+/**
+ *      Indicate where sort is inverted
+ **/
+
+boolean invertSort();
+
+
 
 }       // end of interface BurlFilter
 

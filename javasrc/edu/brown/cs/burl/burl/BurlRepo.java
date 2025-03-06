@@ -124,14 +124,24 @@ void setInitialValues(BurlRepoRow row,String isbn);
  *      Return the set of rows
  **/
 
-Iterable<BurlRepoRow> getRows();
+default BurlRowIter getRows() 
+{
+   return getRows(null,false);
+}
+
+
+/**
+ *      Return ordered set of rows
+ **/
+
+BurlRowIter getRows(BurlRepoColumn sort,boolean invert);
 
 
 /**
  *      Return the set of rows matching a filter
  **/
 
-Iterable<BurlRepoRow> getRows(BurlFilter filter); 
+BurlRowIter getRows(BurlFilter filter); 
 
 
 /**

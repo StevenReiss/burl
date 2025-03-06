@@ -43,6 +43,7 @@ import edu.brown.cs.burl.burl.BurlException;
 import edu.brown.cs.burl.burl.BurlLibrary;
 import edu.brown.cs.burl.burl.BurlRepo;
 import edu.brown.cs.burl.burl.BurlRepoColumn;
+import edu.brown.cs.burl.burl.BurlUser;
 import edu.brown.cs.ivy.bower.BowerCORS;
 import edu.brown.cs.ivy.bower.BowerRouter;
 
@@ -159,6 +160,7 @@ BowerRouter<ControlSession> setupRouter()
    br.addRoute("POST","/rest/entries",entry_manager::handleFindEntries); 
    br.addRoute("POST","/rest/editentry",entry_manager::handleEditEntry); 
    br.addRoute("POST","/rest/removeentry",entry_manager::handleRemoveEntry); 
+   br.addRoute("POST","/rest/addentry",entry_manager::handleAddEntry); 
    
 // br.addRoute("POST","/rest/removeentry",this::handleRemoveEntry);
    
@@ -215,6 +217,10 @@ String handleError(HttpExchange he,ControlSession session)
 String handleAddLibraryUser(HttpExchange he,ControlSession session)
 {
    String email = BowerRouter.getParameter(he,"email");
+   BurlUser user = session.getUser();
+   if (email != null && email.equals("*")) {
+      email = user.getEmail();
+    }
    if (!BowerUtil.validateEmail(email)) {
       return BowerRouter.errorResponse(he,session,400,"Bad email");
     }
@@ -224,6 +230,9 @@ String handleAddLibraryUser(HttpExchange he,ControlSession session)
       libid = session.getLibraryId();
     }
    BurlUserAccess useracc = validateLibrary(session,libid);
+   
+   if (user.getEmail() == email && acc == BurlUserAccess.NONE) useracc = BurlUserAccess.LIBRARIAN;
+   
    switch (useracc) {
       case NONE :
       case VIEWER :
@@ -478,7 +487,7 @@ String handleImport(HttpExchange he,ControlSession session)
    
    BurlRepo repo =  lib.getRepository();
    
-   JSONObject cindata = BowerRouter.getJson(he,"csvdata");
+   JSONObject cindata = BowerRouter.getJson(he,"cvsdata");
    if (cindata != null) {
       JSONArray dataarr = cindata.getJSONArray("rows");
       Map<BurlRepoColumn,Integer> colmap = null;
@@ -490,9 +499,12 @@ String handleImport(HttpExchange he,ControlSession session)
             if (err != null) {
                return BowerRouter.errorResponse(he,session,400,err);
              }
+            continue;
           }
          repo.importCSV(row,updmode,docount,colmap);
        }
+      
+      return BowerRouter.jsonOKResponse(session);
     }
    
    JSONObject jindata = BowerRouter.getJson(he,"jsondata");
@@ -502,6 +514,7 @@ String handleImport(HttpExchange he,ControlSession session)
          JSONObject row = dataarr.getJSONObject(i);
          repo.importJSON(row,updmode,docount);  
        }
+      return BowerRouter.jsonOKResponse(session);
     }
    
    return BowerRouter.errorResponse(he,session,500,"Not implemented");
