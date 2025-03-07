@@ -528,7 +528,7 @@ ControlSession checkSession(BowerSessionStore<ControlSession> bss,String sid)
       BurlRepoColumn sort,boolean invert)
 {
    String orderby = (sort == null ? "burl_id" : sort.getFieldName());
-   String desc = " DESC";
+   String desc = (invert ? " DESC" : "");
    String kname = repo.getNameKey();
    String rname = "BurlRepo_" + kname;
    String q1 = "SELECT * FROM " + rname + " ORDER BY " + orderby + desc;

@@ -30,7 +30,7 @@ class ItemData {
     _jsonData = newdata;
   }
 
-  String getField(String fldname) {
+  String getField(String fldname, {String join = " | "}) {
     String? id = globals.fieldData.getFieldName(fldname);
     if (id == null) return "";
     dynamic v1 = _jsonData[id];
@@ -39,9 +39,17 @@ class ItemData {
       return v1 as String;
     } else if (v1.runtimeType == List) {
       List v1l = v1 as List;
-      return v1l.join(" | ");
+      return v1l.join(join);
     }
     return "";
+  }
+
+  String getMultiField(String fldname) {
+    if (globals.fieldData.isViewMultiple(fldname)) {
+      return getField(fldname, join: "\n");
+    } else {
+      return getField(fldname);
+    }
   }
 
   List<String>? getMultiple(String fldname) {

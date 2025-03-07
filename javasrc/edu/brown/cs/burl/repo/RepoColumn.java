@@ -188,15 +188,31 @@ RepoColumn(String name,int no,BurlFieldData fd)
 private String fixLccCode(String code)
 {
    if (code == null) return null;
+   if (!code.contains("00")) return code;
    
-   if (!code.endsWith("0")) return code;
    code = code.replace("-","");
    int idx2 = -1;
+   boolean pre = false;
+   boolean havenum = false;
+   
    for (int i = 0; i < code.length(); ++i) {
-      if (code.charAt(i) == '0') {
-         if (idx2 < 0) idx2 = i;
+      char c = code.charAt(i);
+      if (c == '0') {
+         if (idx2 < 0) {
+            idx2 = i;
+            if (!havenum) pre = true;
+            else pre = false;
+          }
+         continue;
        }
       else {
+         if (Character.isDigit(c)) {
+            if (!pre && idx2 >= 0) idx2 = -1;
+            havenum = true;
+          }
+         else {
+            if (havenum && idx2 >= 0 && !pre) idx2 = -1;
+          }
          if (idx2 >= 0) {
             String ncode = code.substring(0,idx2);
             ncode += code.substring(i);
@@ -205,6 +221,7 @@ private String fixLccCode(String code)
             i -= len;
           }
          idx2 = -1;
+         if (havenum && !Character.isDigit(c) && c != '.') break;
        }
     }
    

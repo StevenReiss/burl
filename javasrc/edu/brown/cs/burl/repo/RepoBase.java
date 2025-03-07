@@ -1017,32 +1017,40 @@ private class FilterIter implements Iterable<BurlRepoRow>, BurlRowIter {
    private BurlFilter item_filter;
    private BurlRowIter base_iter;
    private BurlRepoRow next_item;
+   private int  item_count;
    
    FilterIter(BurlRowIter base,BurlFilter filter) {
       item_filter = filter;
       base_iter = base;
       next_item = null;
+      item_count = base.getRowCount();
     }
    
    @Override public Iterator<BurlRepoRow> iterator()            { return this; }
    
-   @Override public int getRowCount()                           { return base_iter.getRowCount(); }
+   @Override public int getRowCount() {    
+      return item_count;
+    }
    
    @Override public boolean hasNext() {
       if (next_item != null) return true;
+      if (base_iter == null) return false;
       for ( ; ; ) {
          if (!base_iter.hasNext()) {
-            base_iter = null;
             return false;
           }
          BurlRepoRow brr = base_iter.next();
-         if (!item_filter.matches(brr)) continue;
+         if (!item_filter.matches(brr)) {
+            --item_count;
+            continue;
+          }
          next_item = brr;
          return true;
        }
     }
    
    @Override public BurlRepoRow next() {
+      if (base_iter == null) return null;
       if (next_item == null) {
          if (!hasNext()) return null;
        }

@@ -224,7 +224,7 @@ String handleAddLibraryUser(HttpExchange he,ControlSession session)
    if (!BowerUtil.validateEmail(email)) {
       return BowerRouter.errorResponse(he,session,400,"Bad email");
     }
-   BurlUserAccess acc = getEnumParameter(he,"access",BurlUserAccess.NONE);
+   BurlUserAccess acc = BowerRouter.getEnumParameter(he,"access",BurlUserAccess.NONE);
    Number libid = getIdParameter(he,"library");
    if (libid == null) {
       libid = session.getLibraryId();
@@ -257,7 +257,7 @@ String handleCreateLibrary(HttpExchange he,ControlSession session)
    if (name == null || name.isEmpty()) {
       return BowerRouter.errorResponse(he,session,400,"Bad library name");
     }
-   BurlRepoType repotype = getEnumParameter(he,"repotype",BurlRepoType.DATABASE);
+   BurlRepoType repotype = BowerRouter.getEnumParameter(he,"repotype",BurlRepoType.DATABASE);
    BurlLibrary lib = burl_main.createLibrary(name,session.getUser(),repotype);
    
    if (lib == null) {
@@ -338,7 +338,7 @@ String handleExportLibrary(HttpExchange he,ControlSession session)
    if (lib == null) {
       return BowerRouter.errorResponse(he,session,400,"No library given");
     }
-   BurlExportFormat exp = getEnumParameter(he,"format",BurlExportFormat.CSV);
+   BurlExportFormat exp = BowerRouter.getEnumParameter(he,"format",BurlExportFormat.CSV);
    BurlUserAccess useracc = validateLibrary(session,lid);
    switch (useracc) {
       case NONE :
@@ -410,6 +410,17 @@ String handlePrintLabels(HttpExchange he,ControlSession session)
    if (brc == null) {
       return BowerRouter.errorResponse(he,session,400,"No labeled field");
     }
+   
+   BurlUserAccess useracc = validateLibrary(session,lid);
+   switch (useracc) {
+      case NONE :
+      case VIEWER :
+      case EDITOR :
+         return BowerRouter.errorResponse(he,session,402,"Not authorized");
+      default :
+         break;
+    }
+   
    List<Number> todo = burl_store.dataFieldSearch(repo,brc.getFieldName(),"no");
    
    File f1 = null;
@@ -445,7 +456,7 @@ String handleAddIsbns(HttpExchange he,ControlSession session)
       return BowerRouter.errorResponse(he,session,400,"No library given");
     }
    List<String> isbns = BowerRouter.getParameterList(he,"isbns");
-   BurlUpdateMode upd = getEnumParameter(he,"mode",BurlUpdateMode.AUGMENT);
+   BurlUpdateMode upd = BowerRouter.getEnumParameter(he,"mode",BurlUpdateMode.AUGMENT);
    boolean count = BowerRouter.getBooleanParameter(he,"count",true);
    
    BurlUserAccess acc = validateLibrary(session,lid);
@@ -482,7 +493,7 @@ String handleImport(HttpExchange he,ControlSession session)
    if (lib == null) {
       return BowerRouter.errorResponse(he,session,400,"Bad library id");
     }
-   BurlUpdateMode updmode = getEnumParameter(he,"update",burl_main.getUpdateMode());
+   BurlUpdateMode updmode = BowerRouter.getEnumParameter(he,"update",burl_main.getUpdateMode());
    boolean docount = BowerRouter.getBooleanParameter(he,"count",false);
    
    BurlRepo repo =  lib.getRepository();
@@ -621,24 +632,7 @@ BurlUserAccess validateLibrary(ControlSession session,Number lid)
 }
 
 
-@SuppressWarnings("unchecked")
-public static <T extends Enum<T>> T getEnumParameter(HttpExchange he,String param,T dflt)
-{
-   String val = BowerRouter.getParameter(he,param);
-   if (val == null || val.isEmpty()) return dflt;
-   Object [] vals = dflt.getClass().getEnumConstants();
-   if (vals == null) return null;
-   Enum<?> v = dflt;
-   for (int i = 0; i < vals.length; ++i) {
-      Enum<?> e = (Enum<?>) vals[i];
-      if (e.name().equalsIgnoreCase(val)) {
-         v = e;
-         break;
-       }
-    }
-   
-   return (T) v;
-}
+
 
 
 

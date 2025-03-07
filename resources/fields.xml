@@ -18,9 +18,9 @@
 		ALTNAMES='Author,Authors' SORT='T' />
       <FIELD NAME="Contents" MARC="505a" MULTIPLE='T' />
       <FIELD NAME="Subjects" MARC="630a -- x -- v+650a -- x -- v+651a -- e -- g -- 4 -- v -- x -- y -- z"
-		OPENLIB="subject" GOOGLE="categories" MULTIPLE="T" ALTNAMES='Subject,subj' SORT='T' />
+		OPENLIB="subject" GOOGLE="categories" MULTIPLE="T" ALTNAMES='Subject,subj' SORT='T' VIEWMULT='T' />
       <FIELD NAME="Notes" MARC="504a" MULTIPLE="T" />
-      <FIELD NAME="Series" MARC="440a n v+490a x+830a v x" MULTIPLE="T" />
+      <FIELD NAME="Series" MARC="440a n v+490a x*a v x" MULTIPLE="T" />
       <FIELD NAME="Version" MARC="251a" />
       <FIELD NAME="Dewey Class No." MARC="082a--2" OPENLIB="ddc" FIELDNAME="dewey"
 		ALTNAMES='Dewey,ddn' SORT='T' />

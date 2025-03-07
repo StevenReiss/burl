@@ -56,7 +56,11 @@ Widget textFormField({
   }
 
   Widget w = TextFormField(
-    decoration: getDecoration(hint: hint, label: label, vPadding: vpadding),
+    decoration: getDecoration(
+      hint: hint,
+      label: label,
+      vPadding: vpadding,
+    ),
     validator: validator,
     controller: controller,
     onChanged: onChanged,
@@ -102,10 +106,15 @@ Widget textField({
   bool? enabled,
   String tooltip = "",
   bool readOnly = false,
+  double? height,
 }) {
   label ??= hint;
   hint ??= label;
-  maxLines ??= 1;
+  if (maxLines == 0) {
+    maxLines = null;
+  } else {
+    maxLines ??= 1;
+  }
   keyboardType ??=
       (maxLines == 1 ? TextInputType.text : TextInputType.multiline);
 
@@ -122,7 +131,9 @@ Widget textField({
     readOnly: readOnly,
     decoration: getDecoration(hint: hint, label: label),
   );
-
+  if (height != null) {
+    w = SizedBox(height: height, child: w);
+  }
   w = tooltipWidget(tooltip, w);
 
   return w;
@@ -132,7 +143,10 @@ Widget errorField(String? text) {
   String t1 = (text ?? "");
   return Text(
     t1,
-    style: const TextStyle(color: laf.errorColor, fontSize: laf.errorFontSize),
+    style: const TextStyle(
+      color: laf.errorColor,
+      fontSize: laf.errorFontSize,
+    ),
   );
 }
 
@@ -200,7 +214,9 @@ Widget itemWithMenu<T>(
   return w1;
 }
 
-List<PopupMenuItem<MenuAction>> _itemMenuBuilder(List<MenuAction> acts) {
+List<PopupMenuItem<MenuAction>> _itemMenuBuilder(
+  List<MenuAction> acts,
+) {
   return acts.map<PopupMenuItem<MenuAction>>(_menuItemAction).toList();
 }
 
@@ -255,7 +271,10 @@ Widget submitButton(
     child: Text(name),
   );
   Widget w = Padding(
-    padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 6.0),
+    padding: const EdgeInsets.symmetric(
+      vertical: 16.0,
+      horizontal: 6.0,
+    ),
     child: eb,
   );
   w = tooltipWidget(tooltip, w);
@@ -307,8 +326,12 @@ Widget topMenuAction(List<MenuAction> labels) {
   );
 }
 
-List<PopupMenuItem<MenuAction>> _topMenuActionBuilder(List<MenuAction> labels) {
-  return labels.map<PopupMenuItem<MenuAction>>(_menuItemAction).toList();
+List<PopupMenuItem<MenuAction>> _topMenuActionBuilder(
+  List<MenuAction> labels,
+) {
+  return labels
+      .map<PopupMenuItem<MenuAction>>(_menuItemAction)
+      .toList();
 }
 
 PopupMenuItem<MenuAction> _menuItemAction(dynamic val) {
@@ -441,7 +464,11 @@ Widget dropDownWidget<T>(
 
   itmlst.addAll(
     items.map<DropdownMenuItem<T>>((T v) {
-      return DropdownMenuItem<T>(value: v, enabled: true, child: Text(lbl(v)));
+      return DropdownMenuItem<T>(
+        value: v,
+        enabled: true,
+        child: Text(lbl(v)),
+      );
     }).toList(),
   );
 
@@ -488,11 +515,15 @@ Widget booleanField({
 
 void goto(BuildContext context, Widget w) {
   // if (!context.mounted) return;
-  Navigator.of(context).push(MaterialPageRoute(builder: (context) => w));
+  Navigator.of(
+    context,
+  ).push(MaterialPageRoute(builder: (context) => w));
 }
 
 Future<void> gotoThen(BuildContext context, Widget w) async {
-  await Navigator.of(context).push(MaterialPageRoute(builder: (context) => w));
+  await Navigator.of(
+    context,
+  ).push(MaterialPageRoute(builder: (context) => w));
 }
 
 void gotoDirect(BuildContext context, Widget w) {
@@ -667,7 +698,9 @@ class TimeFormField {
     label ??= hint;
     hint ??= label;
     _helpText = label;
-    if (current != null) initialTime ??= TimeOfDay.fromDateTime(current);
+    if (current != null) {
+      initialTime ??= TimeOfDay.fromDateTime(current);
+    }
     initialTime ??= TimeOfDay.now();
     _editControl.text = _formatTime(initialTime);
 
@@ -962,7 +995,10 @@ PreferredSizeWidget appBar(String title) {
   return AppBar(
     title: Text(
       title,
-      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+      style: const TextStyle(
+        fontWeight: FontWeight.bold,
+        color: Colors.black,
+      ),
     ),
   );
 }
@@ -1060,7 +1096,7 @@ ThemeData getTheme() {
 InputDecoration getDecoration({
   String? hint,
   String? label,
-  double vPadding = 0,
+  double vPadding = 0.0,
   double hPadding = 4.0,
   String? error,
 }) {
@@ -1072,7 +1108,10 @@ InputDecoration getDecoration({
     labelStyle: getLabelStyle(),
     hoverColor: laf.decorationHoverColor,
     focusedBorder: const OutlineInputBorder(
-      borderSide: BorderSide(width: 2, color: laf.decorationBorderColor),
+      borderSide: BorderSide(
+        width: 2,
+        color: laf.decorationBorderColor,
+      ),
     ),
     border: const OutlineInputBorder(
       borderSide: BorderSide(width: 2, color: laf.decorationInputColor),
@@ -1085,7 +1124,10 @@ InputDecoration getDecoration({
 }
 
 TextStyle getLabelStyle() {
-  return const TextStyle(color: laf.labelColor, fontWeight: FontWeight.bold);
+  return const TextStyle(
+    color: laf.labelColor,
+    fontWeight: FontWeight.bold,
+  );
 }
 
 Widget getPadding(double size) {
@@ -1096,7 +1138,9 @@ Widget getTopLevelLogo(BuildContext context) {
   return SizedBox(
     width: MediaQuery.of(context).size.width * 0.3,
     height: MediaQuery.of(context).size.height * 0.25,
-    child: Center(child: Image.asset(laf.topLevelImage, fit: BoxFit.contain)),
+    child: Center(
+      child: Image.asset(laf.topLevelImage, fit: BoxFit.contain),
+    ),
   );
 }
 

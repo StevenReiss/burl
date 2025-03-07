@@ -67,7 +67,15 @@ class FieldData {
     Map<String, dynamic>? fd = _fieldData[id];
     String? v = fd?["SORT"];
     if (v == null) return false;
-    if ("tT1yY".startsWith(v.substring(0, 1))) return true;
+    if ("tT1yY".contains(v.substring(0, 1))) return true;
+    return false;
+  }
+
+  bool isViewMultiple(String id) {
+    Map<String, dynamic>? fd = _fieldData[id];
+    String? v = fd?["VIEWMULT"];
+    if (v == null) return false;
+    if ("tT1yY".contains(v.substring(0, 1))) return true;
     return false;
   }
 
@@ -81,6 +89,21 @@ class FieldData {
 
   List<String> getFieldNames() {
     return _fieldNames;
+  }
+
+  bool canEdit(String useracc, String fld) {
+    switch (useracc) {
+      case "NONE":
+      case "VIEWER":
+        return false;
+      default:
+        break;
+    }
+    Map<String, dynamic>? fd = _fieldData[fld];
+    String? acc = fd?["ACCESS"];
+    if (acc == null) return true;
+    // otherwise compare user access levels here
+    return true;
   }
 }        // end of class FieldData
 

@@ -189,13 +189,13 @@ String handleFindEntries(HttpExchange he,ControlSession session)
          jsonfilter = new JSONObject(filterstr);
        }
       else {
-         jsonfilter = BurlUtil.buildJson("any",filterstr);
+         jsonfilter = BurlUtil.buildJson("all",filterstr);
        }
       EntityFilter filter = new EntityFilter(jsonfilter,repo,sortfld,invert);
       iter = repo.getRows(filter);
     }
    else if (iter == null) {
-      iter = repo.getRows();  
+      iter = repo.getRows(sortfld,invert);  
     }
    JSONArray results = new JSONArray();
    
@@ -355,6 +355,7 @@ private class EntityFilter implements BurlFilter {
          boolean matchany = false;
          for (BurlRepoColumn brc : for_repo.getColumns()) {
             String data = row.getData(brc);
+            if (data == null || data.isEmpty()) continue;
             if (matchItem(data,all)) {
                matchany = true;
                break;
@@ -380,9 +381,9 @@ private class EntityFilter implements BurlFilter {
    private boolean matchItem(String data,Object keyobj) {
       data = data.toLowerCase();
       if (keyobj instanceof String) {
-         String key = keyobj.toString();
+         String key = keyobj.toString().toLowerCase();
          for (StringTokenizer tok = new StringTokenizer(key); tok.hasMoreTokens(); ) {
-            String t = tok.nextToken().toLowerCase();
+            String t = tok.nextToken();
             if (data.contains(t)) return true;
           }
          return false;

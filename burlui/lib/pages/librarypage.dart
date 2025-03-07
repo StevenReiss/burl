@@ -23,6 +23,7 @@ import '../widgets.dart' as widgets;
 import '../util.dart' as util;
 import '../globals.dart' as globals;
 import 'loginpage.dart';
+import 'entrypage.dart';
 
 const String defaultSort = "<DEFAULT>";
 
@@ -66,7 +67,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
   void initState() {
     _libData = widget._libData;
     _scrollController.addListener(_loadMore);
-    _getSortFields;
+    _getSortFields();
     super.initState();
   }
 
@@ -92,8 +93,12 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
       body: widgets.topLevelNSPage(
         context,
         FutureBuilder<List<ItemData>>(
-          future: (_numItems < 0 ? _fetchInitialData() : _fetchMoreData()),
-          builder: (BuildContext ctx, AsyncSnapshot<List<ItemData>> snapshot) {
+          future:
+              (_numItems < 0 ? _fetchInitialData() : _fetchMoreData()),
+          builder: (
+            BuildContext ctx,
+            AsyncSnapshot<List<ItemData>> snapshot,
+          ) {
             if (snapshot.hasError) {
               return Center(child: Text("Error: ${snapshot.error}"));
             } else if (!snapshot.hasData) {
@@ -123,6 +128,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
+            const Text("Sort by: "),
             widgets.dropDown(
               _sortFields,
               value: defaultSort,
@@ -130,7 +136,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
               tooltip: "Select the field to sort the results on",
             ),
             widgets.textButton(
-              (_sortInvert ? "Invert" : "Normal"),
+              (_sortInvert ? "Inverse Order" : "Normal Order"),
               _changeSortOrder,
               tooltip: "Push to invert the sort order",
             ),
@@ -155,33 +161,37 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     if (_canAddToLibrary()) {
       rslt.add(
         widgets.MenuAction(
-          "Add Items from ISBN/LCCN File",
-          _addBooks,
-          "Add one or more books or items given file or ISBN/LCCN numbers. "
-              "Note this done in background and may take a while.",
-        ),
-      );
-      rslt.add(
-        widgets.MenuAction(
           "Add Items by ISBN/LCCN",
           _addBooks,
-          "Add one or more books or items given ISBN/LCCN. "
+          "Add one or more books or items given a file or ISBN/LCCN numbers. "
               "Note this done in background and may take a while.",
         ),
       );
       rslt.add(
         widgets.MenuAction(
-          "Add Item Manually (Initially Empty)",
+          "Add Single Item Manually (Initially Empty)",
           _addManualItem,
           "Add a new book or item manually",
         ),
       );
     }
     rslt.add(
-      widgets.MenuAction("Refresh", _refreshList, "Refresh this list of items"),
+      widgets.MenuAction(
+        "Refresh",
+        _refreshList,
+        "Refresh this list of items",
+      ),
     );
-    if (_libData.getUserAccess() == 'OWNER' ||
-        _libData.getUserAccess() == "ADMIN") {
+    if (_canPrintLabels()) {
+      rslt.add(
+        widgets.MenuAction(
+          "Print Labels",
+          _printLabels,
+          "Print labels for those items that need them",
+        ),
+      );
+    }
+    if (_canAddUsers()) {
       rslt.add(
         widgets.MenuAction(
           "Add User",
@@ -230,13 +240,40 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     }
   }
 
+  bool _canAddUsers() {
+    switch (_libData.getUserAccess()) {
+      case "ADMIN":
+      case "OWNER":
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  bool _canPrintLabels() {
+    switch (_libData.getUserAccess()) {
+      case "NONE":
+      case "VIEWER":
+      case "EDITOR":
+        return false;
+      default:
+        return true;
+    }
+  }
+
   void _addBooks() async {
+    // show add dialog
     // get file or list of items to add, call add
   }
 
   void _addManualItem() async {
-    Map<String, String?> data = {"library": _libData.getLibraryId().toString()};
-    Map<String, dynamic> rslt = await util.postJson("addentry", body: data);
+    Map<String, String?> data = {
+      "library": _libData.getLibraryId().toString(),
+    };
+    Map<String, dynamic> rslt = await util.postJson(
+      "addentry",
+      body: data,
+    );
     if (rslt["status"] == "OK") {
       // take entityid from the result and go to entry page for it
     }
@@ -254,10 +291,15 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
   void _detachLibrary() async {
     // ask user if they are sure
     BuildContext dcontext = context;
-    Map<String, String?> data = {"library": _libData.getLibraryId().toString()};
+    Map<String, String?> data = {
+      "library": _libData.getLibraryId().toString(),
+    };
     data["email"] = "*";
     data["access"] = "NONE";
-    Map<String, dynamic> rslt = await util.postJson("addentry", body: data);
+    Map<String, dynamic> rslt = await util.postJson(
+      "addentry",
+      body: data,
+    );
     if (rslt["status"] == "OK") {
       if (dcontext.mounted) {
         Navigator.pop(dcontext);
@@ -283,6 +325,12 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
 
   void _changePassword() async {
     // bring up change password dialog
+  }
+
+  void _printLabels() async {
+    // dialog to get file name to store result
+    // call print labels to get result file
+    // save result file
   }
 
   void _logout() async {
@@ -323,7 +371,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
   }
 
   void _getSortFields() {
-    _sortFields.add("<Default>");
+    _sortFields.add(defaultSort);
     for (String fn in globals.fieldData.getFieldNames()) {
       if (globals.fieldData.isSortable(fn)) {
         _sortFields.add(fn);
@@ -348,6 +396,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     _itemList.clear();
     _numItems = 0;
     _maxRead = 0;
+    _scrollController.jumpTo(_scrollController.initialScrollOffset);
     Map<String, String?> data = {
       "library": _libData.getLibraryId().toString(),
       "count": "20",
@@ -362,7 +411,10 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
       data["invert"] = "true";
     }
 
-    Map<String, dynamic> rslts = await util.postJson("entries", body: data);
+    Map<String, dynamic> rslts = await util.postJson(
+      "entries",
+      body: data,
+    );
     if (rslts["status"] == "OK") {
       List<dynamic> items = rslts["data"];
       for (Map<String, dynamic> item in items) {
@@ -380,7 +432,9 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
   Future<List<ItemData>> _fetchMoreData() async {
     if (_maxRead < _itemList.length) return _itemList;
 
-    while (_maxRead >= _itemList.length && _maxRead < _numItems && !_isDone) {
+    while (_maxRead >= _itemList.length &&
+        _maxRead < _numItems &&
+        !_isDone) {
       if (_iterId == null) break;
       Map<String, String?> data = {
         "library": _libData.getLibraryId().toString(),
@@ -388,9 +442,13 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
         "count": "20",
       };
 
-      Map<String, dynamic> rslts = await util.postJson("entries", body: data);
+      Map<String, dynamic> rslts = await util.postJson(
+        "entries",
+        body: data,
+      );
       if (rslts["status"] == "OK") {
         List<dynamic> items = rslts["data"];
+        _numItems = rslts["count"];
         for (Map<String, dynamic> item in items) {
           ItemData id = ItemData(item);
           _itemList.add(id);
@@ -455,7 +513,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     Widget w1 = GestureDetector(
       key: Key("Item $idx"),
       onTap: () {
-        _handleSelect(idx);
+        _handleSelect(index);
       },
       child: w,
     );
@@ -490,12 +548,16 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
       );
       return child;
     } else {
-      Widget child = SizedBox(width: 50);
+      Widget child = SizedBox(width: 32);
       return child;
     }
   }
 
-  Widget _badImage(BuildContext context, Object exception, StackTrace? st) {
+  Widget _badImage(
+    BuildContext context,
+    Object exception,
+    StackTrace? st,
+  ) {
     return const Text('ð¢');
   }
 
@@ -511,7 +573,11 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     return const Text('ð¢');
   }
 
-  void _handleSelect(int index) {
-    // goto entry page for index
+  void _handleSelect(int index) async {
+    await widgets.gotoThen(
+      context,
+      BurlEntryWidget(_libData, _itemList[index]),
+    );
+    setState(() {});
   }
 } // end of class _BurlPageState

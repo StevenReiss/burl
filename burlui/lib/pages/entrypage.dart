@@ -58,10 +58,8 @@ class _BurlEntryPageState extends State<BurlEntryPage> {
   void initState() {
     _libData = widget._libData;
     _itemData = widget._itemData;
-    for (String fld in globals.fieldData.getFieldNames()) {
-      TextEditingController ctrl = TextEditingController();
-      ctrl.text = _itemData.getField(fld);
-    }
+    _controllers.clear();
+    _resetFields();
     super.initState();
   }
 
@@ -98,24 +96,35 @@ class _BurlEntryPageState extends State<BurlEntryPage> {
   }
 
   Widget _getEntryWidget() {
-    List<Widget> childs = [];
+    List<TableRow> rows = [];
+    String acc = _libData.getUserAccess();
     for (String fld in globals.fieldData.getFieldNames()) {
       TextEditingController? ctrl = _controllers[fld];
       Widget lbl = Text(globals.fieldData.getLabel(fld));
-      childs.add(lbl);
       Widget fldw = widgets.textField(
         controller: ctrl,
+        height: _getHeight(ctrl!.text),
+        enabled: globals.fieldData.canEdit(acc, fld),
+        maxLines: 0,
         onChanged: (String s) {
           _fieldEdited(fld, s);
         },
       );
-      childs.add(fldw);
+      TableRow row = TableRow(children: <Widget>[lbl, fldw]);
+      rows.add(row);
+      TableRow spacer = TableRow(
+        children: [SizedBox(height: 1), SizedBox(height: 1)],
+      );
+      rows.add(spacer);
     }
-    Widget w1 = GridView.count(
-      crossAxisCount: 2,
-      crossAxisSpacing: 4,
-      mainAxisSpacing: 2,
-      children: childs,
+    Map<int, TableColumnWidth> widths = {
+      0: IntrinsicColumnWidth(),
+      1: FlexColumnWidth(),
+    };
+    Widget w1 = Table(
+      children: rows,
+      columnWidths: widths,
+      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
     );
 
     Widget cancelBtn = widgets.submitButton(
@@ -130,13 +139,13 @@ class _BurlEntryPageState extends State<BurlEntryPage> {
     );
     Widget revertBtn = widgets.submitButton(
       "Revert",
-      _doSave,
+      _doRevert,
       enabled: _hasChanged,
       tooltip: "Save any changes",
     );
     Widget saveBtn = widgets.submitButton(
       "Save",
-      _doRevert,
+      _doSave,
       enabled: _hasChanged,
       tooltip: "Revert any changes",
     );
@@ -147,10 +156,24 @@ class _BurlEntryPageState extends State<BurlEntryPage> {
 
     Widget w3 = Column(
       mainAxisAlignment: MainAxisAlignment.start,
-      children: <Widget>[Expanded(child: w1), widgets.fieldSeparator(), w2],
+      children: <Widget>[w1, widgets.fieldSeparator(), w2],
     );
 
     return w3;
+  }
+
+  double? _getHeight(String txt) {
+    int nline = 1;
+    int lidx = 0;
+    for (;;) {
+      int nidx = txt.indexOf("\n", lidx);
+      if (nidx < 0) break;
+      nline += (nidx - lidx) ~/ 60;
+      ++nline;
+      lidx = nidx + 1;
+    }
+    nline += (txt.length - lidx) ~/ 60;
+    return 36.0 * nline;
   }
 
   bool _canRemove() {
@@ -179,7 +202,10 @@ class _BurlEntryPageState extends State<BurlEntryPage> {
       "library": _libData.getLibraryId().toString(),
       "entry": _itemData.getId().toString(),
     };
-    Map<String, dynamic> rslt = await util.postJson("removeentry", body: data);
+    Map<String, dynamic> rslt = await util.postJson(
+      "removeentry",
+      body: data,
+    );
     if (rslt["status"] == "OK") {
       if (dcontext.mounted) {
         Navigator.pop(dcontext);
@@ -188,31 +214,51 @@ class _BurlEntryPageState extends State<BurlEntryPage> {
   }
 
   void _fieldEdited(String fld, String? text) {
-    _hasChanged = true;
+    setState(() {
+      _hasChanged = true;
+    });
   }
 
   Future<void> _doCancel() async {
     BuildContext dcontext = context;
-    await _doRevert();
+    await _revertEdits();
     if (dcontext.mounted) {
       Navigator.pop(dcontext);
     }
   }
 
   Future<void> _doRevert() async {
+    await _revertEdits();
+    setState(() {
+      _hasChanged = false;
+    });
+  }
+
+  Future<void> _revertEdits() async {
     for (String fld in globals.fieldData.getFieldNames()) {
       TextEditingController? ctrl = _controllers[fld];
       ctrl!.text = _itemData.getField(fld);
     }
   }
 
-  Future<void> _doSave() async {
+  void _resetFields() {
+    for (String fld in globals.fieldData.getFieldNames()) {
+      TextEditingController ctrl = TextEditingController();
+      ctrl.text = _itemData.getMultiField(fld);
+      _controllers[fld] = ctrl;
+    }
+  }
+
+  Future<void> _saveEdits() async {
     Map<String, dynamic> edits = {};
     for (String fld in globals.fieldData.getFieldNames()) {
       TextEditingController? ctrl = _controllers[fld];
       if (ctrl != null) {
         String oldv = _itemData.getField(fld);
         String newv = ctrl.text;
+        if (globals.fieldData.isViewMultiple(fld)) {
+          newv = newv.replaceAll("\n", " | ");
+        }
         if (oldv != newv) {
           edits[fld] = newv;
         }
@@ -224,19 +270,30 @@ class _BurlEntryPageState extends State<BurlEntryPage> {
         "entry": _itemData.getId().toString(),
         "edits": edits.toString(),
       };
-      Map<String, dynamic> rslt = await util.postJson("editentry", body: data);
+      Map<String, dynamic> rslt = await util.postJson(
+        "editentry",
+        body: data,
+      );
       if (rslt["status"] == "OK") {
         Map<String, dynamic> data = rslt["entry"];
         _itemData.reload(data);
+        setState(() {});
       }
     }
-    _hasChanged = false;
+  }
+
+  Future<void> _doSave() async {
+    await _saveEdits();
+    _resetFields();
+    setState(() {
+      _hasChanged = false;
+    });
   }
 
   Future<void> _doAccept() async {
     BuildContext dcontext = context;
     if (_hasChanged) {
-      await _doSave();
+      await _saveEdits();
     }
     if (dcontext.mounted) {
       Navigator.pop(dcontext);
