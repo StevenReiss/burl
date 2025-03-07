@@ -27,7 +27,7 @@ class BurlRegister extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Burl Registration',
-      theme: util.getTheme(),
+      theme: widgets.getTheme(),
       home: const BurlRegisterWidget(),
     );
   }
@@ -66,7 +66,10 @@ class _BurlRegisterWidgetState extends State<BurlRegisterWidget> {
     String p2 = util.hasher(p1 + salt);
 
     var body = {'email': email, 'password': p2, 'salt': salt};
-    Map<String, dynamic> jresp = await util.postJson("register", body: body);
+    Map<String, dynamic> jresp = await util.postJson(
+      "register",
+      body: body,
+    );
     if (jresp['status'] == "OK") return null;
     return jresp['message'];
   }
@@ -144,7 +147,10 @@ class _BurlRegisterWidgetState extends State<BurlRegisterWidget> {
   }
 
   void _gotoLogin() {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => const BurlLogin()));
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const BurlLogin()),
+    );
   }
 
   String? _validateConfirmPassword(String? value) {

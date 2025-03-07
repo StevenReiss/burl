@@ -17,10 +17,10 @@
 
 import 'dart:convert' as convert;
 import 'package:crypto/crypto.dart' as crypto;
-import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'globals.dart' as globals;
+import 'dart:io';
 
 String hasher(String msg) {
   final bytes = convert.utf8.encode(msg);
@@ -41,10 +41,6 @@ bool validatePassword(String? pwd) {
   if (pwd == null || pwd == '') return false;
   // check length, contents
   return true;
-}
-
-ThemeData getTheme() {
-  return ThemeData(primarySwatch: Colors.lightBlue);
 }
 
 Uri getServerUri(String path, [Map<String, dynamic>? query]) {
@@ -75,7 +71,10 @@ Future<Map<String, dynamic>> postJson(
   return js;
 }
 
-Future<void> postJsonOnly(String url, {Map<String, String?>? body}) async {
+Future<void> postJsonOnly(
+  String url, {
+  Map<String, String?>? body,
+}) async {
   Uri u = getServerUri(url);
   Map<String, String> headers = {"accept": "application/json"};
   if (globals.burlSession != null) {
@@ -86,6 +85,24 @@ Future<void> postJsonOnly(String url, {Map<String, String?>? body}) async {
     }
   }
   await http.post(u, body: body, headers: headers);
+}
+
+Future<void> postJsonDownload(
+  String url,
+  String path, {
+  Map<String, String?>? body,
+}) async {
+  Uri u = getServerUri(url);
+  Map<String, String> headers = {"accept": "application/json"};
+  if (globals.burlSession != null) {
+    if (body == null) {
+      body = {"session": globals.burlSession};
+    } else if (body["session"] == null) {
+      body["session"] = globals.burlSession;
+    }
+  }
+  dynamic resp = await http.post(u, body: body, headers: headers);
+  await File(path).writeAsBytes(resp.bodyBytes);
 }
 
 Future<Map<String, dynamic>> getJson(

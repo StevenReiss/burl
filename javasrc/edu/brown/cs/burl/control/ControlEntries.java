@@ -126,9 +126,7 @@ String handleAddEntry(HttpExchange he,ControlSession session)
       case NONE :
       case VIEWER :
       case EDITOR :
-      case SENIOR : 
          return BowerRouter.errorResponse(he,session,400,"Not authorized");
-      case ADMIN :
       case OWNER :
       case LIBRARIAN :
          break;
@@ -311,18 +309,16 @@ String handleRemoveEntry(HttpExchange he,ControlSession session)
     }
    BurlUserAccess acc = burl_store.getUserAccess(user.getEmail(),libid);
    switch (acc) {
-      case ADMIN :
       case LIBRARIAN :
       case OWNER :
          break;
       case EDITOR :
       case NONE :
-      case SENIOR :
       case VIEWER :
          return BowerRouter.errorResponse(he,session,402,"Unauthorized");
     }
    
-// repo.removeRow(entid);
+   repo.removeRow(entid);
    
    return BowerRouter.jsonOKResponse(session);
 }

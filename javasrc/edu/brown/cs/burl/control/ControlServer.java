@@ -22,10 +22,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -44,6 +46,7 @@ import edu.brown.cs.burl.burl.BurlLibrary;
 import edu.brown.cs.burl.burl.BurlRepo;
 import edu.brown.cs.burl.burl.BurlRepoColumn;
 import edu.brown.cs.burl.burl.BurlUser;
+import edu.brown.cs.burl.burl.BurlUtil;
 import edu.brown.cs.ivy.bower.BowerCORS;
 import edu.brown.cs.ivy.bower.BowerRouter;
 
@@ -237,9 +240,7 @@ String handleAddLibraryUser(HttpExchange he,ControlSession session)
       case NONE :
       case VIEWER :
       case EDITOR :
-      case SENIOR :
          return BowerRouter.errorResponse(he,session,402,"Not authorized");
-      case ADMIN :
       case OWNER :
       case LIBRARIAN :
          break; 
@@ -309,8 +310,6 @@ String handleRemoveLibrary(HttpExchange he,ControlSession session)
       case NONE :
       case VIEWER :
       case EDITOR :
-      case SENIOR :
-      case ADMIN :
       case LIBRARIAN :
          return BowerRouter.errorResponse(he,session,400,"Not authorized");
       case OWNER :
@@ -345,8 +344,6 @@ String handleExportLibrary(HttpExchange he,ControlSession session)
          return BowerRouter.errorResponse(he,session,400,"Not authorized");
       case VIEWER :
       case EDITOR :
-      case SENIOR :
-      case ADMIN :
       case OWNER :
       case LIBRARIAN :
          break; 
@@ -458,15 +455,23 @@ String handleAddIsbns(HttpExchange he,ControlSession session)
    List<String> isbns = BowerRouter.getParameterList(he,"isbns");
    BurlUpdateMode upd = BowerRouter.getEnumParameter(he,"mode",BurlUpdateMode.AUGMENT);
    boolean count = BowerRouter.getBooleanParameter(he,"count",true);
+   String isbnstr = BowerRouter.getParameter(he,"isbnstr");
+   if (isbnstr != null && !isbnstr.isBlank()) {
+      if (isbns == null) isbns = new ArrayList<>();
+      for (StringTokenizer tok = new StringTokenizer(isbnstr); tok.hasMoreTokens(); ) {
+         String s = tok.nextToken();
+         String s1 = BurlUtil.getValidISBN(s);
+         if (s1 == null) s1 = BurlUtil.getValidLCCN(s);
+         if (s1 != null) isbns.add(s1);
+       }
+    }
    
    BurlUserAccess acc = validateLibrary(session,lid);
    switch (acc) {
       case NONE :
       case VIEWER :
       case EDITOR :
-      case SENIOR : 
          return BowerRouter.errorResponse(he,session,400,"Not authorized");
-      case ADMIN :
       case OWNER :
       case LIBRARIAN :
          break;

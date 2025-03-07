@@ -221,7 +221,9 @@ private String fixLccCode(String code)
             i -= len;
           }
          idx2 = -1;
-         if (havenum && !Character.isDigit(c) && c != '.') break;
+         if (havenum && Character.isWhitespace(c)) {
+            havenum = false;
+          }
        }
     }
    

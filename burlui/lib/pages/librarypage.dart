@@ -24,6 +24,10 @@ import '../util.dart' as util;
 import '../globals.dart' as globals;
 import 'loginpage.dart';
 import 'entrypage.dart';
+import 'changepassworddialog.dart';
+import 'addentriesdialog.dart';
+import 'adduserdialog.dart';
+import 'printlabelsdialog.dart';
 
 const String defaultSort = "<DEFAULT>";
 
@@ -57,7 +61,9 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
   int _maxRead = 0;
   double _scrollext = 0;
   final List<String> _sortFields = [];
-  final ScrollController _scrollController = ScrollController();
+  final ScrollController _scrollController = ScrollController(
+    keepScrollOffset: false,
+  );
   String? _sortOn;
   bool _sortInvert = false;
 
@@ -169,9 +175,9 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
       );
       rslt.add(
         widgets.MenuAction(
-          "Add Single Item Manually (Initially Empty)",
+          "Add Single Item Manually",
           _addManualItem,
-          "Add a new book or item manually",
+          "Add a new book or item manually.  This starts out as an empty item.",
         ),
       );
     }
@@ -231,7 +237,6 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
 
   bool _canAddToLibrary() {
     switch (_libData.getUserAccess()) {
-      case "ADMIN":
       case "OWNER":
       case "LIBRARIAN":
         return true;
@@ -242,7 +247,6 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
 
   bool _canAddUsers() {
     switch (_libData.getUserAccess()) {
-      case "ADMIN":
       case "OWNER":
         return true;
       default:
@@ -262,11 +266,11 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
   }
 
   void _addBooks() async {
-    // show add dialog
-    // get file or list of items to add, call add
+    await addEntriesDialog(context, _libData);
   }
 
   void _addManualItem() async {
+    BuildContext dcontext = context;
     Map<String, String?> data = {
       "library": _libData.getLibraryId().toString(),
     };
@@ -275,6 +279,15 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
       body: data,
     );
     if (rslt["status"] == "OK") {
+      ItemData item = ItemData(rslt["entry"]);
+      if (dcontext.mounted) {
+        await widgets.gotoThen(
+          dcontext,
+          BurlEntryWidget(_libData, item),
+        );
+      }
+      setState(() {});
+
       // take entityid from the result and go to entry page for it
     }
   }
@@ -285,6 +298,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
   }
 
   void _addUser() async {
+    await addUserDialog(context, _libData);
     // provide a dialog to specify user email and the permissions
   }
 
@@ -308,8 +322,12 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
   }
 
   void _deleteLibrary() async {
-    // ask user if they are sure
     BuildContext dcontext = context;
+    bool confirm = await widgets.getValidation(
+      context,
+      "Do You Really want to delete the library",
+    );
+    if (!confirm) return;
     Map<String, String?> data = {};
     data["library"] = _libData.getLibraryId().toString();
     Map<String, dynamic> rslt = await util.postJson(
@@ -324,13 +342,11 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
   }
 
   void _changePassword() async {
-    // bring up change password dialog
+    await changePasswordDialog(context);
   }
 
   void _printLabels() async {
-    // dialog to get file name to store result
-    // call print labels to get result file
-    // save result file
+    await printLabelsDialog(context, _libData);
   }
 
   void _logout() async {
@@ -396,7 +412,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     _itemList.clear();
     _numItems = 0;
     _maxRead = 0;
-    _scrollController.jumpTo(_scrollController.initialScrollOffset);
+    //  _scrollController.jumpTo(_scrollController.initialScrollOffset);
     Map<String, String?> data = {
       "library": _libData.getLibraryId().toString(),
       "count": "20",
@@ -573,11 +589,24 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     return const Text('ð¢');
   }
 
-  void _handleSelect(int index) async {
-    await widgets.gotoThen(
-      context,
-      BurlEntryWidget(_libData, _itemList[index]),
+  Future<dynamic> _handleSelect(int index) async {
+    ItemData item = _itemList[index];
+    int id = item.getId();
+    await widgets.gotoThen(context, BurlEntryWidget(_libData, item));
+    Map<String, String?> data = {
+      "library": _libData.getLibraryId().toString(),
+      "entry": id.toString(),
+    };
+    Map<String, dynamic> itemrslt = await util.getJson(
+      "getentry",
+      body: data,
     );
+    ItemData? newitem;
+    if (itemrslt["status"] == "OK") {
+      newitem = ItemData(itemrslt["entry"]);
+      _itemList[index] = newitem;
+    }
+    _itemList.removeAt(index);
     setState(() {});
   }
 } // end of class _BurlPageState

@@ -106,7 +106,9 @@ class _BurlLoginWidgetState extends State<BurlLoginWidget> {
   void _gotoForgotPassword() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const BurlForgotPasswordWidget()),
+      MaterialPageRoute(
+        builder: (context) => const BurlForgotPasswordWidget(),
+      ),
     );
   }
 
@@ -153,7 +155,10 @@ class _BurlLoginWidgetState extends State<BurlLoginWidget> {
                         maxWidth: 350,
                       ),
                       width: MediaQuery.of(context).size.width * 0.4,
-                      child: widgets.submitButton("Login", _handleLogin),
+                      child: widgets.submitButton(
+                        "Login",
+                        _handleLogin,
+                      ),
                     ),
                     Row(
                       mainAxisSize: MainAxisSize.min,
@@ -171,8 +176,14 @@ class _BurlLoginWidgetState extends State<BurlLoginWidget> {
                 ),
               ),
               widgets.getPadding(16),
-              widgets.textButton("Not a user? Register Here.", _gotoRegister),
-              widgets.textButton("Forgot Password?", _gotoForgotPassword),
+              widgets.textButton(
+                "Not a user? Register Here.",
+                _gotoRegister,
+              ),
+              widgets.textButton(
+                "Forgot Password?",
+                _gotoForgotPassword,
+              ),
             ],
           ),
         ),
@@ -301,7 +312,10 @@ class _HandleLogin {
       'padding': pad,
       'password': p3,
     };
-    Map<String, dynamic> jresp = await util.postJson("login", body: body);
+    Map<String, dynamic> jresp = await util.postJson(
+      "login",
+      body: body,
+    );
     if (jresp['status'] == "OK") {
       globals.burlSession = jresp['session'];
       _curSession = jresp['session'];

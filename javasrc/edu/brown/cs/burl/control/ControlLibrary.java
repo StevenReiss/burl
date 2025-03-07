@@ -46,7 +46,6 @@ private ControlMain     burl_control;
 private JSONObject	lib_data;
 
 
-
 /********************************************************************************/
 /*										*/
 /*	Constructors								*/
@@ -103,6 +102,10 @@ ControlLibrary(ControlMain bm,JSONObject data)
    ControlStorage store = burl_control.getStorage();
    List<BurlLibraryAccess> acclist = store.getLibraryAccess(getId());
    jobj.put("owner",getUsers(BurlUserAccess.OWNER,acclist));
+   jobj.put("librarian",getUsers(BurlUserAccess.LIBRARIAN,acclist));
+   jobj.put("editor",getUsers(BurlUserAccess.EDITOR,acclist));
+   jobj.put("viewer",getUsers(BurlUserAccess.VIEWER,acclist));
+   
 
    return jobj;
 }
@@ -112,7 +115,7 @@ private String getUsers(BurlUserAccess level,List<BurlLibraryAccess> acclst)
 {
    StringBuffer buf = new StringBuffer();
    for (BurlLibraryAccess acc : acclst) {
-      if (acc.getAccessLevel() == level) {
+      if (level == null || acc.getAccessLevel() == level) {
          if (!buf.isEmpty()) buf.append(" ");
          buf.append(acc.getUserEmail());
        }
@@ -120,11 +123,13 @@ private String getUsers(BurlUserAccess level,List<BurlLibraryAccess> acclst)
    return buf.toString();
 }
 
+
 @Override public BurlRepoType getRepoType()
 {
    int rtyp = lib_data.getInt("repo_type");
    return BurlRepoType.values()[rtyp];
 }
+
 
 
 

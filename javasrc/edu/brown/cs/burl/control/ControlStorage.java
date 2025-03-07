@@ -377,8 +377,8 @@ ControlStorage(ControlMain ctrl)
 
 @Override public List<BurlLibraryAccess> getLibraryAccess(Number lid)
 {
-   String q1 = "SELECT * FROM BurlUserAccess WHERE libraryid = $1 AND access_level = $2";
-   List<JSONObject> accs = sqlQueryN(q1,lid,BurlUserAccess.OWNER.ordinal());
+   String q1 = "SELECT * FROM BurlUserAccess WHERE libraryid = $1";
+   List<JSONObject> accs = sqlQueryN(q1,lid);
    
    List<BurlLibraryAccess> rslt = new ArrayList<>();
    for (JSONObject obj : accs) {

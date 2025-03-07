@@ -91,9 +91,7 @@ enum BurlUserAccess {
    NONE,                // no access
    VIEWER,              // read-only access
    EDITOR,              // edit information fields
-   SENIOR,              // etit most fields ???
    LIBRARIAN,           // edit all fields
-   ADMIN,               // all access but remove
    OWNER,               // all access plus remove
 }
 

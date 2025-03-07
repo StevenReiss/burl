@@ -7,7 +7,9 @@
 		ALTNAMES="Title" SORT='T' />
       <FIELD NAME="Edition" MARC="250a b" />
       <FIELD NAME="Imprint" MARC="260a b c+264a b c" OPENLIB="publisher : publish_year"
-		GOOGLE="publisher : publishedData" MULTIPLE="T" ALTNAMES='Publisher' SORT='T' />
+		GOOGLE="publisher : publishedDate" MULTIPLE="T" ALTNAMES='Publisher' SORT='T' />
+      <FIELD NAME="Date" MARC="260c+264c" OPENLIB="publish_year" GOOGLE="publishedDate"
+		MULTIPLE='T' SORT='T' />
       <FIELD NAME="Description" MARC="300a b c e" GOOGLE="description"
 		ALTNAMES="Desc" />
       <FIELD NAME="ISBN" ISBN="ORIGINAL" FIX="ISBN"  SORT='T' />

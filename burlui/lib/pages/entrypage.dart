@@ -178,7 +178,6 @@ class _BurlEntryPageState extends State<BurlEntryPage> {
 
   bool _canRemove() {
     switch (_libData.getUserAccess()) {
-      case "ADMIN":
       case "LIBRARIAN":
       case "OWNER":
         return true;
@@ -198,6 +197,11 @@ class _BurlEntryPageState extends State<BurlEntryPage> {
 
   void _removeEntry() async {
     BuildContext dcontext = context;
+    bool confirm = await widgets.getValidation(
+      context,
+      "Do You Really want to delete this item",
+    );
+    if (!confirm) return;
     Map<String, String?> data = {
       "library": _libData.getLibraryId().toString(),
       "entry": _itemData.getId().toString(),
@@ -208,7 +212,7 @@ class _BurlEntryPageState extends State<BurlEntryPage> {
     );
     if (rslt["status"] == "OK") {
       if (dcontext.mounted) {
-        Navigator.pop(dcontext);
+        Navigator.pop(dcontext, "OK");
       }
     }
   }
@@ -296,7 +300,7 @@ class _BurlEntryPageState extends State<BurlEntryPage> {
       await _saveEdits();
     }
     if (dcontext.mounted) {
-      Navigator.pop(dcontext);
+      Navigator.pop(dcontext, "OK");
     }
   }
 } // end of class _BurlEntryPageState

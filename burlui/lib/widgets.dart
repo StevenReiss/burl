@@ -386,8 +386,8 @@ class MenuAction {
 ///                                                                             */
 ///******************************************************************************/
 
-Widget fieldSeparator() {
-  return const SizedBox(height: 8);
+Widget fieldSeparator([double ht = 8]) {
+  return SizedBox(height: ht);
 }
 
 ///******************************************************************************/
@@ -520,7 +520,7 @@ void goto(BuildContext context, Widget w) {
   ).push(MaterialPageRoute(builder: (context) => w));
 }
 
-Future<void> gotoThen(BuildContext context, Widget w) async {
+Future<dynamic> gotoThen(BuildContext context, Widget w) async {
   await Navigator.of(
     context,
   ).push(MaterialPageRoute(builder: (context) => w));

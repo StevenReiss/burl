@@ -269,12 +269,6 @@ void handleAddLibraryUser(List<String> args)
          else if (s.startsWith("-v")) {
             acc = BurlUserAccess.VIEWER;
           }
-         else if (s.startsWith("-s")) {
-            acc = BurlUserAccess.SENIOR;
-          }
-         else if (s.startsWith("-a")) {
-            acc = BurlUserAccess.ADMIN;
-          }
          else {
             badAddUserArgs();
             return;
@@ -601,10 +595,12 @@ void handlePrintLabels(List<String> args)
       if (s.startsWith("-")) {
          if (s.startsWith("-f") && i+1 < args.size()) {    // -file <file>
             if (file != null) {
-               badExportArgs();
+               badPrintLabelsArgs();
                return;
              }
-            file = new File(args.get(++i));
+            String fn = args.get(++i);
+            if (!fn.endsWith(".rtf")) fn = fn + ".rtf";
+            file = new File(fn);
           }
        }
       else if (file == null) {
@@ -630,7 +626,7 @@ void handlePrintLabels(List<String> args)
 
 private void badPrintLabelsArgs()
 {
-   IvyLog.logI("BURLCLI","labels <file>");
+   IvyLog.logI("BURLCLI","labels <file[.rtf]>");
 }
 
 

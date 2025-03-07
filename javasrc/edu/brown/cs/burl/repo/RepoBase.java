@@ -895,20 +895,38 @@ private class ImportJsonEntry implements BurlBibEntry {
       if (idx > 0) author = author.substring(idx+1).trim();
       if (author.length() > 3) author = author.substring(0,3);
       
-      String code1 = code;
+      String code1 = code.trim();
       String code2 = "";
-      int len = code.length();
-      if (len > 12) {
-         int idx1 = code.lastIndexOf(" ",12);
-         int idx2 = code.lastIndexOf(".",12);
-         int idx3 = code.lastIndexOf("-",12);
+      int idx4 = code.indexOf(" ");
+      int idx5 = code.indexOf(".");
+      int idx6 = -1;
+      if (idx5 >= 0) idx6 = code.indexOf(".",idx5+1);
+      if (idx6 < idx4) idx4 = idx6;
+      if (idx4 > 0) {
+         code2 = code.substring(idx4+1).trim();
+         if (code2.startsWith(".")) code2 = code2.substring(1).trim();
+         code = code.substring(0,idx4).trim();
+       }
+      if (code1.length() > 12) {
+         int idx1 = code1.lastIndexOf(" ",12);
+         int idx2 = code1.lastIndexOf(".",12);
+         int idx3 = code1.lastIndexOf("-",12);
          int sidx = 0;
          if (idx1 > 0 && idx1 > sidx) sidx = idx1;
          if (idx2 > 0 && idx2 > sidx) sidx = idx2;
          if (idx3 > 0 && idx3 > sidx) sidx = idx3;
          code1 = code.substring(0,sidx);
-         code2 = code.substring(sidx+1).trim();
-         if (code2.length() > 12) code2 = code2.substring(0,12);
+         if (code2.isEmpty()) code2 = code.substring(sidx+1).trim();
+         else code2 = code2 + " " + code.substring(sidx+1).trim();
+       }
+      if (code2.length() > 12) {
+         int idx7 = code1.lastIndexOf(" ",12);
+         int idx8 = code1.lastIndexOf(".",12);
+         int idx9 = code1.lastIndexOf("-",12);
+         idx7 = Math.max(idx7,idx8);
+         idx7 = Math.max(idx7,idx9);
+         if (idx7 < 0) idx7 = 12;
+         code2 = code2.substring(0,idx7);
        }
       
       cntidx = insertLabelText(cnts,cntidx,"aaaaaaaaaaaa",code1);
@@ -969,7 +987,7 @@ private int insertLabelText(StringBuffer buf,int start,String pat,String rep)
    if (idx < 0) return -1;
    
    int len = pat.length();
-   buf.replace(start,start+len,rep);
+   buf.replace(idx,idx+len,rep);
    
    return start + rep.length() - 1;
 }

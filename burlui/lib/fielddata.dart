@@ -21,7 +21,13 @@ class FieldData {
   final Map<String, Map<String, dynamic>> _fieldData = {};
   final List<String> _fieldNames = [];
 
-  FieldData();
+  static final FieldData _instance = FieldData._();
+
+  FieldData._();
+
+  factory FieldData() {
+    return _instance;
+  }
 
   Future<bool> loadData() async {
     Map<String, dynamic> data = await util.getJson("fielddata");
@@ -42,17 +48,17 @@ class FieldData {
           _fieldData[s2.trim()] = finfo;
           _fieldData[s2.trim().toLowerCase()] = finfo;
         }
-        String? s3 = finfo["FIELDNAME"];
-        if (s3 == null) {
-          String s3 = finfo["NAME"];
-          s3 = s3.replaceAll(" ", "_");
-          s3 = s3.replaceAll(",", "_");
-          s3 = s3.replaceAll("-", "_");
-          s3 = s3.replaceAll(".", "");
-          s3 = s3.trim();
-          _fieldData[s3] = finfo;
-          _fieldData[s3.toLowerCase()] = finfo;
-        }
+      }
+      String? s3 = finfo["FIELDNAME"];
+      if (s3 == null) {
+        String s3 = finfo["NAME"];
+        s3 = s3.replaceAll(" ", "_");
+        s3 = s3.replaceAll(",", "_");
+        s3 = s3.replaceAll("-", "_");
+        s3 = s3.replaceAll(".", "");
+        s3 = s3.trim();
+        _fieldData[s3] = finfo;
+        _fieldData[s3.toLowerCase()] = finfo;
       }
     }
     return true;
