@@ -16,6 +16,7 @@
  ********************************************************************************/
 
 import 'globals.dart' as globals;
+import 'dart:convert';
 
 class ItemData {
   late Map<String, dynamic> _jsonData;
@@ -35,13 +36,16 @@ class ItemData {
     if (id == null) return "";
     dynamic v1 = _jsonData[id];
     if (v1 == null) return "";
+    String v2 = "";
     if (v1.runtimeType == String) {
-      return v1 as String;
+      v2 = v1 as String;
     } else if (v1.runtimeType == List) {
       List v1l = v1 as List;
-      return v1l.join(join);
+      v2 = v1l.join(join);
     }
-    return "";
+    List<int> runes = v2.runes.toList();
+    String v3 = utf8.decode(runes);
+    return v3;
   }
 
   String getMultiField(String fldname) {

@@ -23,6 +23,7 @@ import '../widgets.dart' as widgets;
 import '../util.dart' as util;
 import '../globals.dart' as globals;
 import 'loginpage.dart';
+import 'dart:convert';
 
 class BurlEntryWidget extends StatelessWidget {
   final LibraryData _libData;
@@ -188,7 +189,7 @@ class _BurlEntryPageState extends State<BurlEntryPage> {
 
   void _logout() async {
     BuildContext dcontext = context;
-    await util.postJsonOnly("/rest/logout");
+    await util.postJsonOnly("logout");
     globals.burlSession = null;
     if (dcontext.mounted) {
       widgets.gotoDirect(dcontext, BurlLogin());
@@ -248,7 +249,10 @@ class _BurlEntryPageState extends State<BurlEntryPage> {
   void _resetFields() {
     for (String fld in globals.fieldData.getFieldNames()) {
       TextEditingController ctrl = TextEditingController();
-      ctrl.text = _itemData.getMultiField(fld);
+      String t2 = _itemData.getMultiField(fld);
+      // List<int> runes = t1.runes.toList();
+      // String t2 = utf8.decode(runes);
+      ctrl.text = t2;
       _controllers[fld] = ctrl;
     }
   }
@@ -272,7 +276,7 @@ class _BurlEntryPageState extends State<BurlEntryPage> {
       Map<String, String?> data = {
         "library": _libData.getLibraryId().toString(),
         "entry": _itemData.getId().toString(),
-        "edits": edits.toString(),
+        "edits": json.encode(edits),
       };
       Map<String, dynamic> rslt = await util.postJson(
         "editentry",

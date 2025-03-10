@@ -69,7 +69,7 @@ public static File getBaseDirectory()
 }
 
 
-private static File findBaseDirectory()
+public static File findBaseDirectory()
 {
    File f1 = new File(System.getProperty("user.dir"));
    for (File f2 = f1; f2 != null; f2 = f2.getParentFile()) {
@@ -79,11 +79,11 @@ private static File findBaseDirectory()
    if (isBaseDirectory(f3)) return f3;
    
    File fc = new File("/vol");
-   File fd = new File(fc,"iot");
+   File fd = new File(fc,"burl");
    if (isBaseDirectory(fd)) return fd;
    
    File fa = new File("/pro");
-   File fb = new File(fa,"iot");
+   File fb = new File(fa,"burl");
    if (isBaseDirectory(fb)) return fb;
    
    return null;
@@ -94,10 +94,11 @@ private static boolean isBaseDirectory(File dir)
 {
    File f2 = new File(dir,"secret");
    if (!f2.exists()) return false;
-   
-   File f3 = new File(f2,"Database.props");
+   File f2a = new File(dir,"resources");
+   File f3 = new File(f2a,"burl.props");
    File f4 = new File(f2,"burl.props");
-   if (f3.exists() && f4.exists()) return true;
+   File f5 = new File(f2a,"fields.xml");
+   if (f3.exists() && f4.exists() && f5.exists()) return true;
    
    return false;
 }
@@ -358,7 +359,9 @@ public static String fixFirstLast(String val)
 public static boolean sendEmail(String sendto,String subj,String body)
 {
    if (sendto == null || subj == null && body == null) return false;
-   
+   if (base_directory == null) {
+      base_directory = findBaseDirectory();
+    }
    File f2 = new File(base_directory,"secret");
    File f4 = new File(f2,"burl.props");
    Properties props = new Properties();

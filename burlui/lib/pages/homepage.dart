@@ -57,16 +57,12 @@ class _BurlHomePageState extends State<BurlHomePage> {
   }
 
   Future _getLibraries() async {
-    List<LibraryData> rslt = await getLibraries();
-    _libraryData = rslt;
+    _libraryData = await getLibraries();
     _haveData = true;
     LibraryData? sd0 = _libraryData.singleOrNull;
     if (_initial && sd0 != null) {
       _initial = false;
-      Future.delayed(Duration.zero, () {
-        _gotoLibraryPage(sd0);
-        setState(() {});
-      });
+      await _gotoLibraryPage(sd0);
     } else {
       setState(() {});
     }
@@ -144,11 +140,10 @@ class _BurlHomePageState extends State<BurlHomePage> {
     await _handleLogout().then(_gotoLogin);
   }
 
-  void _gotoLibraryPage(LibraryData sd) async {
+  Future _gotoLibraryPage(LibraryData sd) async {
     await widgets.gotoThen(context, BurlLibraryWidget(sd));
-    setState(() {
-      _getLibraries();
-    });
+    _libraryData = await getLibraries();
+    setState(() {});
   }
 
   dynamic _gotoLogin(bool fg) {
@@ -161,7 +156,7 @@ class _BurlHomePageState extends State<BurlHomePage> {
 
   Future<bool> _handleLogout() async {
     BuildContext dcontext = context;
-    await util.postJsonOnly("/rest/logout");
+    await util.postJsonOnly("logout");
     globals.burlSession = null;
     if (dcontext.mounted) {
       widgets.gotoDirect(dcontext, BurlLogin());
@@ -184,7 +179,7 @@ class _BurlHomePageState extends State<BurlHomePage> {
     bool fg = await widgets.getValidation(context, msg);
     if (!fg) return false;
 
-    Map<String, dynamic> js = await util.postJson("rest/removeuser");
+    Map<String, dynamic> js = await util.postJson("removeuser");
     if (js['status'] == 'OK') {
       globals.burlSession = null;
       fg = true;

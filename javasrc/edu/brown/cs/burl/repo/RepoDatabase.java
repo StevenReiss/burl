@@ -111,6 +111,10 @@ RepoDatabase(BurlControl bc,BurlLibrary lib)
 {
    if (id == null) return null;
    
+   List<Number> rslt = burl_store.dataFieldSearch(this,"burl_id",id); 
+   
+   if (rslt.size() == 0) return null;
+   
    return new DatabaseRow(id);
 }
 

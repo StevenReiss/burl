@@ -604,7 +604,7 @@ private void setupHttp()
    
    if (host_name != null) {
       String hpfx = "https";
-      if (host_name.equals("localhost")) hpfx = "https";
+      if (host_name.equals("localhost")) hpfx = "http";
       host_prefix = hpfx + "://" + host_name;
     }
    
@@ -758,8 +758,11 @@ JSONObject createHttpPost(String urlcmd,JSONObject json,File file)
        }
     }
    catch (Exception e) {
+      IvyLog.logE("BURLCLI","Server is down.  Please try again later");
+      System.exit(1);
       IvyLog.logE("BURLCLI","Problem communicationg with server",e);
     }
+   
    
    return null;
 }
@@ -769,7 +772,8 @@ boolean checkResponse(JSONObject obj,String cmd)
 {
    String err = null;
    if (obj == null) {
-      err = "Problem with the server: no response";
+      IvyLog.logE("BURLCLI","Server is down.  Please try again later");
+      System.exit(1);
     }
    
    String sid = obj.optString("session");

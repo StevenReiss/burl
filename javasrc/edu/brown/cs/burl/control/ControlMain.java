@@ -34,6 +34,7 @@ import edu.brown.cs.burl.burl.BurlLibrary;
 import edu.brown.cs.burl.burl.BurlRepo;
 import edu.brown.cs.burl.burl.BurlRepoFactory;
 import edu.brown.cs.burl.burl.BurlUser;
+import edu.brown.cs.burl.burl.BurlUtil;
 import edu.brown.cs.burl.repo.RepoFactory;
 import edu.brown.cs.ivy.exec.IvyExecQuery;
 import edu.brown.cs.ivy.file.IvyLog;
@@ -214,14 +215,14 @@ private void setupProperties()
    String bd = base_properties.getProperty("baseDirectory");
    if (bd != null) base_directory = new File(bd);
    else {
-      base_directory = findBaseDirectory();
-      File f5 = new File(base_directory,"secret");
-      File f6 = new File(f5,"burl.props");
-      try (FileInputStream fis = new FileInputStream(f6)) {
-	 base_properties.loadFromXML(fis);
-       }
-      catch (IOException e) { } 
+      base_directory = BurlUtil.findBaseDirectory(); 
     }
+   File f5 = new File(base_directory,"secret");
+   File f6 = new File(f5,"burl.props");
+   try (FileInputStream fis = new FileInputStream(f6)) {
+      base_properties.loadFromXML(fis);
+    }
+   catch (IOException e) { } 
    
    File f1 = new File(System.getProperty("user.home"));
    File f2 = new File(f1,".config");
@@ -289,46 +290,6 @@ private boolean setUpdateMode()
 }
 
 
-/********************************************************************************/
-/*										*/
-/*	Find base directory							*/
-/*										*/
-
-/********************************************************************************/
-
-private File findBaseDirectory()
-{
-   File f1 = new File(System.getProperty("user.dir"));
-   for (File f2 = f1; f2 != null; f2 = f2.getParentFile()) {
-      if (isBaseDirectory(f2)) return f2;
-    }
-   File f3 = new File(System.getProperty("user.home"));
-   if (isBaseDirectory(f3)) return f3;
-   
-   File fc = new File("/vol");
-   File fd = new File(fc,"burl");
-   if (isBaseDirectory(fd)) return fd;
-   
-   File fa = new File("/pro");
-   File fb = new File(fa,"burl");
-   if (isBaseDirectory(fb)) return fb;
-   
-   return null;
-}
-
-
-private static boolean isBaseDirectory(File dir)
-{
-   File f2 = new File(dir,"secret");
-   if (!f2.exists()) return false;
-   File f2a = new File(dir,"resources");
-   File f3 = new File(f2a,"burl.props");
-   File f4 = new File(f2,"burl.props");
-   File f5 = new File(f2a,"fields.xml");
-   if (f3.exists() && f4.exists() && f5.exists()) return true;
-   
-   return false;
-}
 
 
 /********************************************************************************/
@@ -347,7 +308,7 @@ private void process()
    catch (BurlException e) {
       IvyLog.logE("BURL","Problem starting BURL server",e);
     }
-}
+} 
 
 
 
@@ -430,6 +391,10 @@ BurlBibEntry findBibEntry(String isbn)
    
    return bibentry_factory.findBibEntry(isbn);
 }
+
+
+
+
 
 
 

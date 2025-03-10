@@ -47,10 +47,8 @@ Future changePasswordDialog(BuildContext context) async {
       return;
     }
     var data = {'userpwd': util.hasher(p1)};
-    // need to get username and user email to encode the password here
-    // or we will send the password over clear text (using https is ok)
 
-    await util.postJsonOnly("/rest/changepassword", body: data);
+    await util.postJsonOnly("changepassword", body: data);
     if (dcontext.mounted) {
       Navigator.of(dcontext).pop("OK");
     }
@@ -70,7 +68,10 @@ Future changePasswordDialog(BuildContext context) async {
           children: <Widget>[
             const Text(
               "Change Password",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
             ),
             const SizedBox(height: 15),
             widgets.textFormField(
@@ -89,7 +90,11 @@ Future changePasswordDialog(BuildContext context) async {
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
-              children: [cancelBtn, const SizedBox(width: 15), acceptBtn],
+              children: [
+                cancelBtn,
+                const SizedBox(width: 15),
+                acceptBtn,
+              ],
             ),
           ],
         ),

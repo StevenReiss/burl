@@ -24,10 +24,12 @@ class BurlForgotPasswordWidget extends StatefulWidget {
   const BurlForgotPasswordWidget({super.key});
 
   @override
-  State<BurlForgotPasswordWidget> createState() => _BurlForgotPasswordWidgetState();
+  State<BurlForgotPasswordWidget> createState() =>
+      _BurlForgotPasswordWidgetState();
 }
 
-class _BurlForgotPasswordWidgetState extends State<BurlForgotPasswordWidget> {
+class _BurlForgotPasswordWidgetState
+    extends State<BurlForgotPasswordWidget> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String? _emailGiven;
 
@@ -59,7 +61,10 @@ class _BurlForgotPasswordWidgetState extends State<BurlForgotPasswordWidget> {
                     ),
                     const Padding(padding: EdgeInsets.all(16.0)),
                     Container(
-                      constraints: const BoxConstraints(minWidth: 100, maxWidth: 600),
+                      constraints: const BoxConstraints(
+                        minWidth: 100,
+                        maxWidth: 600,
+                      ),
                       width: MediaQuery.of(context).size.width * 0.8,
                       child: widgets.textFormField(
                         hint: "Email",
@@ -69,7 +74,10 @@ class _BurlForgotPasswordWidgetState extends State<BurlForgotPasswordWidget> {
                     ),
                     const Padding(padding: EdgeInsets.all(16.0)),
                     Container(
-                      constraints: const BoxConstraints(minWidth: 200, maxWidth: 350),
+                      constraints: const BoxConstraints(
+                        minWidth: 200,
+                        maxWidth: 350,
+                      ),
                       width: MediaQuery.of(context).size.width * 0.4,
                       child: widgets.submitButton(
                         "Request Password Email",
@@ -106,12 +114,15 @@ class _BurlForgotPasswordWidgetState extends State<BurlForgotPasswordWidget> {
   }
 
   void _gotoLogin() {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => const BurlLogin()));
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const BurlLogin()),
+    );
   }
 
   Future _forgotPassword() async {
     String em = (_emailGiven as String).toLowerCase();
     var body = {'email': em};
-    await util.postJsonOnly("/rest/forgotpassword", body: body);
+    await util.postJsonOnly("forgotpassword", body: body);
   }
 }

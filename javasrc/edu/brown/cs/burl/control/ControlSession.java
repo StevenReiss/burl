@@ -91,6 +91,7 @@ void setUser(ControlUser u)
    session_user = u;
    session_userid = (u == null ? null : u.getId());
 }
+
 void setUserId(Number uid) 
 {
    session_userid = uid;

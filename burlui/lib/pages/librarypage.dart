@@ -28,6 +28,7 @@ import 'changepassworddialog.dart';
 import 'addentriesdialog.dart';
 import 'adduserdialog.dart';
 import 'printlabelsdialog.dart';
+import '../lookandfeel.dart' as laf;
 
 const String defaultSort = "<DEFAULT>";
 
@@ -148,6 +149,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
             ),
           ],
         ),
+        Divider(height: 8, thickness: 8, color: laf.topLevelBackground),
         widgets.fieldSeparator(),
         Expanded(
           child: ListView.separated(
@@ -351,7 +353,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
 
   void _logout() async {
     BuildContext dcontext = context;
-    await util.postJsonOnly("/rest/logout");
+    await util.postJsonOnly("logout");
     globals.burlSession = null;
     if (dcontext.mounted) {
       widgets.gotoDirect(dcontext, BurlLogin());
@@ -412,6 +414,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     _itemList.clear();
     _numItems = 0;
     _maxRead = 0;
+    _scrollext = 0;
     //  _scrollController.jumpTo(_scrollController.initialScrollOffset);
     Map<String, String?> data = {
       "library": _libData.getLibraryId().toString(),
@@ -597,7 +600,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
       "library": _libData.getLibraryId().toString(),
       "entry": id.toString(),
     };
-    Map<String, dynamic> itemrslt = await util.getJson(
+    Map<String, dynamic> itemrslt = await util.postJson(
       "getentry",
       body: data,
     );

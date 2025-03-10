@@ -180,7 +180,7 @@ private boolean sendRegistrationEmail(HttpExchange he,ControlSession session,
 {
    String pfx = burl_main.getUrlPrefix(); 
    // need to get host from he
-   String msg = "Thank you for registering with iQsign.\n";
+   String msg = "Thank you for registering with BURL.\n";
    msg += "To complete the reqistration process, please click on or paste the link:\n";
    msg += "   " + pfx + "/validate?";
    msg += "email=" + BurlUtil.encodeURIComponent(email);
@@ -189,7 +189,7 @@ private boolean sendRegistrationEmail(HttpExchange he,ControlSession session,
    
    IvyLog.logD("BURL","SEND EMAIL to " + email + " " + msg);
    
-   boolean sts = BurlUtil.sendEmail(email,"Verify your Email for iQsign",msg); 
+   boolean sts = BurlUtil.sendEmail(email,"Verify your Email for BURL",msg); 
    
    return sts;
 } 
@@ -215,8 +215,8 @@ String handleValidationRequest(HttpExchange he,ControlSession session)
    
    String result = "<html>" +
    "<p>Thank you for validating your email. </p> " + 
-   "<p>You should be able to log into iQsign now.</p>" +
-   "<p>WELCOME to iQsign !!!</p>" +
+   "<p>You should be able to log into BURL now.</p>" +
+   "<p>WELCOME to BURL !!!</p>" +
    "</html>";
    
    return result;
@@ -262,7 +262,7 @@ String handleAuthentication(HttpExchange he,ControlSession session)
             "Unauthorized");
     }
    
-   return null;
+   return null; 
 }
 
 
@@ -310,12 +310,14 @@ String handleForgotPassword(HttpExchange he,ControlSession session)
 String handleChangePassword(HttpExchange he,ControlSession session)
 {
    Number uid = session.getUserId();
-   String pwd = BowerRouter.getParameter(he,"password");
+   String pwd = BowerRouter.getParameter(he,"userpwd");
    
    ControlUser user = burl_store.findUserById(uid);
    if (user == null) {
       return BowerRouter.errorResponse(he,session,402,"Bad user");
     }
+   String salt = user.getSalt();
+   pwd = BurlUtil.secureHash(pwd + salt);
    
    burl_store.updatePassword(uid,pwd);  
    

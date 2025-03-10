@@ -17,6 +17,9 @@
 
 package edu.brown.cs.burl.repo;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import edu.brown.cs.burl.burl.BurlFieldData;
 import edu.brown.cs.burl.burl.BurlRepoColumn;
 import edu.brown.cs.burl.burl.BurlUtil;
@@ -34,6 +37,10 @@ class RepoColumn implements BurlRepoColumn, RepoConstants
 private String  column_name;
 private int     column_number;
 private BurlFieldData field_data;
+
+private static final Pattern PRE_ZERO = Pattern.compile("[A-Za-z](0+)[1-9]");
+private static final Pattern POST_ZERO = Pattern.compile(".[0-9]*[1-9](0+)[ .,A-Z]");
+
 
 
 /********************************************************************************/
@@ -185,46 +192,26 @@ RepoColumn(String name,int no,BurlFieldData fd)
 
 
 
-private String fixLccCode(String code)
+static String fixLccCode(String code)
 {
    if (code == null) return null;
    if (!code.contains("00")) return code;
    
    code = code.replace("-","");
-   int idx2 = -1;
-   boolean pre = false;
-   boolean havenum = false;
-   
-   for (int i = 0; i < code.length(); ++i) {
-      char c = code.charAt(i);
-      if (c == '0') {
-         if (idx2 < 0) {
-            idx2 = i;
-            if (!havenum) pre = true;
-            else pre = false;
-          }
-         continue;
-       }
-      else {
-         if (Character.isDigit(c)) {
-            if (!pre && idx2 >= 0) idx2 = -1;
-            havenum = true;
-          }
-         else {
-            if (havenum && idx2 >= 0 && !pre) idx2 = -1;
-          }
-         if (idx2 >= 0) {
-            String ncode = code.substring(0,idx2);
-            ncode += code.substring(i);
-            code = ncode;
-            int len = (i-idx2);
-            i -= len;
-          }
-         idx2 = -1;
-         if (havenum && Character.isWhitespace(c)) {
-            havenum = false;
-          }
-       }
+
+   for ( ; ; ) {
+      Matcher m = PRE_ZERO.matcher(code);
+      if (!m.find()) break;
+      int start = m.start(1);
+      int end = m.end(1);
+      code = code.substring(0,start) + code.substring(end);
+    }
+   for ( ; ; ) {
+      Matcher m = POST_ZERO.matcher(code);
+      if (!m.find()) break;
+      int start = m.start(1);
+      int end = m.end(1);
+      code = code.substring(0,start) + code.substring(end);
     }
    
    return code;

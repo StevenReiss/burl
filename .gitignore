@@ -56,6 +56,7 @@ test/*
 burl.jar
 test.*
 **/burl.jar
+**/~*
 
 # Ignore Gradle project-specific cache directory
 .gradle

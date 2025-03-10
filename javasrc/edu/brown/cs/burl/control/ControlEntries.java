@@ -307,6 +307,9 @@ String handleRemoveEntry(HttpExchange he,ControlSession session)
    if (row == null) {
       return BowerRouter.errorResponse(he,session,400,"Bad entity");
     }
+   if (user == null) {
+      return BowerRouter.errorResponse(he,session,400,"Bad user");
+    }
    BurlUserAccess acc = burl_store.getUserAccess(user.getEmail(),libid);
    switch (acc) {
       case LIBRARIAN :

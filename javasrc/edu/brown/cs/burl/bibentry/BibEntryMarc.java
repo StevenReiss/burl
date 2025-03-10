@@ -18,14 +18,17 @@
 package edu.brown.cs.burl.bibentry;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.w3c.dom.Element;
 
 import edu.brown.cs.burl.burl.BurlRepoColumn;
+import edu.brown.cs.ivy.file.Pair;
 import edu.brown.cs.ivy.xml.IvyXml;
 
 class BibEntryMarc extends BibEntryBase
@@ -75,7 +78,8 @@ public String computeEntry(BurlRepoColumn brc)
       if (code.length() < 4) continue;
       
       String tag = code.substring(0,3);
-      String addall = "";               // set to null to use old method
+      String addall = "";              
+      Map<String,String> additems = new HashMap<>();
       
       int idx = 3;
       for ( ; idx < code.length(); ++idx) {
@@ -86,17 +90,30 @@ public String computeEntry(BurlRepoColumn brc)
        }
       
       Set<String> subs = new HashSet<>();
+      String additem = null;
       for (int i = idx; i < code.length(); ++i) {
          char chk = code.charAt(i);
          if (Character.isJavaIdentifierPart(chk)) {
-            subs.add(code.substring(i,i+1));
+            String what = String.valueOf(chk);
+            if (additem != null) additems.put(what,additem);
+            subs.add(what);
+            additem = null;
+          }
+         else {
+            if (additem == null) additem = String.valueOf(chk);
+            else additem = additem + String.valueOf(chk);
           }
        }
-      List<List<String>> vals = getOrderedSubfields(tag,subs);
-      for (List<String> ents : vals) {
+      List<List<Pair<String,String>>> vals = getOrderedSubfields(tag,subs);
+      for (List<Pair<String,String>> ents : vals) {
          StringBuffer buf = new StringBuffer();
-         for (String val : ents) {
-            if (!buf.isEmpty() && addall != null) buf.append(addall);
+         for (Pair<String,String> pair : ents) {
+            String val = pair.getElement1();
+            String cod = pair.getElement0();
+            String add = additems.get(cod);
+            if (add == null) add = addall;
+            if (val.isEmpty()) continue;
+            if (!buf.isEmpty() && add != null) buf.append(add);
             buf.append(val);
           }
          if (!buf.isEmpty()) items.add(buf.toString());
@@ -131,20 +148,20 @@ public String computeEntry(BurlRepoColumn brc)
 
 
 
-List<List<String>> getOrderedSubfields(String tag,Set<String> use)
+List<List<Pair<String,String>>> getOrderedSubfields(String tag,Set<String> use)
 {
    if (tag == null) return null;
    
-   List<List<String>> rslt = new ArrayList<>();
+   List<List<Pair<String,String>>> rslt = new ArrayList<>();
    
    for (Element datafield : IvyXml.children(marc_xml,"datafield")) {
       if (tag.equals(IvyXml.getAttrString(datafield,"tag"))) {
-         List<String> tags = new ArrayList<>();
+         List<Pair<String,String>> tags = new ArrayList<>();
          for (Element subfld : IvyXml.children(datafield,"subfield")) {
             String code = IvyXml.getAttrString(subfld,"code");
             if (use == null || use.contains(code)) {
                String val = IvyXml.getText(subfld);
-               tags.add(val);
+               tags.add(Pair.createPair(code,val));
              }
           }
          rslt.add(tags);

@@ -258,8 +258,8 @@ ControlStorage(ControlMain ctrl)
 
 @Override public void updatePassword(Number uid,String pwd)
 { 
-   String q1 = "UPDATE iQsignUsers SET password = $1, " +
-      " temppassword = NULL " +
+   String q1 = "UPDATE BurlUsers SET password = $1, " +
+      " temp_password = NULL " +
       "WHERE id = $2";
    sqlUpdate(q1,pwd,uid);
 }
@@ -337,8 +337,8 @@ ControlStorage(ControlMain ctrl)
    String q1 = "DELETE FROM BurlUserAccess WHERE libraryid = $1";
    String q2 = "DELETE FROM BurlLibraries WHERE id = $1";
    
-   sqlUpdate(q1);
-   sqlUpdate(q2);
+   sqlUpdate(q1,lid);
+   sqlUpdate(q2,lid);
 }
 
 
@@ -495,7 +495,7 @@ ControlSession checkSession(BowerSessionStore<ControlSession> bss,String sid)
 }
 
 
-@Override public List<Number> dataFieldSearch(BurlRepo repo,String fld,String val)
+@Override public List<Number> dataFieldSearch(BurlRepo repo,String fld,Object val) 
 {
    List<Number> ids = new ArrayList<>();
    String kname = repo.getNameKey(); 

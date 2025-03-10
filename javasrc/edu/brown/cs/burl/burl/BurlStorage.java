@@ -176,7 +176,7 @@ void removeDataTable(BurlRepo repo);
  *      Look for all ids where the field has a given value
  **/
 
-List<Number> dataFieldSearch(BurlRepo repo,String field,String value);
+List<Number> dataFieldSearch(BurlRepo repo,String field,Object value);
 
 
 /**

@@ -227,6 +227,8 @@ String handleAddLibraryUser(HttpExchange he,ControlSession session)
    if (!BowerUtil.validateEmail(email)) {
       return BowerRouter.errorResponse(he,session,400,"Bad email");
     }
+   email = email.toLowerCase();
+   
    BurlUserAccess acc = BowerRouter.getEnumParameter(he,"access",BurlUserAccess.NONE);
    Number libid = getIdParameter(he,"library");
    if (libid == null) {
@@ -234,7 +236,10 @@ String handleAddLibraryUser(HttpExchange he,ControlSession session)
     }
    BurlUserAccess useracc = validateLibrary(session,libid);
    
-   if (user.getEmail() == email && acc == BurlUserAccess.NONE) useracc = BurlUserAccess.LIBRARIAN;
+   if (user.getEmail() == email && acc == BurlUserAccess.NONE) {
+      // always allow user to remove themselves
+      useracc = BurlUserAccess.LIBRARIAN;
+    }
    
    switch (useracc) {
       case NONE :
@@ -242,12 +247,30 @@ String handleAddLibraryUser(HttpExchange he,ControlSession session)
       case EDITOR :
          return BowerRouter.errorResponse(he,session,402,"Not authorized");
       case OWNER :
+         // might want to not remove the only owner of a library here
       case LIBRARIAN :
          break; 
     }
    
+   ControlLibrary lib = burl_store.findLibraryById(libid);
+   if (lib == null) {
+      return BowerRouter.errorResponse(he,session,400,"Bad library");
+    }
+   
+   BurlUserAccess oldacc = burl_store.getUserAccess(email,libid);
+   
    burl_store.setUserAccess(email,libid,acc);
    
+   if (oldacc == BurlUserAccess.NONE && acc != BurlUserAccess.NONE) {
+      String an = "a ";
+      if (acc == BurlUserAccess.OWNER) an = "an ";
+      String body = "You have been invited to access the library " + lib.getName() +
+         " by " + user.getEmail() + " as " + an + acc + ".\n" +
+         "If you haven't already, please register with BURL (" + 
+         burl_main.getUrlPrefix() + ").\n";
+      BurlUtil.sendEmail(email,"BURL Library Invitation",body);
+    }
+      
    return BowerRouter.jsonOKResponse(session);
 }
 

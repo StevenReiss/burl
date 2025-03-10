@@ -33,6 +33,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -70,6 +72,9 @@ private Map<String,Number> isbn_lccn_map;
 private static BurlFieldData field_data;
 
 private static final String [] EMPTY_STRINGS = new String [0];
+
+private static final Pattern LCC_ELEMENT = Pattern.compile(
+      "(([A-Za-z]+)([0-9]+)(\\.[0-9]+)?)|([0-9]{4})");
 
 
       
@@ -305,6 +310,7 @@ protected static String getMultiplePattern()
    for (BurlRepoColumn brc : repo_columns) {
       String v = brr.getData(brc);
       BurlIsbnType isbntype = brc.getIsbnType();
+      boolean islccn = brc.isLccnField();
       if (isbntype == BurlIsbnType.ORIGINAL) {
          if (visbn != null && (v == null || v.isEmpty())) {
             brr.setData(brc,visbn);
@@ -325,7 +331,7 @@ protected static String getMultiplePattern()
       else if (bib != null) {
          switch (updmode) {
             case AUGMENT :
-               if (isbntype == BurlIsbnType.NONE) {
+               if (isbntype == BurlIsbnType.NONE && !islccn) {
                   if (v != null && !v.isEmpty()) continue; 
                 }
                break;
@@ -458,6 +464,7 @@ private static void addIsbn(String isbn,int len,Set<String> rslt)
    
    String isbn = BurlUtil.getValidISBN(idno);
    String lccn = BurlUtil.getValidLCCN(idno);
+   if (isbn != null) lccn = null;
    
    for (BurlRepoColumn brc : getColumns()) {
       String dflt = brc.getDefault();
@@ -590,9 +597,11 @@ JSONObject getJsonForRow(BurlRepoRow rr)
           }
        }
       else if (brc.isMultiple()) {
-         String [] items = v.split(field_data.getMultiplePattern());
          JSONArray arr = new JSONArray();
-         arr.putAll(items);
+         if (v != null) {
+            String [] items = v.split(field_data.getMultiplePattern());
+            arr.putAll(items);
+          }
          value = arr;
        }
       result.put(brc.getName(),value);
@@ -877,12 +886,12 @@ private class ImportJsonEntry implements BurlBibEntry {
       if (flg != null && flg.equals("yes")) continue;
        
       String code = findLabelData(lbldata,"CODE",brr);
-      String author = findLabelData(lbldata,"AUTHOR",brr);
       if (code == null) {
          IvyLog.logI("REPO","Missing code field: no label printed");
          continue;
-       }
-      
+       } 
+      code = RepoColumn.fixLccCode(code); 
+      String author = findLabelData(lbldata,"AUTHOR",brr);
       if (author == null) author = "";
       int idx = author.indexOf(field_data.getMultiple());
       if (idx >= 0) {
@@ -890,61 +899,30 @@ private class ImportJsonEntry implements BurlBibEntry {
        }
       idx = author.indexOf(",");
       if (idx > 0) author = author.substring(0,idx);
-      author = author.trim();
-      idx = author.indexOf(" ");
-      if (idx > 0) author = author.substring(idx+1).trim();
-      if (author.length() > 3) author = author.substring(0,3);
+      if (author.length() > 12) author = author.substring(0,12);
+      author = fixUnicode(author);
       
-      String code1 = code.trim();
-      String code2 = "";
-      int idx4 = code.indexOf(" ");
-      int idx5 = code.indexOf(".");
-      int idx6 = -1;
-      if (idx5 >= 0) idx6 = code.indexOf(".",idx5+1);
-      if (idx6 < idx4) idx4 = idx6;
-      if (idx4 > 0) {
-         code2 = code.substring(idx4+1).trim();
-         if (code2.startsWith(".")) code2 = code2.substring(1).trim();
-         code = code.substring(0,idx4).trim();
-       }
-      if (code1.length() > 12) {
-         int idx1 = code1.lastIndexOf(" ",12);
-         int idx2 = code1.lastIndexOf(".",12);
-         int idx3 = code1.lastIndexOf("-",12);
-         int sidx = 0;
-         if (idx1 > 0 && idx1 > sidx) sidx = idx1;
-         if (idx2 > 0 && idx2 > sidx) sidx = idx2;
-         if (idx3 > 0 && idx3 > sidx) sidx = idx3;
-         code1 = code.substring(0,sidx);
-         if (code2.isEmpty()) code2 = code.substring(sidx+1).trim();
-         else code2 = code2 + " " + code.substring(sidx+1).trim();
-       }
-      if (code2.length() > 12) {
-         int idx7 = code1.lastIndexOf(" ",12);
-         int idx8 = code1.lastIndexOf(".",12);
-         int idx9 = code1.lastIndexOf("-",12);
-         idx7 = Math.max(idx7,idx8);
-         idx7 = Math.max(idx7,idx9);
-         if (idx7 < 0) idx7 = 12;
-         code2 = code2.substring(0,idx7);
-       }
+      List<String> items = getLabelElements(code);
       
-      cntidx = insertLabelText(cnts,cntidx,"aaaaaaaaaaaa",code1);
+      cntidx = insertLabelText(cnts,cntidx,"nnnnnnnnnnnn",items.get(0));
       if (cntidx < 0) {
-         more = true;
+         more = false;
          break;
        }
-      cntidx = insertLabelText(cnts,cntidx,"bbbbbbbbbbbb",code2);
-      cntidx = insertLabelText(cnts,cntidx,"CCC",author);
+      cntidx = insertLabelText(cnts,cntidx,"cccccccccccc",items.get(1));
+      cntidx = insertLabelText(cnts,cntidx,"yyyy",items.get(2));
+      cntidx = insertLabelText(cnts,cntidx,"aaaaaaaaaaaa",author);
+
       done.add(id);
     }
    
    if (!more) {
       for ( ; ; ) {
-         cntidx = insertLabelText(cnts,cntidx,"aaaaaaaaaaaa","");
+         cntidx = insertLabelText(cnts,cntidx,"nnnnnnnnnnnn","");
          if (cntidx < 0) break;
-         cntidx = insertLabelText(cnts,cntidx,"bbbbbbbbbbbb","");
-         cntidx = insertLabelText(cnts,cntidx,"CCC","");
+         cntidx = insertLabelText(cnts,cntidx,"cccccccccccc","");
+         cntidx = insertLabelText(cnts,cntidx,"yyyy","");
+         cntidx = insertLabelText(cnts,cntidx,"aaaaaaaaaaaa","");
        }
     }
    
@@ -963,6 +941,87 @@ private class ImportJsonEntry implements BurlBibEntry {
     }
 
    return more;
+}
+
+
+
+private String fixUnicode(String s) 
+{
+   if (s == null || s.isEmpty()) return s;
+   StringBuffer buf = new StringBuffer();
+   
+   s.codePoints().forEach((ch) -> {
+      if (ch > 127) {
+         buf.append("\\u" + ch + "?");
+       }
+      else buf.append((char) ch);
+    });
+   
+   if (buf.length() == s.length()) return s;
+   
+   return buf.toString();
+}
+
+
+List<String> getLabelElements(String lcc)
+{
+   List<String> lcclets = getLccElements(lcc);
+   List<String> rslt = new ArrayList<>();
+   if (lcclets.isEmpty()) {
+      rslt.add("");
+    }
+   else {
+      rslt.add(lcclets.remove(0));
+    }
+   
+   String year = "";
+   String add = "";
+   while (!lcclets.isEmpty()) {
+      String l0 = lcclets.remove(0);
+      if (Character.isDigit(l0.charAt(0))) {
+         year = l0;
+         break;
+       }
+      if (add.isEmpty()) add = l0;
+      else {
+         if (add.length() + 1 + l0.length() > 12) continue;
+         else add = add + " " + l0;
+       }
+    }
+   rslt.add(add);
+   rslt.add(year);
+   
+   return rslt;
+}
+
+List<String> getLccElements(String lcc)
+{
+   List<String> rslt = new ArrayList<>();
+   if (lcc == null) return rslt;
+   lcc = lcc.trim();
+   
+   Matcher m = LCC_ELEMENT.matcher(lcc);
+   
+   while (m.find()) {
+      String x = m.group(0);
+      String x5 = m.group(5);
+      if (x5 != null && x5.isEmpty()) x5 = null;
+      if (x.contains("00") && x5 == null) {
+         String x0 = m.group(1);
+         String x1 = m.group(3);
+         String x2 = m.group(4);
+         while (x1.startsWith("0")) x1 = x1.substring(1);
+         while (x2 != null && x2.endsWith("0")) x2 = x2.substring(0,x2.length()-1);
+         if (x2 != null && x2.equals(".")) x2 = null;
+         if (x2 == null) x2 = "";
+         x = x0 + x1 + x2;
+       }
+      if (x.length() >= 12) x = x.substring(0,12);
+      rslt.add(x);
+      if (x5 != null) break; 
+    }
+   
+   return rslt;
 }
 
 
@@ -989,7 +1048,7 @@ private int insertLabelText(StringBuffer buf,int start,String pat,String rep)
    int len = pat.length();
    buf.replace(idx,idx+len,rep);
    
-   return start + rep.length() - 1;
+   return idx + rep.length() - 1;
 }
 
 
