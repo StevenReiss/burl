@@ -16,11 +16,15 @@ endif
 
 git push
 
+ssh sherpa.cs.brown.edu mkdir /vol/burl
+
 ssh sherpa.cs.brown.edu '(cd /vol/burl; git pull)'
 if ($status > 0) exit;
 
-scp burlui/assets/*.html sherpa.cs.brown.edu:/vol/web/html/burl
+# scp burlui/assets/*.html sherpa.cs.brown.edu:/vol/web/html/burl
 scp burlui/assets/images/*.png sherpa.cs.brown.edu:/vol/web/html/burl/images
+
+
 
 set ivylib = ( ivy.jar postgresql.jar mysql.jar json.jar jakarta.mail.jar jakarta.activation.jar \
       slf4j-api.jar junit.jar jsoup.jar mongojava.jar  )
@@ -29,6 +33,7 @@ foreach i ( $ivylib )
 end
 
 
+ssh sherpa.cs.brown.edu mkdir /vol/burl/secret
 pushd secret
 update.csh
 popd
@@ -41,4 +46,95 @@ echo start server here
 pushd burlui
 echo buildweb here
 popd
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
