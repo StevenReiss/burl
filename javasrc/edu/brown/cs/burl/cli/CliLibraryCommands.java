@@ -25,7 +25,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.TreeMap;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -122,8 +124,9 @@ void handleSetLibrary(List<String> args)
    
    if (name == null) name = cli_main.getDefaultLibrary();
    
-   String libnm = findLibrary(name);
-   if (libnm != null) {
+   JSONObject libobj = findLibrary(name);
+   if (libobj != null) {
+      String libnm = libobj.getString("name");
       IvyLog.logI("BURLCLI","Library set to " + libnm);
     }
    else {
@@ -133,7 +136,7 @@ void handleSetLibrary(List<String> args)
 
 
 
-String findLibrary(String name)
+JSONObject findLibrary(String name)
 {
    if (!cli_main.isLoggedIn()) return null;
    
@@ -162,7 +165,7 @@ String findLibrary(String name)
          Number lid = lib.getNumber("id");
          cli_main.setLibraryId(lid);
          cli_main.setDefaultLibrary(libnm); 
-         return libnm;
+         return lib;
        }
     }
    
@@ -224,8 +227,9 @@ void handleNewLibrary(List<String> args)
    JSONObject rslt = cli_main.createHttpPost("createlibrary",data);
    if (cli_main.checkResponse(rslt,"library creation")) {
       IvyLog.logI("BURLCLI","Library " + libname + " created");
-      String libnm = findLibrary(libname);
-      if (libnm != null) {
+      JSONObject libobj = findLibrary(libname);
+      if (libobj != null) {
+         String libnm = libobj.getString("name");
          IvyLog.logI("BURLCLI","Library set to " + libnm);
        }
     }
@@ -301,6 +305,70 @@ private void badAddUserArgs()
    IvyLog.logI("BURLCLI",
          "adduser email [-librarian|-none|-viewer|-editor|-owner|-senior|-admin]");
 }
+
+
+
+/********************************************************************************/
+/*                                                                              */
+/*      List library users                                                      */
+/*                                                                              */
+/********************************************************************************/
+
+void handleListUsers(List<String> args) 
+{
+   if (args.size() > 0) {
+      badListUsersArgs();
+      return;
+    }
+   
+   Number lid = cli_main.getLibraryId();
+   if (lid == null || !cli_main.isLoggedIn()) {
+      badListUsersArgs();
+      return;
+    }
+   
+   JSONObject libs = cli_main.createHttpPost("findlibraries",null);
+   
+   if (!cli_main.checkResponse(libs,null)) {
+      badListUsersArgs();
+      return;
+    }
+   
+   JSONObject libobj = findLibrary(lid.toString());
+   if (libobj == null) {
+      badListUsersArgs();
+      return;
+    }
+
+   Map<String,String> users = new TreeMap<>();
+   addUsers(libobj,"OWNER    ","owner",users);
+   addUsers(libobj,"LIBRARIAN","librarian",users);
+   addUsers(libobj,"EDITOR   ","editor",users);
+   addUsers(libobj,"VIEWER   ","viewer",users);
+   
+   for (Map.Entry<String,String> ent : users.entrySet()) {
+      IvyLog.logI("BURLCLI","   " + ent.getValue() + "  " + ent.getKey());
+    }
+}
+
+
+private void addUsers(JSONObject obj,String id,String fld,Map<String,String> users)
+{
+   String us = obj.optString(fld);
+   if (us == null || us.isEmpty()) return;
+   for (StringTokenizer tok = new StringTokenizer(us); tok.hasMoreTokens(); ) {
+      String u = tok.nextToken();
+      users.put(u,id);
+    }
+}
+
+
+private void badListUsersArgs()
+{
+   IvyLog.logI("BURLCLI","users");
+}
+
+
 
 
 /********************************************************************************/

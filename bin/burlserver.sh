@@ -14,7 +14,16 @@ else
 fi
 
 CP=$LIB/jakarta.mail.jar:$LIB/jakarta.activation.jar:$SRD1/burl.jar
+echo java -cp $CP edu.brown.cs.burl.burl.BurlMain -L burlserver.log -S -LD
 java -cp $CP edu.brown.cs.burl.burl.BurlMain -L burlserver.log -S -LD
+
+
+
+
+
+
+
+
 
 
 

@@ -480,6 +480,11 @@ private void processCommand(String cmd,List<String> args)
             lib_commands.handleAddLibraryUser(args);
           } 
          break;
+      case "users" :
+         if (checkLibrary(cmd)) {
+            lib_commands.handleListUsers(args);
+          } 
+         break;
       case "newlibrary" :
          if (checkLoggedIn(cmd)) {
             lib_commands.handleNewLibrary(args);
@@ -564,6 +569,7 @@ private void showValidCommands()
    IvyLog.logI("BURLCLI","   list:          list available libraries"); 
    IvyLog.logI("BURLCLI","   library:       set current library"); 
    IvyLog.logI("BURLCLI","   adduser:       add a new user to current library"); 
+   IvyLog.logI("BURLCLI","   users:         list all users of the current library");
    IvyLog.logI("BURLCLI","   newlibrary:    create a new library"); 
    IvyLog.logI("BURLCLI","   export:        export the current library as CSV or JSON"); 
    IvyLog.logI("BURLCLI","   labels:        print the next set of labels"); 
@@ -662,9 +668,9 @@ void autoSetLibrary()
 {
    if (!logged_in) return;
    
-   String libnm = lib_commands.findLibrary(library_name);
-   
-   if (libnm != null) {
+   JSONObject libobj = lib_commands.findLibrary(library_name);
+   if (libobj != null) {
+      String libnm = libobj.getString("name");
       IvyLog.logI("BURLCLI","Library set to " + libnm);
     }
 }
