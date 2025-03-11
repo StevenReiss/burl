@@ -60,7 +60,7 @@ ControlSession(BowerSessionStore<ControlSession> bss)
 }
 
 
-ControlSession(BowerSessionStore<ControlSession> bss,JSONObject data)
+ControlSession(BowerSessionStore<ControlSession> bss,String sid,JSONObject data)
 {
    session_store = bss;
    session_user = null;
@@ -69,6 +69,7 @@ ControlSession(BowerSessionStore<ControlSession> bss,JSONObject data)
    last_time = data.optLong("last_time");
    session_code = data.optString("code",null);
    create_time = data.optLong("creation_time");
+   setSessionId(sid);
 }
 
 

@@ -86,14 +86,11 @@ public BurlBibEntry findBibEntry(String idno)
    if (bibentry == null&& isbn != null) {
       bibentry = congressSearch(isbn);
     }
-   if (bibentry == null && altisbn != null) {
-      bibentry = congressSearch(altisbn);
+   if (bibentry == null && lccn != null && isbn == null) {
+      bibentry = congressSearch(lccn);
     }
    if (bibentry == null && isbn != null) {
       bibentry = openLibrarySearch(isbn);
-    }
-   if (bibentry == null && altisbn != null) {
-      bibentry = openLibrarySearch(altisbn);
     }
    if (bibentry == null && isbn != null) {
       bibentry = googleSearch(isbn);
@@ -101,8 +98,8 @@ public BurlBibEntry findBibEntry(String idno)
    if (bibentry == null && altisbn != null) {
       bibentry = googleSearch(altisbn);
     }
-   if (bibentry == null && lccn != null) {
-      bibentry = congressSearch(lccn);
+   if (bibentry == null && altisbn != null) {
+      bibentry = openLibrarySearch(altisbn);
     }
    
    return bibentry;
@@ -345,8 +342,10 @@ private BibEntryBase searchForMarcItemXml(String isbn,String url)
          if (rcode >= 400) return null;
          if (body.contains("<!DOCTYPE html>")) {
             IvyLog.logD("BIBENTRY","Waiting for MARC server");
-            IvyLog.logD("RESULT:\n" + body);
-            waitFor(60);
+            if (!body.contains("No Connections Available")) {
+               IvyLog.logD("RESULT:\n" + body);
+             }
+            waitFor(110);
             continue;
           }
          Element xml = IvyXml.convertStringToXml(body);

@@ -481,7 +481,6 @@ private void processCommand(String cmd,List<String> args)
           } 
          break;
       case "newlibrary" :
-      case "newlib" :
          if (checkLoggedIn(cmd)) {
             lib_commands.handleNewLibrary(args);
           }
@@ -492,7 +491,6 @@ private void processCommand(String cmd,List<String> args)
           }
          break;
       case "labels" :
-      case "label" :
          if (checkLibrary(cmd)) {
             lib_commands.handlePrintLabels(args); 
           }
@@ -502,7 +500,6 @@ private void processCommand(String cmd,List<String> args)
             lib_commands.handleRemoveLibrary(args);
           }
          break;
-      case "addisbns" :
       case "add" :
          if (checkLibrary(cmd)) {
             lib_commands.handleAddIsbns(args);
@@ -542,11 +539,43 @@ private void processCommand(String cmd,List<String> args)
          // handle ping
          break;
          
+      case "help" :
+         showValidCommands();
+         break;
+         
       default :
          IvyLog.logE("BURLCLI","Invalid command " + cmd);
+         showValidCommands();
          break;
     }
+}
 
+
+private void showValidCommands()
+{
+   IvyLog.logI("BURLCLI","Valid commands include:");
+   IvyLog.logI("BURLCLI","   register:      register a new user (reg)");
+   IvyLog.logI("BURLCLI","   login:         log in to BURL"); 
+   IvyLog.logI("BURLCLI","   logout:        log out"); 
+   IvyLog.logI("BURLCLI","   forgot:        send forgot password email"); 
+   IvyLog.logI("BURLCLI","   password:      change password"); 
+// IvyLog.logI("BURLCLI","   validate:      validate user based on emailed key"); 
+   IvyLog.logI("BURLCLI","   removeuser:    unregister from BURL"); 
+   IvyLog.logI("BURLCLI","   list:          list available libraries"); 
+   IvyLog.logI("BURLCLI","   library:       set current library"); 
+   IvyLog.logI("BURLCLI","   adduser:       add a new user to current library"); 
+   IvyLog.logI("BURLCLI","   newlibrary:    create a new library"); 
+   IvyLog.logI("BURLCLI","   export:        export the current library as CSV or JSON"); 
+   IvyLog.logI("BURLCLI","   labels:        print the next set of labels"); 
+   IvyLog.logI("BURLCLI","   removelibrary: remove/delete the current library");  
+   IvyLog.logI("BURLCLI","   add:           add entries to current library by ISBN or LCCN"); 
+   IvyLog.logI("BURLCLI","   import:        import entry data from CSV or JSON"); 
+   IvyLog.logI("BURLCLI","   find:          search library for entries"); 
+   IvyLog.logI("BURLCLI","   entry:         set current entry");
+   IvyLog.logI("BURLCLI","   edit:          edit fields of the current entry"); 
+   IvyLog.logI("BURLCLI","   removeentry:   remove the current entry");
+   IvyLog.logI("BURLCLI","   exit:          Exit from BURLCLI"); 
+   IvyLog.logI("BURLCLI","   help:          Print this information"); 
 }
 
 

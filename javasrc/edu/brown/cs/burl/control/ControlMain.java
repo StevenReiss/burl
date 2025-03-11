@@ -307,6 +307,7 @@ private void process()
     }
    catch (BurlException e) {
       IvyLog.logE("BURL","Problem starting BURL server",e);
+      System.exit(1);
     }
 } 
 

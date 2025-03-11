@@ -434,7 +434,7 @@ ControlSession checkSession(BowerSessionStore<ControlSession> bss,String sid)
       long now = System.currentTimeMillis();
       long lupt = json.getLong("last_used");
       if (now - lupt <= SESSION_TIMEOUT) { 
-	 ControlSession bs = new ControlSession(bss,json);
+	 ControlSession bs = new ControlSession(bss,sid,json); 
 	 return bs;
        }
     }
