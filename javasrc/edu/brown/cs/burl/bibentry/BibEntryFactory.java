@@ -141,33 +141,39 @@ private BibEntryLOCResult searchForLOCInfo(String isbn)
    HttpRequest.Builder builder = createHttpBuilder(LOC_API_BASE_URL,"q",isbn);
    builder.GET();
    HttpRequest req = builder.build();
+   
    try {
-      HttpResponse<String> resp = client.send(req,
-            HttpResponse.BodyHandlers.ofString());
-      String body = resp.body();
-      int vcode = resp.statusCode();
-      if (vcode == 429) {
-         IvyLog.logE("BIBENTRY","RATE LIMITED");
-         return null;
+      for ( ; ; ) {
+         try {
+            HttpResponse<String> resp = client.send(req,
+                  HttpResponse.BodyHandlers.ofString());
+            String body = resp.body();
+            int vcode = resp.statusCode();
+            if (vcode == 429 || vcode == 503) {
+               IvyLog.logE("BIBENTRY","Waiting for LOC server " + vcode);
+               waitFor(60);
+               continue;
+             }
+            else if (vcode >= 400) {
+               IvyLog.logE("BIBENTRY","Problem doing LOC search for " + req.uri() +
+                     ": " + vcode + " " + body);
+               break;
+             }
+            JSONObject rslt0 = new JSONObject(body);
+            return new BibEntryLOCResult(rslt0); 
+          }
+         catch (InterruptedException e) { 
+            IvyLog.logE("BIBENTRY","HTTP interrupted searching Library of Congress",e);
+            continue;
+          }
+         catch (IOException e) {
+            IvyLog.logE("BIBENTRY","HTTP Error searching Library of Congress",e); 
+            break;
+          }
        }
-      else if (vcode >= 400) {
-         IvyLog.logE("BIBENTRY","Problem doing LOC search for " + req.uri() +
-               ": " + vcode + " " + body);
-         return null;
-       }
-//    HttpHeaders hdrs = resp.headers();
-//    List<String> loc = hdrs.allValues("Location");
-      JSONObject rslt0 = new JSONObject(body);
-      return new BibEntryLOCResult(rslt0); 
-    }
-   catch (InterruptedException e) { 
-      IvyLog.logE("BIBENTRY","HTTP interrupted searching Library of Congress",e);
-    }
-   catch (IOException e) {
-      IvyLog.logE("BIBENTRY","HTTP Error searching Library of Congress",e); 
     }
    finally {
-      waitFor(2);
+      waitFor(10);
     }
    
    return null; 
@@ -339,6 +345,7 @@ private BibEntryBase searchForMarcItemXml(String isbn,String url)
          if (rcode >= 400) return null;
          if (body.contains("<!DOCTYPE html>")) {
             IvyLog.logD("BIBENTRY","Waiting for MARC server");
+            IvyLog.logD("RESULT:\n" + body);
             waitFor(60);
             continue;
           }
@@ -353,7 +360,7 @@ private BibEntryBase searchForMarcItemXml(String isbn,String url)
          IvyLog.logE("BIBENTRY","HTTP error getting marc XML",e);
        }
       finally {
-         waitFor(5);
+         waitFor(10);
        }
       break;
     }

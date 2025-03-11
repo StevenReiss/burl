@@ -344,7 +344,10 @@ void handleAddIsbns(List<String> args)
       else isbns.add(s);
     }
    
-   if (isbns.isEmpty()) return;
+   if (isbns.isEmpty()) {
+      badAddIsbnArgs();
+      return;
+    }
    
    JSONArray jarr = new JSONArray(isbns);
    JSONObject data = BurlUtil.buildJson("library",cli_main.getLibraryId(),
@@ -353,7 +356,7 @@ void handleAddIsbns(List<String> args)
          "isbns",jarr);
    JSONObject rslt = cli_main.createHttpPost("addisbns",data);
    if (cli_main.checkResponse(rslt,"adding isbns")) {
-      IvyLog.logI("BURLCLI","Isbn's are queued for addition");
+      IvyLog.logI("BURLCLI","ISBN's are queued for addition");
     }
 }
 

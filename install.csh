@@ -16,7 +16,7 @@ endif
 
 git push
 
-ssh sherpa.cs.brown.edu mkdir /vol/burl
+echo /vol/burl should be defined and cloned from github
 
 ssh sherpa.cs.brown.edu '(cd /vol/burl; git pull)'
 if ($status > 0) exit;
