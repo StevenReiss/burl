@@ -39,6 +39,11 @@ class ItemData {
     String v2 = "UNDEF $fldname ${v1.runtimeType}";
     if (v1.runtimeType == String) {
       v2 = v1 as String;
+      if (globals.fieldData.isMultiple(fldname)) {
+        if (join != " | ") {
+          v2 = v2.replaceAll(" | ", join);
+        }
+      }
     } else if (v1.runtimeType == List) {
       List v1l = v1 as List;
       v2 = v1l.join(join);

@@ -170,6 +170,7 @@ Widget loginTextField(
   bool obscureText = false,
   double fraction = 0,
   String tooltip = "",
+  TextInputAction textInputAction = TextInputAction.next,
 }) {
   Widget form = textFormField(
     hint: hint,
@@ -181,6 +182,7 @@ Widget loginTextField(
     fraction: fraction,
     obscureText: obscureText,
     keyboardType: keyboardType,
+    textInputAction: textInputAction,
   );
   Widget w = Container(
     constraints: const BoxConstraints(minWidth: 100, maxWidth: 600),

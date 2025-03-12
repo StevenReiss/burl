@@ -137,6 +137,7 @@ class _BurlLoginWidgetState extends State<BurlLoginWidget> {
                       validator: _validateUserName,
                       controller: _userController,
                       fraction: 0.8,
+                      textInputAction: TextInputAction.next,
                     ),
                     widgets.fieldSeparator(),
                     widgets.loginTextField(
@@ -147,6 +148,7 @@ class _BurlLoginWidgetState extends State<BurlLoginWidget> {
                       controller: _pwdController,
                       fraction: 0.8,
                       obscureText: true,
+                      textInputAction: TextInputAction.go,
                     ),
                     widgets.errorField(_loginError),
                     Container(

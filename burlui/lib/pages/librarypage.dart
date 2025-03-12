@@ -503,16 +503,38 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     }
 
     ItemData id = _itemList[index];
+    int idx = id.getId();
     String lcc = id.getField("LCC");
     String ttl = id.getField("Title");
     String aut = id.getField("Primary");
     String isbn = id.getField("ISBN");
+    String date = id.getField("Date");
+    String imprint = id.getField("Imprint");
+    String ddn = id.getField("Dewey");
+
+    String? other = imprint;
+    String? son = _sortOn;
+    if (son != null) {
+      switch (_sortOn) {
+        case "Imprint":
+        case "Related Names":
+        case "Subjects":
+          other = id.getField(son);
+          break;
+        case "Shelf":
+          other = "SHELF ${id.getField(son)}";
+          break;
+      }
+    }
+    if (date.isNotEmpty && !lcc.contains(date)) {
+      lcc = "$lcc $date";
+    }
     if (aut.isEmpty) {
       aut = id.getField("Authors");
     }
-    int idx = id.getId();
-
-    // if lcc doesn't end with date, then add last part of imprint to lcc
+    if (ddn.isNotEmpty) {
+      isbn = "$isbn      $ddn";
+    }
 
     String txt = "";
     if (ttl.contains("/")) {
@@ -520,7 +542,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     } else {
       txt = "$ttl\n$aut";
     }
-    txt = "$txt\n$isbn";
+    txt = "$txt\n$isbn\n$other";
     Widget w = Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
