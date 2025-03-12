@@ -418,6 +418,48 @@ private void badRemoveEntryArgs()
    IvyLog.logI("BURLCLI","removeentry [<id>]");
 }
 
+
+
+/********************************************************************************/
+/*                                                                              */
+/*      Fix Fields command -- normalize fields                                  */
+/*                                                                              */
+/********************************************************************************/
+
+void handleFixFields(List<String> args)
+{
+   for (String s : args) {
+      if (s.startsWith("-")) {
+         badFixFieldsArgs();
+         return;
+       }
+      else {
+         badFixFieldsArgs();
+         return;
+       }
+    }
+   
+   Number libid = cli_main.getLibraryId();
+   if (libid == null) {
+      badRemoveEntryArgs();
+      return;
+    }
+   
+   JSONObject data = BurlUtil.buildJson("library",libid);
+   JSONObject rslt = cli_main.createHttpPost("fixfields",data);
+   if (cli_main.checkResponse(rslt,"fixfields")) {
+      IvyLog.logI("BURLCLI","Fields normalized");
+    } 
+}
+
+
+private void badFixFieldsArgs()
+{
+   IvyLog.logI("BURLCLI","fixfields");
+}
+
+
+
 /********************************************************************************/
 /*                                                                              */
 /*      Entry displays                                                          */

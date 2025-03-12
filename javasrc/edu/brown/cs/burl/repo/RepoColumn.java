@@ -183,6 +183,9 @@ RepoColumn(String name,int no,BurlFieldData fd)
       case YES_NO :
          nval = fixYesNo(val);
          break; 
+      case DATE :
+         nval = fixDate(val); 
+         break;
     }
    
    if (nval != null) return nval;
@@ -227,6 +230,18 @@ private String fixYesNo(String val)
    if ("yY1tT".indexOf(c) >= 0) return "yes";
    
    return "no";
+}
+
+
+private String fixDate(String val)
+{
+   if (val == null || val.isBlank()) return "";
+   
+   Pattern pat = Pattern.compile("[12][0-9]{3}");
+   Matcher m = pat.matcher(val);
+   if (!m.find()) return "";
+   
+   return m.group(0);
 }
 
 

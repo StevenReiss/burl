@@ -536,6 +536,11 @@ private void processCommand(String cmd,List<String> args)
             entry_commands.handleRemoveEntry(args);
           }
          break;
+      case "fixfields" :
+         if (checkLibrary(cmd)) {
+            entry_commands.handleFixFields(args); 
+          }
+         break;
          
       case "exit" :
          System.exit(0);

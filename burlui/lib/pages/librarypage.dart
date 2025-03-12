@@ -120,6 +120,18 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
   }
 
   Widget _getPageWidget() {
+    String sorton = defaultSort;
+    String? son = _sortOn;
+    if (son != null) sorton = son;
+    Widget list = ListView.separated(
+      itemCount: _numItems,
+      itemBuilder: _getItemTile,
+      separatorBuilder: _getItemSeparator,
+      controller: _scrollController,
+    );
+    if (_numItems == 0) {
+      list = const Text("No Results Found");
+    }
     Widget w = Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
@@ -138,7 +150,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
             const Text("Sort by: "),
             widgets.dropDown(
               _sortFields,
-              value: defaultSort,
+              value: sorton,
               onChanged: _changeSort,
               tooltip: "Select the field to sort the results on",
             ),
@@ -151,14 +163,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
         ),
         Divider(height: 8, thickness: 8, color: laf.topLevelBackground),
         widgets.fieldSeparator(),
-        Expanded(
-          child: ListView.separated(
-            itemCount: _numItems,
-            itemBuilder: _getItemTile,
-            separatorBuilder: _getItemSeparator,
-            controller: _scrollController,
-          ),
-        ),
+        Expanded(child: list),
       ],
     );
     return w;
@@ -366,7 +371,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
   }
 
   void _changeSort(String? on) async {
-    if (on == "<Default>") {
+    if (on == defaultSort) {
       _sortOn = null;
     } else {
       _sortOn = on;
@@ -608,8 +613,9 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     if (itemrslt["status"] == "OK") {
       newitem = ItemData(itemrslt["entry"]);
       _itemList[index] = newitem;
+    } else {
+      _itemList.removeAt(index);
     }
-    _itemList.removeAt(index);
     setState(() {});
   }
 } // end of class _BurlPageState

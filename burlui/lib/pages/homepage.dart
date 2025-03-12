@@ -23,6 +23,7 @@ import 'package:flutter/material.dart';
 import 'loginpage.dart';
 import 'librarypage.dart';
 import 'createlibrarydialog.dart' as createlibrary;
+import '../lookandfeel.dart' as laf;
 
 class BurlHomeWidget extends StatelessWidget {
   final bool _initial;
@@ -103,11 +104,24 @@ class _BurlHomePageState extends State<BurlHomePage> {
 
   Widget _libraryListWidget() {
     if (_haveData) {
-      return ListView.builder(
+      Widget w1 = ListView.builder(
         padding: const EdgeInsets.all(10.0),
         itemCount: _libraryData.length,
         itemBuilder: _getTile,
       );
+      Widget w2 = Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          Text("YOUR LIBRARIES:", textScaler: TextScaler.linear(2.0)),
+          Divider(
+            height: 8,
+            thickness: 8,
+            color: laf.topLevelBackground,
+          ),
+          Expanded(child: w1),
+        ],
+      );
+      return w2;
     } else {
       return widgets.circularProgressIndicator();
     }

@@ -236,6 +236,9 @@ String handleFindEntries(HttpExchange he,ControlSession session)
 String handleEditEntry(HttpExchange he,ControlSession session)
 {
    BurlUser user = session.getUser();
+   if (user == null) {
+      return BowerRouter.errorResponse(he,session,400,"Bad user");
+    }
    Number libid = burl_server.getIdParameter(he,"library");
    BurlLibrary lib = burl_store.findLibraryById(libid);
    if (lib == null) {
@@ -322,6 +325,45 @@ String handleRemoveEntry(HttpExchange he,ControlSession session)
     }
    
    repo.removeRow(entid);
+   
+   return BowerRouter.jsonOKResponse(session);
+}
+
+
+/********************************************************************************/
+/*                                                                              */
+/*      Handle fix fields command                                               */
+/*                                                                              */
+/********************************************************************************/
+
+String handleFixFields(HttpExchange he,ControlSession session)
+{
+   BurlUser user = session.getUser();
+   if (user == null) {
+      return BowerRouter.errorResponse(he,session,402,"Bad user");
+    }
+   Number libid = burl_server.getIdParameter(he,"library");
+   BurlLibrary lib = burl_store.findLibraryById(libid);
+   if (lib == null) {
+      return BowerRouter.errorResponse(he,session,402,"Bad library");
+    }
+   BurlRepo repo = lib.getRepository();   
+   BurlUserAccess acc = burl_store.getUserAccess(user.getEmail(),libid);
+   if (acc != BurlUserAccess.OWNER) {
+      return BowerRouter.errorResponse(he,session,402,"Unauthorized");
+    }
+   
+   for (BurlRepoRow row : repo.getRows()) {
+      for (BurlRepoColumn brc : repo.getColumns()) {
+         BurlFixType ftyp = brc.getFixType();
+         if (ftyp == BurlFixType.NONE) continue;
+         String oval = row.getData(brc);
+         String nval = brc.fixFieldValue(oval);
+         if ((oval == null || oval.isBlank()) && (nval == null || nval.isBlank())) continue;
+         if (oval != null && oval.equals(nval)) continue;
+         row.setData(brc,nval);
+       }
+    }
    
    return BowerRouter.jsonOKResponse(session);
 }

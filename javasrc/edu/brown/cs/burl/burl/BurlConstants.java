@@ -130,6 +130,7 @@ enum BurlFixType {
    LCCN,                // normalize the LCCN
    ISBN,                // adjust iand normalize isbn
    YES_NO,              // yes or no are the only valid values
+   DATE,                // date containing only a year
 }
    
 

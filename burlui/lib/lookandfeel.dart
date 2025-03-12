@@ -25,7 +25,6 @@ final Color toolTipRightColor = Colors.yellow.shade200;
 const double toolTipHeight = 50;
 const double toolTipFontSize = 18;
 
-const Color submitBackgroundColor = Color.fromARGB(255, 248, 196, 143);
 const Color submitForegroundColor = Colors.black;
 const double buttonFontSize = 14;
 
@@ -36,6 +35,8 @@ const Color decorationBorderColor = Colors.yellow;
 const Color decorationInputColor = Colors.white;
 
 // APPLICATION-SPECIFIC Definitions
+
+const Color submitBackgroundColor = Color.fromARGB(255, 248, 196, 143);
 
 const Color topLevelBackground = Color.fromARGB(128, 210, 183, 140);
 const String topLevelImage = "assets/images/burllogo.png";

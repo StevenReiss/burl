@@ -93,7 +93,7 @@ String handleLogin(HttpExchange he,ControlSession session)
    
    if (email == null || email.isEmpty() || pwd == null || pwd.isEmpty()) {
       return BowerRouter.errorResponse(he,session,400,
-            "Imavalid email or password");
+            "Invalid email or password");
     }
    
    email = email.toLowerCase();
@@ -130,7 +130,7 @@ String handleRegister(HttpExchange he,ControlSession session)
  
    if (salt == null || !salt.equals(session.getCode())) {
       return BowerRouter.errorResponse(he,session,400,
-            "Imavalid salt");
+            "Invalid salt");
     }
    String newcode = BurlUtil.randomString(SESSION_CODE_LENGTH);   
    session.setCode(newcode);
