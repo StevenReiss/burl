@@ -12,4 +12,5 @@
 <entry key="email.user">EMAIL FROM USER</entry>
 <entry key="email.password">EMAIL PASSWORD -- actually GOOGLE passphrase</entry>
 <entry key="email.replyto">YOUR EMAIL</entry>
+<entry key="keystorePassword">KEYSTORE PASSWORD for catre.jks</entry>
 </properties>

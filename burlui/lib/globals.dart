@@ -19,5 +19,5 @@ import "fielddata.dart";
 
 String? burlSession;
 
-bool debugServer = true;
+bool debugServer = false;
 FieldData fieldData = FieldData();
