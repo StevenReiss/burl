@@ -17,6 +17,7 @@
 
 import 'package:flutter/material.dart';
 import '../util.dart' as util;
+import '../globals.dart' as globals;
 import '../widgets.dart' as widgets;
 import 'loginpage.dart';
 
@@ -54,6 +55,7 @@ class _BurlRegisterWidgetState extends State<BurlRegisterWidget> {
 
   Future<String> _preRegister() async {
     Map<String, dynamic> js = await util.getJson("register");
+    globals.burlSession = js['session'];
     return js['salt'];
   }
 

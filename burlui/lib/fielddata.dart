@@ -16,6 +16,7 @@
  ********************************************************************************/
 
 import "util.dart" as util;
+import "globals.dart" as globals;
 
 class FieldData {
   final Map<String, Map<String, dynamic>> _fieldData = {};
@@ -32,6 +33,7 @@ class FieldData {
   Future<bool> loadData() async {
     Map<String, dynamic> data = await util.getJson("fielddata");
     if (data["status"] != "OK") return false;
+    globals.burlSession ??= data['session'];
     Map<String, dynamic> d0 = data['data'];
     Map<String, dynamic> d1 = d0['BURL'];
     Map<String, dynamic> fd1 = d1['FIELDS'];

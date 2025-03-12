@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.StringTokenizer;
 
 import org.json.JSONArray;
@@ -260,12 +261,14 @@ String handleAddLibraryUser(HttpExchange he,ControlSession session)
    burl_store.setUserAccess(email,libid,acc);
    
    if (oldacc == BurlUserAccess.NONE && acc != BurlUserAccess.NONE) {
+      Properties props = burl_main.getProperties();
+      String host = props.getProperty("webaddress","https://sherpa.cs.brown.edu/burl");
       String an = "a ";
       if (acc == BurlUserAccess.OWNER) an = "an ";
       String body = "You have been invited to access the library " + lib.getName() +
          " by " + user.getEmail() + " as " + an + acc + ".\n" +
          "If you haven't already, please register with BURL (" + 
-         burl_main.getUrlPrefix() + ").\n";
+         host + ").\n";
       BurlUtil.sendEmail(email,"BURL Library Invitation",body);
     }
       
