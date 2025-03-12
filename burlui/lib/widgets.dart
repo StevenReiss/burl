@@ -107,6 +107,7 @@ Widget textField({
   String tooltip = "",
   bool readOnly = false,
   double? height,
+  bool collapse = false,
 }) {
   label ??= hint;
   hint ??= label;
@@ -117,6 +118,14 @@ Widget textField({
   }
   keyboardType ??=
       (maxLines == 1 ? TextInputType.text : TextInputType.multiline);
+
+  InputDecoration deco = getDecoration(hint: hint, label: label);
+  if (collapse) {
+    deco = InputDecoration.collapsed(
+      hintText: hint,
+      border: OutlineInputBorder(),
+    );
+  }
 
   Widget w = TextField(
     controller: controller,
@@ -129,7 +138,7 @@ Widget textField({
     textInputAction: textInputAction,
     enabled: enabled,
     readOnly: readOnly,
-    decoration: getDecoration(hint: hint, label: label),
+    decoration: deco,
   );
   if (height != null) {
     w = SizedBox(height: height, child: w);

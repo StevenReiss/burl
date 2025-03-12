@@ -104,12 +104,12 @@ class _BurlEntryPageState extends State<BurlEntryPage> {
       Widget lbl = Text(globals.fieldData.getLabel(fld));
       Widget fldw = widgets.textField(
         controller: ctrl,
-        height: _getHeight(ctrl!.text),
         enabled: globals.fieldData.canEdit(acc, fld),
         maxLines: 0,
         onChanged: (String s) {
           _fieldEdited(fld, s);
         },
+        collapse: true,
       );
       TableRow row = TableRow(children: <Widget>[lbl, fldw]);
       rows.add(row);
@@ -161,20 +161,6 @@ class _BurlEntryPageState extends State<BurlEntryPage> {
     );
 
     return w3;
-  }
-
-  double? _getHeight(String txt) {
-    int nline = 1;
-    int lidx = 0;
-    for (;;) {
-      int nidx = txt.indexOf("\n", lidx);
-      if (nidx < 0) break;
-      nline += (nidx - lidx) ~/ 60;
-      ++nline;
-      lidx = nidx + 1;
-    }
-    nline += (txt.length - lidx) ~/ 60;
-    return 36.0 * nline;
   }
 
   bool _canRemove() {

@@ -382,7 +382,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
   }
 
   void _loadMore() {
-    if (_scrollController.position.pixels > _scrollext) {
+    if (_scrollController.position.pixels >= _scrollext) {
       _scrollext = _scrollController.position.pixels;
       setState(() {});
     }
