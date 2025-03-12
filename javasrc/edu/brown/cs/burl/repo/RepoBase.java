@@ -596,14 +596,14 @@ JSONObject getJsonForRow(BurlRepoRow rr)
             value = Integer.valueOf(0);
           }
        }
-      else if (brc.isMultiple()) {
-         JSONArray arr = new JSONArray();
-         if (v != null) {
-            String [] items = v.split(field_data.getMultiplePattern());
-            arr.putAll(items);
-          }
-         value = arr;
-       }
+//    else if (brc.isMultiple()) {
+//       JSONArray arr = new JSONArray();
+//       if (v != null) {
+//          String [] items = v.split(field_data.getMultiplePattern());
+//          arr.putAll(items);
+//        }
+//       value = arr;
+//     }
       result.put(brc.getName(),value);
     }
    
@@ -878,6 +878,7 @@ private class ImportJsonEntry implements BurlBibEntry {
    int cntidx = 0;
    boolean more = false;
    List<Number> done = new ArrayList<>();
+   BurlRepoColumn datecol = getColumn("Date");
    
    for (Number id : ids) {
       BurlRepoRow brr = getRowForId(id);
@@ -901,8 +902,10 @@ private class ImportJsonEntry implements BurlBibEntry {
       if (idx > 0) author = author.substring(0,idx);
       if (author.length() > 12) author = author.substring(0,12);
       author = fixUnicode(author);
+      String date = null;
+      if (datecol != null) date = brr.getData(datecol);
       
-      List<String> items = getLabelElements(code);
+      List<String> items = getLabelElements(code,date);
       
       cntidx = insertLabelText(cnts,cntidx,"nnnnnnnnnnnn",items.get(0));
       if (cntidx < 0) {
@@ -963,7 +966,7 @@ private String fixUnicode(String s)
 }
 
 
-List<String> getLabelElements(String lcc)
+List<String> getLabelElements(String lcc,String date)
 {
    List<String> lcclets = getLccElements(lcc);
    List<String> rslt = new ArrayList<>();
@@ -988,6 +991,9 @@ List<String> getLabelElements(String lcc)
          else add = add + " " + l0;
        }
     }
+   
+   if (year.isEmpty() && date != null) year = date;
+   
    rslt.add(add);
    rslt.add(year);
    

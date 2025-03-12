@@ -142,6 +142,10 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
           controller: _findControl,
           textInputAction: TextInputAction.done,
           onEditingComplete: _handleSearch,
+          suffixIcon: IconButton(
+            icon: Icon(Icons.clear),
+            onPressed: _clearSearch,
+          ),
         ),
         widgets.fieldSeparator(),
         Row(
@@ -365,7 +369,12 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     }
   }
 
-  void _handleSearch() async {
+  void _clearSearch() async {
+    _findControl.clear();
+    await _handleSearch();
+  }
+
+  Future<void> _handleSearch() async {
     await _fetchInitialData();
     setState(() {});
   }

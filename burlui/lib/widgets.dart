@@ -46,6 +46,7 @@ Widget textFormField({
   BuildContext? context,
   bool? enabled,
   String tooltip = "",
+  Widget? suffixIcon,
 }) {
   label ??= hint;
   hint ??= label;
@@ -60,6 +61,7 @@ Widget textFormField({
       hint: hint,
       label: label,
       vPadding: vpadding,
+      suffixIcon: suffixIcon,
     ),
     validator: validator,
     controller: controller,
@@ -1111,6 +1113,7 @@ InputDecoration getDecoration({
   double vPadding = 0.0,
   double hPadding = 4.0,
   String? error,
+  Widget? suffixIcon,
 }) {
   hint ??= label;
   label ??= hint;
@@ -1132,6 +1135,7 @@ InputDecoration getDecoration({
       horizontal: hPadding,
       vertical: vPadding,
     ),
+    suffixIcon: suffixIcon,
   );
 }
 
