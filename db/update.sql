@@ -6,19 +6,19 @@ echo WORKING ON DATABASE $db
 
 
 
-ENUM SignDim "( '16by9', '4by3', '16by10', 'other' )"
-
-
-
 $run $host $db <<EOF
 
 $runcmd
 
-ALTER TABLE iQsignUsers ADD temppassword text;
+DROP TABLE IF EXISTS BurlWorkQueue;
 
-ALTER TABLE iQsignImages ADD is_border bool DEFAULT false;
-ALTER TABLE iQsignImages ADD description text;
-
+CREATE TABLE BurlWorkQueue (
+   id $iddeftype NOT NULL PRIMARY KEY,
+   libraryid $idtype NOT NULL,
+   item text NOT NULL,
+   count bool NOT NULL DEFAULT true,
+   mode int DEFAULT 0
+$ENDTABLE;
 
 EOF
 

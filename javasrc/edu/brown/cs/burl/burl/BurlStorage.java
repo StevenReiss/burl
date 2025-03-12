@@ -213,6 +213,27 @@ void updateDataRow(BurlRepo repo,Number id,String fld,String val);
 void removeDataRow(BurlRepo repo,Number id);
 
 
+/**
+ *      Add to work queue
+ **/
+
+void addToWorkQueue(Number libraryid,String isbn,BurlUpdateMode upd,boolean count);
+
+
+/**
+ *      Remove from work queue
+ **/
+
+void removeFromWorkQueue(Number queueid);
+
+
+/**
+ *      Return work queue contents
+ */
+
+List<BurlWorkItem> getWorkQueue(); 
+
+
 
 }       // end of interface BurlStorage
 

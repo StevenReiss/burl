@@ -3,7 +3,5 @@
 <properties>
 <entry key="updateMode">replace</entry>
 <entry key="shortDisplay">Title,LCC,Subjects</entry>
+<entry key="hostpfx">https://sherpa.cs.brown.edu</entry>
 </properties>
-
-
-

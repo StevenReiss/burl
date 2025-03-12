@@ -95,6 +95,13 @@ CREATE TABLE BurlRepoStores (
 $ENDTABLE;
 
 
+CREATE TABLE BurlWorkQueue (
+   id $iddeftype NOT NULL PRIMARY KEY,
+   libraryid $idtype NOT NULL,
+   item text NOT NULL,
+   count bool NOT NULL DEFAULT true
+$ENDTABLE;
+
 
 EOF
 

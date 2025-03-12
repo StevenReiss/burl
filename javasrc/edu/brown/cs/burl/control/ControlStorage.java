@@ -18,15 +18,9 @@
 package edu.brown.cs.burl.control;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -42,6 +36,8 @@ import edu.brown.cs.burl.burl.BurlRepoColumn;
 import edu.brown.cs.burl.burl.BurlStorage;
 import edu.brown.cs.burl.burl.BurlUser;
 import edu.brown.cs.burl.burl.BurlUtil;
+import edu.brown.cs.burl.burl.BurlWorkItem;
+import edu.brown.cs.ivy.bower.BowerDatabasePool;
 import edu.brown.cs.ivy.bower.BowerConstants.BowerSessionStore;
 import edu.brown.cs.ivy.file.IvyDatabase;
 import edu.brown.cs.ivy.file.IvyLog;
@@ -57,7 +53,7 @@ class ControlStorage implements ControlConstants, BurlStorage
 /********************************************************************************/
 
 private ControlMain	burl_control;
-private Connection	sql_database;
+private BowerDatabasePool sql_database;
 private String		database_name;
 
 
@@ -73,13 +69,10 @@ ControlStorage(ControlMain ctrl)
    sql_database = null;
    database_name = BURL_DATA_STORE;
 
-   boolean propsfound = false;
-
    Properties props = burl_control.getProperties();
    if (props.containsKey("edu.brown.cs.ivy.file.dbmstype")) {
       try {
-	 IvyDatabase.setProperties(props);
-	 propsfound = true;
+	 sql_database = new BowerDatabasePool(props,database_name);
        }
       catch (SQLException e) { }
     }
@@ -89,33 +82,28 @@ ControlStorage(ControlMain ctrl)
    File f3 = new File(f2,"burl");
    File f4 = new File(f3,"database.props");
 
-   if (!propsfound && f4.exists()) {
+   if (sql_database == null && f4.exists()) {
       try {
-	 IvyDatabase.setProperties(f4);
-	 propsfound = true;
+	 sql_database = new BowerDatabasePool(f4,database_name);
        }
       catch (SQLException e) { }
     }
    File f5 = new File(f1,"database.props");
-   if (!propsfound && f5.exists()) {
+   if (sql_database == null && f5.exists()) {
       try {
-	 IvyDatabase.setProperties(f5);
-	 propsfound = true;
+	 sql_database = new BowerDatabasePool(f5,database_name);
        }
       catch (SQLException e) { }
     }
-   if (!propsfound) {
+   if (sql_database == null) {
       try (InputStream ins = getClass().getClassLoader().getResourceAsStream("database.props")) {
-	 IvyDatabase.setProperties(ins);
-	 propsfound = true;
-       }
+	 sql_database = new BowerDatabasePool(ins,database_name);
+       } 
       catch (Exception e) {
 	 IvyLog.logE("BURL","Database properties not found or bad");
 	 System.exit(1);
        }
     }
-
-   checkDatabase();
 }
 
 
@@ -140,23 +128,23 @@ ControlStorage(ControlMain ctrl)
    if (email == null || pwd == null) return null;
    email = email.toLowerCase();
 
-   List<JSONObject> userset = sqlQueryN(q1,email);
+   List<JSONObject> userset = sql_database.sqlQueryN(q1,email);
    if (!userset.isEmpty()) throw new BurlException("User already registered");
 
    if (salt == null) {
       salt = BurlUtil.randomString(SALT_LENGTH);
     }
    boolean valid = (validator == null || validator.isEmpty());
-   sqlUpdate(q2,email,pwd,salt,valid);
+   sql_database.sqlUpdate(q2,email,pwd,salt,valid);
    
-   JSONObject user = sqlQuery1(q1,email);
+   JSONObject user = sql_database.sqlQuery1(q1,email);
 
    if (user == null) return null;
    
    ControlUser cuser = new ControlUser(user);
    
    if (!valid) {
-      sqlUpdate(q3,cuser.getId(),validator);
+      sql_database.sqlUpdate(q3,cuser.getId(),validator);
     }
 
    return cuser;
@@ -172,12 +160,12 @@ ControlStorage(ControlMain ctrl)
    String q2 = "DELETE FROM BurlValidator WHERE userid = $1 AND validator = $2";
    String q3 = "UPDATE BurlUsers SET valid = TRUE WHERE id = $1";
    
-   JSONObject rslt = sqlQuery1(q1,email,code);
+   JSONObject rslt = sql_database.sqlQuery1(q1,email,code);
    if (rslt == null) return false;
    
    Number uid = rslt.getNumber("userid");
-   sqlUpdate(q2,uid,code);
-   sqlUpdate(q3,uid);
+   sql_database.sqlUpdate(q2,uid,code);
+   sql_database.sqlUpdate(q3,uid);
    
    return true;
 }
@@ -202,7 +190,7 @@ ControlStorage(ControlMain ctrl)
    if (tencoded != null && !tencoded.isEmpty()) {
       tencoded = BurlUtil.secureHash(encoded + localsalt);
       if (tencoded.equals(pwd)) {
-         sqlUpdate(q1,user.getId()); 
+         sql_database.sqlUpdate(q1,user.getId()); 
          return user;
        }
     }
@@ -221,7 +209,7 @@ ControlStorage(ControlMain ctrl)
    
    String q1 = "SELECT * FROM BurlUsers WHERE email = $1";
    
-   JSONObject juser = sqlQuery1(q1,email);
+   JSONObject juser = sql_database.sqlQuery1(q1,email);
    if (juser == null) return null;
    
    return new ControlUser(juser);
@@ -234,7 +222,7 @@ ControlStorage(ControlMain ctrl)
    
    String q1 = "SELECT * FROM BurlUsers WHERE id = $1";
    
-   JSONObject juser = sqlQuery1(q1,uid);
+   JSONObject juser = sql_database.sqlQuery1(q1,uid);
    if (juser == null) return null;
    
    return new ControlUser(juser);
@@ -250,8 +238,8 @@ ControlStorage(ControlMain ctrl)
    String q2 = "DELETE FROM BurlUsers WHERE id = $1";
    // third query to delete any libraries that have no associated users
    
-   sqlUpdate(q1,uid);
-   sqlUpdate(q2,uid); 
+   sql_database.sqlUpdate(q1,uid);
+   sql_database.sqlUpdate(q2,uid); 
 }
 
 
@@ -261,7 +249,7 @@ ControlStorage(ControlMain ctrl)
    String q1 = "UPDATE BurlUsers SET password = $1, " +
       " temp_password = NULL " +
       "WHERE id = $2";
-   sqlUpdate(q1,pwd,uid);
+   sql_database.sqlUpdate(q1,pwd,uid);
 }
 
 
@@ -269,7 +257,7 @@ ControlStorage(ControlMain ctrl)
 @Override public void setTemporaryPassword(Number uid,String pwd)
 {
    String q1 = "UPDATE BurlUsers SET temp_password = $1 WHERE id = $2";
-   sqlUpdate(q1,pwd,uid);
+   sql_database.sqlUpdate(q1,pwd,uid);
 }
  
 
@@ -290,12 +278,12 @@ ControlStorage(ControlMain ctrl)
    for (int i = 0; i < 3; ++i) {
       namekey = BurlUtil.randomString(NAME_KEY_LENGTH);
       namekey = namekey.toLowerCase();
-      int ct = sqlUpdate(q1,name,namekey,repotype.ordinal());
+      int ct = sql_database.sqlUpdate(q1,name,namekey,repotype.ordinal());
       if (ct == 1) break;
       // retry in case of duplicate namekeys      
     }
    
-   JSONObject libj = sqlQuery1(q2,namekey);
+   JSONObject libj = sql_database.sqlQuery1(q2,namekey);
    if (libj == null) return null;
    
    return new ControlLibrary(burl_control,libj);
@@ -307,7 +295,7 @@ ControlStorage(ControlMain ctrl)
 {
    String q1 = "SELECT * FROM BurlUserAccess WHERE email = $1";
    
-   List<JSONObject> accs = sqlQueryN(q1,user.getEmail());
+   List<JSONObject> accs = sql_database.sqlQueryN(q1,user.getEmail());
    
    List<BurlLibrary> rslt = new ArrayList<>();
    for (JSONObject obj : accs) {
@@ -325,7 +313,7 @@ ControlStorage(ControlMain ctrl)
    if (lid == null) return null;
    
    String q1 = "SELECT * FROM BurlLibraries WHERE id = $1";
-   JSONObject libj = sqlQuery1(q1,lid);
+   JSONObject libj = sql_database.sqlQuery1(q1,lid);
    if (libj == null) return null;
    
    return new ControlLibrary(burl_control,libj);
@@ -337,8 +325,8 @@ ControlStorage(ControlMain ctrl)
    String q1 = "DELETE FROM BurlUserAccess WHERE libraryid = $1";
    String q2 = "DELETE FROM BurlLibraries WHERE id = $1";
    
-   sqlUpdate(q1,lid);
-   sqlUpdate(q2,lid);
+   sql_database.sqlUpdate(q1,lid);
+   sql_database.sqlUpdate(q2,lid);
 }
 
 
@@ -353,7 +341,7 @@ ControlStorage(ControlMain ctrl)
 {
    String q1 = "SELECT * FROM BurlUserAccess WHERE email = $1 AND libraryid = $2";
    
-   JSONObject jobj = sqlQuery1(q1,email,lid);
+   JSONObject jobj = sql_database.sqlQuery1(q1,email,lid);
    if (jobj == null) return BurlUserAccess.NONE;
    ControlAccess acc = new ControlAccess(jobj);
    return acc.getAccessLevel();
@@ -366,10 +354,10 @@ ControlStorage(ControlMain ctrl)
    String q2 = "INSERT INTO BurlUserAccess ( email, libraryid, access_level ) " +
          "VALUES ( $1, $2, $3 )";
    
-   sqlUpdate(q1,email,lid);
+   sql_database.sqlUpdate(q1,email,lid);
    
    if (acc != BurlUserAccess.NONE) {
-      sqlUpdate(q2,email,lid,acc);
+      sql_database.sqlUpdate(q2,email,lid,acc);
     }
 }
 
@@ -378,7 +366,7 @@ ControlStorage(ControlMain ctrl)
 @Override public List<BurlLibraryAccess> getLibraryAccess(Number lid)
 {
    String q1 = "SELECT * FROM BurlUserAccess WHERE libraryid = $1";
-   List<JSONObject> accs = sqlQueryN(q1,lid);
+   List<JSONObject> accs = sql_database.sqlQueryN(q1,lid);
    
    List<BurlLibraryAccess> rslt = new ArrayList<>();
    for (JSONObject obj : accs) {
@@ -403,7 +391,7 @@ ControlStorage(ControlMain ctrl)
 @Override public void startSession(String sid,String code)
 {
    String q = "INSERT INTO BurlSession (session, code) VALUES ( $1, $2 )";
-   sqlUpdate(q,sid,code);
+   sql_database.sqlUpdate(q,sid,code);
 }
 
 
@@ -411,7 +399,7 @@ ControlStorage(ControlMain ctrl)
 {
    String q = "UPDATE BurlSession SET userid = $1, libraryid = $2, last_used = CURRENT_TIMESTAMP " +
       "WHERE session = $3";
-   sqlUpdate(q,uid,lid,sid);
+   sql_database.sqlUpdate(q,uid,lid,sid);
 }
 
 
@@ -419,7 +407,7 @@ ControlStorage(ControlMain ctrl)
 @Override public void removeSession(String sid)
 {
    String q = "DELETE FROM BurlSession WHERE session = $1";
-   sqlUpdate(q,sid);
+   sql_database.sqlUpdate(q,sid);
 }
 
 
@@ -429,7 +417,7 @@ ControlSession checkSession(BowerSessionStore<ControlSession> bss,String sid)
    
    String q = "SELECT * FROM BurlSession WHERE session = $1";
    
-   JSONObject json = sqlQuery1(q,sid);
+   JSONObject json = sql_database.sqlQuery1(q,sid);
    if (json != null) {
       long now = System.currentTimeMillis();
       long lupt = json.getLong("last_used");
@@ -456,7 +444,7 @@ ControlSession checkSession(BowerSessionStore<ControlSession> bss,String sid)
    String rname = "BurlRepo_" + repo.getNameKey();
    String q1 = "SELECT * FROM BurlRepoStores WHERE name = $1";
    
-   JSONObject tbl = sqlQuery1(q1,kname);
+   JSONObject tbl = sql_database.sqlQuery1(q1,kname);
    if (tbl != null) {
       // check if we need to add a new field to the table and then update the fields
       // by doing ALTER TABLE ADD (or REMOVE) for each field
@@ -476,18 +464,18 @@ ControlSession checkSession(BowerSessionStore<ControlSession> bss,String sid)
        }
       q2 += ")";
       String q3 = "INSERT INTO BurlRepoStores ( name, fields ) VALUES ( $1, $2 )";
-      int ct = sqlUpdate(q2); 
+      int ct = sql_database.sqlUpdate(q2); 
       if (ct < 0) return false;
-      sqlUpdate(q3,kname,flds.toString());
+      sql_database.sqlUpdate(q3,kname,flds.toString());
       BurlRepoColumn isbnfld = repo.getOriginalIsbnField();
       if (isbnfld != null) {
          String q4 = "CREATE INDEX " + rname + "Isbn ON " + rname + " ( " + isbnfld.getFieldName() + " )";
-         sqlUpdate(q4);
+         sql_database.sqlUpdate(q4);
        }
       BurlRepoColumn lccnfld = repo.getLccnField();
       if (lccnfld != null) {
          String q5 = "CREATE INDEX " + rname + "Lccn ON " + rname + " ( " + lccnfld.getFieldName() + " )";
-         sqlUpdate(q5);
+         sql_database.sqlUpdate(q5);
        }
     }
          
@@ -502,7 +490,7 @@ ControlSession checkSession(BowerSessionStore<ControlSession> bss,String sid)
    String rname = "BurlRepo_" + kname;
    String q1 = "SELECT burl_id FROM " + rname + " WHERE " + fld + " = $1";
    
-   List<JSONObject> rslts = sqlQueryN(q1,val);
+   List<JSONObject> rslts = sql_database.sqlQueryN(q1,val);
    for (JSONObject rslt : rslts) {
       ids.add(rslt.getNumber("burl_id"));
     }
@@ -518,8 +506,8 @@ ControlSession checkSession(BowerSessionStore<ControlSession> bss,String sid)
    String q1 = "DROP TABLE IF EXISTS " + rname + " CASCADE";
    String q2 = "DELETE FROM BurlRepoStores WHERE name = $1";
    
-   sqlUpdate(q1);
-   sqlUpdate(q2,kname);
+   sql_database.sqlUpdate(q1);
+   sql_database.sqlUpdate(q2,kname);
 }
 
 
@@ -535,8 +523,8 @@ ControlSession checkSession(BowerSessionStore<ControlSession> bss,String sid)
    String q2 = "SELECT COUNT(burl_id) FROM " + rname;
 
    try {
-      ResultSet rs = executeQueryStatement(q1);
-      JSONObject cntj = sqlQuery1(q2);
+      ResultSet rs = sql_database.executeQueryStatement(q1);
+      JSONObject cntj = sql_database.sqlQuery1(q2);
       int cnt = cntj.getInt("count");
       return new ResultSetIterator(rs,cnt); 
     }
@@ -556,7 +544,7 @@ ControlSession checkSession(BowerSessionStore<ControlSession> bss,String sid)
    String rname = "BurlRepo_" + kname;
    String q1 = "SELECT * FROM " + rname + " WHERE burl_id = $1";
    
-   return sqlQuery1(q1,rid);
+   return sql_database.sqlQuery1(q1,rid);
 }
 
 
@@ -575,10 +563,10 @@ ControlSession checkSession(BowerSessionStore<ControlSession> bss,String sid)
    String q2 = "SELECT burl_id FROM " + rname + " WHERE " + fld + " = $1";
    String q3 = "UPDATE " + rname + " SET " + fld + " = NULL WHERE burl_id = $1";
    String marker = BurlUtil.randomString(NEW_ROW_MARKER_LENGTH);
-   sqlUpdate(q1,marker);
-   JSONObject jo = sqlQuery1(q2,marker);
+   sql_database.sqlUpdate(q1,marker);
+   JSONObject jo = sql_database.sqlQuery1(q2,marker);
    Number id = jo.getNumber("burl_id");
-   sqlUpdate(q3,id);
+   sql_database.sqlUpdate(q3,id);
    return id;
 }
 
@@ -588,7 +576,7 @@ ControlSession checkSession(BowerSessionStore<ControlSession> bss,String sid)
    String kname = repo.getNameKey();
    String rname = "BurlRepo_" + kname;
    String q1 = "UPDATE " + rname + " SET " + fld + " = $1 WHERE burl_id = $2";
-   sqlUpdate(q1,val,rid);
+   sql_database.sqlUpdate(q1,val,rid);
 }
 
 
@@ -597,186 +585,47 @@ ControlSession checkSession(BowerSessionStore<ControlSession> bss,String sid)
    String kname = repo.getNameKey(); 
    String rname = "BurlRepo_" + kname;
    String q1 = "DELETE FROM " + rname + " WHERE burl_id = $1";
-   sqlUpdate(q1,rid);
+   sql_database.sqlUpdate(q1,rid);
 }
+
 
 
 /********************************************************************************/
-/*										*/
-/*	Utility methods 							*/
-/*										*/
+/*                                                                              */
+/*      Work queue methods                                                      */
+/*                                                                              */ 
 /********************************************************************************/
 
-private int sqlUpdate(String query,Object... data)
+@Override public void addToWorkQueue(Number libid,String isbn,BurlUpdateMode upd,boolean count)
 {
-   IvyLog.logD("BURL","SQL: " + query + " " + getDataString(data));
-
-   try {
-      return executeUpdateStatement(query,data);
-    }
-   catch (SQLException e) {
-      IvyLog.logE("BURL","SQL problem",e);
-    }
-
-   return -1;
-}
-
-
-private JSONObject sqlQuery1(String query,Object... data)
-{
-   IvyLog.logD("BURL","SQL: " + query + " " + getDataString(data));
-
-   JSONObject rslt = null;
-
-   try {
-      ResultSet rs = executeQueryStatement(query,data);
-      if (rs.next()) {
-	 rslt = getJsonFromResultSet(rs);
-       }
-      if (rs.next()) rslt = null;
-    }
-   catch (SQLException e) {
-      IvyLog.logE("BURL","SQL problem",e);
-    }
-
-   return rslt;
+   String q1 = "INSERT INTO BurlWorkQueue ( id, libraryid, item, count, mode ) " +
+      "VALUES ( DEFAULT, $1, $2, $3, $4 )";
+   
+   sql_database.sqlUpdate(q1,libid,isbn,count,upd.ordinal());
 }
 
 
 
-private List<JSONObject> sqlQueryN(String query,Object... data)
+@Override public void removeFromWorkQueue(Number wqid)
 {
-   IvyLog.logD("BURL","SQL: " + query + " " + getDataString(data));
-
-   List<JSONObject> rslt = new ArrayList<>();;
-
-   try {
-      ResultSet rs = executeQueryStatement(query,data);
-      while (rs.next()) {
-	 JSONObject json = getJsonFromResultSet(rs);
-	 rslt.add(json);
-       }
-    }
-   catch (SQLException e) {
-      IvyLog.logE("BURL","SQL problem",e);
-    }
-
-   return rslt;
+   String q1 = "DELETE FROM BurlWorkQueue WHERE id = $1";
+   
+   sql_database.sqlUpdate(q1,wqid);
 }
 
 
-
-private ResultSet executeQueryStatement(String q,Object... data) throws SQLException
+@Override public List<BurlWorkItem> getWorkQueue()
 {
-   for ( ; ; ) {
-      waitForDatabase();
-
-      PreparedStatement pst = setupStatement(q,data);
-
-      try {
-	 ResultSet rslt = pst.executeQuery();
-	 return rslt;
-       }
-      catch (SQLException e) {
-	 if (checkDatabaseError(e)) throw e;
-       }
+   String q1 = "SELECT * FROM BurlWorkQueue ORDER BY id";
+   
+   List<JSONObject> data = sql_database.sqlQueryN(q1);
+   
+   List<BurlWorkItem> rslt = new ArrayList<>();
+   for (JSONObject jo : data) {
+      ControlWorkItem witm = new ControlWorkItem(jo);
+      rslt.add(witm);
     }
-}
-
-
-private int executeUpdateStatement(String q,Object... data) throws SQLException
-{
-   for ( ; ; ) {
-      waitForDatabase();
-
-      PreparedStatement pst = setupStatement(q,data);
-
-      try {
-	 int rslt = pst.executeUpdate();
-	 return rslt;
-       }
-      catch (SQLException e) {
-	 if (checkDatabaseError(e)) throw e;
-       }
-    }
-}
-
-
-
-private PreparedStatement setupStatement(String query,Object... data) throws SQLException
-{
-   query = query.replaceAll("\\$[0-9]+","?");
-   PreparedStatement pst = sql_database.prepareStatement(query);
-   for (int i = 0; i < data.length; ++i) {
-      Object v = data[i];
-      if (v instanceof String) {
-	 pst.setString(i+1,(String) v);
-       }
-      else if (v instanceof Integer) {
-	 pst.setInt(i+1,(Integer) v);
-       }
-      else if (v instanceof Long) {
-	 pst.setLong(i+1,(Long) v);
-       }
-      else if (v instanceof Date) {
-	 pst.setDate(i+1,(Date) v);
-       }
-      else if (v instanceof Timestamp) {
-	 pst.setTimestamp(i+1,(Timestamp) v);
-       }
-      else if (v instanceof Boolean) {
-	 pst.setBoolean(i+1,(Boolean) v);
-       }
-      else if (v instanceof Enum) {
-         pst.setInt(i+1,((Enum<?>) v).ordinal());
-       }
-      else {
-	 pst.setObject(i+1,v);
-       }
-    }
-   return pst;
-}
-
-
-private String getDataString(Object... data)
-{
-   if (data.length == 0) return "";
-
-   StringBuffer buf = new StringBuffer();
-   for (int i = 0; i < data.length; ++i) {
-      if (i == 0) buf.append("[");
-      else buf.append(",");
-      buf.append(String.valueOf(data[i]));
-    }
-   buf.append("]");
-
-   return buf.toString();
-}
-
-
-private JSONObject getJsonFromResultSet(ResultSet rs)
-{
-   JSONObject rslt = new JSONObject();
-   try {
-      ResultSetMetaData meta = rs.getMetaData();
-      for (int i = 1; i <= meta.getColumnCount(); ++i) {
-	 String nm = meta.getColumnName(i);
-	 Object v = rs.getObject(i);
-	 if (v instanceof Date) {
-	    Date d = (Date) v;
-	    v = d.getTime();
-	  }
-	 else if (v instanceof Timestamp) {
-	    Timestamp ts = (Timestamp) v;
-	    v = ts.getTime();
-	  }
-	 if (v != null) rslt.put(nm,v);
-       }
-    }
-   catch (SQLException e) {
-      IvyLog.logE("BURL","Database problem decoding result set ",e);
-    }
-
+   
    return rslt;
 }
 
@@ -819,60 +668,13 @@ private class ResultSetIterator implements BurlCountIter<JSONObject> {
        }
       next_done = false;
       
-      return getJsonFromResultSet(result_set);
+      return sql_database.getJsonFromResultSet(result_set); 
     }
    
    
    @Override public int getRowCount()           { return row_count; }
    
 }       // end of inner class ResulSetIterator
-
-
-/********************************************************************************/
-/*										*/
-/*	Establish database connection						*/
-/*										*/
-/********************************************************************************/
-
-private boolean checkDatabase()
-{
-   if (sql_database == null && database_name != null) {
-      try {
-	 sql_database = IvyDatabase.openDatabase(database_name);
-       }
-      catch (Throwable t) {
-	 IvyLog.logE("BURL","Database connection problem",t);
-       }
-    }
-
-   return sql_database != null;
-}
-
-
-
-private void waitForDatabase()
-{
-   while (sql_database == null) {
-      try {
-	 Thread.sleep(1000);
-       }
-      catch (InterruptedException e) { }
-      checkDatabase();
-    }
-}
-
-
-private boolean checkDatabaseError(SQLException e)
-{
-   String msg = e.getMessage();
-   if (msg.contains("FATAL")) sql_database = null;
-   Throwable ex = e.getCause();
-   if (ex instanceof IOException) sql_database = null;
-   if (sql_database == null) {
-      IvyLog.logE("BURL","Database lost connection",e);
-    }
-   return sql_database != null;
-}
 
 
 

@@ -28,8 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -66,7 +64,7 @@ private ControlSessionStore session_store;
 private ControlAuthentication burl_auth;
 private ControlEntries entry_manager;
 private ControlStorage burl_store;
-private WorkThread work_thread;
+private ControlWorkThread work_thread;
 
 
 
@@ -88,7 +86,7 @@ ControlServer(ControlMain main,String keystorepwd)
    burl_auth = new ControlAuthentication(main,session_store); 
    entry_manager = new ControlEntries(main,this);  
    burl_store = main.getStorage();
-   work_thread = new WorkThread();
+   work_thread = new ControlWorkThread(main);
    work_thread.start();
    
    BowerRouter<ControlSession> br = setupRouter();
@@ -661,62 +659,6 @@ BurlUserAccess validateLibrary(ControlSession session,Number lid)
 
 
 
-
-
-
-/********************************************************************************/
-/*                                                                              */
-/*      Worker thread for adding to libraries                                   */
-/*                                                                              */
-/********************************************************************************/
-
-private final class WorkItem implements Runnable {
-  
-   private Number library_id;
-   private List<String> add_isbns;
-   private BurlUpdateMode update_mode;
-   private boolean do_count;
-   
-   WorkItem(Number lid,List<String> isbns,BurlUpdateMode upd,boolean count) {
-      library_id = lid;
-      add_isbns = isbns;
-      update_mode = upd;
-      do_count = count;
-    }
-   
-   @Override public void run() {
-      ControlLibrary lib = burl_store.findLibraryById(library_id);
-      if (lib == null) return;
-      lib.addToLibrary(add_isbns,update_mode,do_count);
-    }
-   
-}       // end of inner class WorkItem
-
-
-private final class WorkThread extends Thread {
-   
-   private BlockingQueue<WorkItem> work_queue;
-   
-   WorkThread() {
-      super("ISBN Adder Thread");
-      work_queue = new LinkedBlockingQueue<>();
-    }
-   
-   void addTask(Number lid,List<String> isbns,BurlUpdateMode mode,boolean count) {
-      WorkItem wi = new WorkItem(lid,isbns,mode,count);
-      work_queue.add(wi);
-    }
-   
-   @Override public void run() {
-      for ( ; ; ) {
-         try {
-            WorkItem wi = work_queue.take();
-            wi.run();
-          }
-         catch (InterruptedException e) { }
-       }
-    }
-}
 
 }       // end of class ControlServer
 
