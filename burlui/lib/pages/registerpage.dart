@@ -120,7 +120,7 @@ class _BurlRegisterWidgetState extends State<BurlRegisterWidget> {
                     widgets.fieldSeparator(),
                     //   const Text("You will have to validate your email before logging in."),
                     //   widgets.fieldSeparator(),
-                    widgets.submitButton("Submit", _handleRegister),
+                    widgets.submitButton("REGISTER", _handleRegister),
                   ],
                 ),
               ),

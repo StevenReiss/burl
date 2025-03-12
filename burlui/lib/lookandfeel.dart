@@ -25,7 +25,7 @@ final Color toolTipRightColor = Colors.yellow.shade200;
 const double toolTipHeight = 50;
 const double toolTipFontSize = 18;
 
-const Color submitBackgroundColor = Colors.yellow;
+const Color submitBackgroundColor = Color.fromARGB(255, 196, 254, 178);
 const Color submitForegroundColor = Colors.black;
 const double buttonFontSize = 14;
 

@@ -156,7 +156,7 @@ class _BurlLoginWidgetState extends State<BurlLoginWidget> {
                       ),
                       width: MediaQuery.of(context).size.width * 0.4,
                       child: widgets.submitButton(
-                        "Login",
+                        "LOGIN",
                         _handleLogin,
                       ),
                     ),

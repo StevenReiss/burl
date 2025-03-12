@@ -271,6 +271,7 @@ Widget submitButton(
   ButtonStyle style = ElevatedButton.styleFrom(
     backgroundColor: laf.submitBackgroundColor,
     foregroundColor: laf.submitForegroundColor,
+    textStyle: TextStyle(fontWeight: FontWeight.bold),
     //  overlayColor: Colors.brown,
   );
   if (!enabled) action = null;
