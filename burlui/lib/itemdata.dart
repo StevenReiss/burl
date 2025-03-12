@@ -36,12 +36,23 @@ class ItemData {
     if (id == null) return "";
     dynamic v1 = _jsonData[id];
     if (v1 == null) return "";
-    String v2 = "";
+    String v2 = "UNDEF $fldname ${v1.runtimeType}";
     if (v1.runtimeType == String) {
       v2 = v1 as String;
     } else if (v1.runtimeType == List) {
       List v1l = v1 as List;
       v2 = v1l.join(join);
+    } else {
+      String v4 = v1.toString();
+      if (v4.startsWith("[")) {
+        // production web application sometimes does odd things here -- need to decode
+        int i = v4.lastIndexOf("]");
+        v4 = v4.substring(1, i).trim();
+        List<String> v4a = v4.split(",");
+        v2 = v4a.join(join);
+      } else {
+        v2 = "UNDEF $fldname ${v1.runtimeType} $v1";
+      }
     }
     List<int> runes = v2.runes.toList();
     String v3 = utf8.decode(runes);

@@ -371,10 +371,13 @@ public static boolean sendEmail(String sendto,String subj,String body)
    catch (IOException e) { }
    
    BowerMailer mi = new BowerMailer(sendto,subj,body);
-   mi.setSender(props.getProperty("email.from"),
-         props.getProperty("email.user"),
-         props.getProperty("email.password"));
-   mi.setReplyTo(props.getProperty("email.replyto"));
+   String from = props.getProperty("email.from");
+   String user = props.getProperty("email.user");
+   String pwd = props.getProperty("email.password");
+   String rply = props.getProperty("email.replyto");
+   IvyLog.logD("EMAIL " + from + " " + user + " " + pwd + " " + rply);
+   mi.setSender(from,user,pwd);
+   mi.setReplyTo(rply);
    boolean fg = mi.send();
    
    return fg;
