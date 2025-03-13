@@ -72,11 +72,7 @@ class ItemData {
     }
   }
 
-  List<String>? getMultiple(String fldname) {
-    return null;
-  }
-
   int getId() {
     return _jsonData["burl_id"];
   }
-}  // end of class ItemData
+} // end of class ItemData

@@ -31,7 +31,8 @@ String hasher(String msg) {
 
 bool validateEmail(String email) {
   const res =
-      r'^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+      r'^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}'
+      r'\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
   final regExp = RegExp(res);
   if (!regExp.hasMatch(email)) return false;
   return true;
@@ -43,19 +44,17 @@ bool validatePassword(String? pwd) {
   return true;
 }
 
-Uri getServerUri(String path, [Map<String, dynamic>? query]) {
-  String p1 = "/rest/$path";
-  if (kDebugMode && globals.debugServer) {
-    return Uri.http("localhost:6737", p1, query);
-  }
-  return Uri.https("sherpa.cs.brown.edu:6737", p1, query);
-}
+/********************************************************************************/
+/*                                                                              */
+/*      Functions for communicating with BURL server                            */
+/*                                                                              */
+/********************************************************************************/
 
 Future<Map<String, dynamic>> postJson(
   String url, {
   Map<String, String?>? body,
 }) async {
-  Uri u = getServerUri(url);
+  Uri u = _getServerUri(url);
   Map<String, String> headers = {};
   headers["accept"] = "application/json";
   if (globals.burlSession != null) {
@@ -71,11 +70,8 @@ Future<Map<String, dynamic>> postJson(
   return js;
 }
 
-Future<void> postJsonOnly(
-  String url, {
-  Map<String, String?>? body,
-}) async {
-  Uri u = getServerUri(url);
+Future<void> postJsonOnly(String url, {Map<String, String?>? body}) async {
+  Uri u = _getServerUri(url);
   Map<String, String> headers = {"accept": "application/json"};
   if (globals.burlSession != null) {
     if (body == null) {
@@ -92,7 +88,7 @@ Future<void> postJsonDownload(
   String path, {
   Map<String, String?>? body,
 }) async {
-  Uri u = getServerUri(url);
+  Uri u = _getServerUri(url);
   Map<String, String> headers = {"accept": "application/json"};
   if (globals.burlSession != null) {
     if (body == null) {
@@ -117,9 +113,18 @@ Future<Map<String, dynamic>> getJson(
       body["session"] = globals.burlSession;
     }
   }
-  Uri u = getServerUri(url, body);
+  Uri u = _getServerUri(url, body);
   dynamic resp = await http.get(u, headers: headers);
   Map<String, dynamic> js = {};
   js = convert.jsonDecode(resp.body) as Map<String, dynamic>;
   return js;
 }
+
+Uri _getServerUri(String path, [Map<String, dynamic>? query]) {
+  String p1 = "/rest/$path";
+  if (kDebugMode && globals.debugServer) {
+    return Uri.http("localhost:6737", p1, query);
+  }
+  return Uri.https("sherpa.cs.brown.edu:6737", p1, query);
+}
+

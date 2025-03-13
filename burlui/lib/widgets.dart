@@ -21,11 +21,11 @@ import 'package:intl/intl.dart' as intl;
 import 'package:duration_picker/duration_picker.dart';
 import 'package:flutter_spinbox/material.dart';
 
-///******************************************************************************/
-///                                                                             */
-///     Text widgets                                                            */
-///                                                                             */
-///******************************************************************************/
+/********************************************************************************/
+/*                                                                              */
+/*    Text widgets                                                              */
+/*                                                                              */
+/********************************************************************************/
 
 Widget textFormField({
   String? hint,
@@ -154,10 +154,7 @@ Widget errorField(String? text) {
   String t1 = (text ?? "");
   return Text(
     t1,
-    style: const TextStyle(
-      color: laf.errorColor,
-      fontSize: laf.errorFontSize,
-    ),
+    style: const TextStyle(color: laf.errorColor, fontSize: laf.errorFontSize),
   );
 }
 
@@ -227,9 +224,7 @@ Widget itemWithMenu<T>(
   return w1;
 }
 
-List<PopupMenuItem<MenuAction>> _itemMenuBuilder(
-  List<MenuAction> acts,
-) {
+List<PopupMenuItem<MenuAction>> _itemMenuBuilder(List<MenuAction> acts) {
   return acts.map<PopupMenuItem<MenuAction>>(_menuItemAction).toList();
 }
 
@@ -260,11 +255,11 @@ Widget tooltipWidget(String tooltip, Widget w) {
   return tt;
 }
 
-///******************************************************************************/
-///                                                                             */
-///     Buttons                                                                 */
-///                                                                             */
-///******************************************************************************/
+/********************************************************************************/
+/*                                                                              */
+/*    Buttons                                                                   */
+/*                                                                              */
+/********************************************************************************/
 
 Widget submitButton(
   String name,
@@ -285,10 +280,7 @@ Widget submitButton(
     child: Text(name),
   );
   Widget w = Padding(
-    padding: const EdgeInsets.symmetric(
-      vertical: 16.0,
-      horizontal: 6.0,
-    ),
+    padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 6.0),
     child: eb,
   );
   w = tooltipWidget(tooltip, w);
@@ -314,11 +306,11 @@ Widget textButton(
   return w;
 }
 
-///******************************************************************************/
-///                                                                             */
-///     Top menus                                                               */
-///                                                                             */
-///******************************************************************************/
+/********************************************************************************/
+/*                                                                              */
+/*      Top menus                                                               */
+/*                                                                              */
+/********************************************************************************/
 
 Widget topMenu(void Function(String)? handler, List labels) {
   return PopupMenuButton(
@@ -340,12 +332,8 @@ Widget topMenuAction(List<MenuAction> labels) {
   );
 }
 
-List<PopupMenuItem<MenuAction>> _topMenuActionBuilder(
-  List<MenuAction> labels,
-) {
-  return labels
-      .map<PopupMenuItem<MenuAction>>(_menuItemAction)
-      .toList();
+List<PopupMenuItem<MenuAction>> _topMenuActionBuilder(List<MenuAction> labels) {
+  return labels.map<PopupMenuItem<MenuAction>>(_menuItemAction).toList();
 }
 
 PopupMenuItem<MenuAction> _menuItemAction(dynamic val) {
@@ -394,21 +382,21 @@ class MenuAction {
   MenuAction(this.label, this.action, [this.tooltip = ""]);
 }
 
-///******************************************************************************/
-///                                                                             */
-///     Field separator                                                         */
-///                                                                             */
-///******************************************************************************/
+/********************************************************************************/
+/*                                                                              */
+/*      Field separator                                                         */
+/*                                                                              */
+/********************************************************************************/
 
 Widget fieldSeparator([double ht = 8]) {
   return SizedBox(height: ht);
 }
 
-///******************************************************************************/
-///                                                                             */
-///     Drop down selectors                                                     */
-///                                                                             */
-///******************************************************************************/
+/********************************************************************************/
+/*                                                                              */
+/*      Drop down selectors                                                     */
+/*                                                                              */
+/********************************************************************************/
 
 Widget dropDown(
   List<String> items, {
@@ -478,11 +466,7 @@ Widget dropDownWidget<T>(
 
   itmlst.addAll(
     items.map<DropdownMenuItem<T>>((T v) {
-      return DropdownMenuItem<T>(
-        value: v,
-        enabled: true,
-        child: Text(lbl(v)),
-      );
+      return DropdownMenuItem<T>(value: v, enabled: true, child: Text(lbl(v)));
     }).toList(),
   );
 
@@ -496,11 +480,11 @@ Widget dropDownWidget<T>(
   return tooltipWidget(tooltip, fld);
 }
 
-///******************************************************************************/
-///                                                                             */
-///     Boolean buttons                                                         */
-///                                                                             */
-///******************************************************************************/
+/********************************************************************************/
+/*                                                                              */
+/*      Boolean buttons                                                         */
+/*                                                                              */
+/********************************************************************************/
 
 Widget booleanField({
   String? label,
@@ -521,23 +505,19 @@ Widget booleanField({
   return tooltipWidget(tooltip, w);
 }
 
-///******************************************************************************/
-///                                                                             */
-///     Page navigation assistance                                              */
-///                                                                             */
-///******************************************************************************/
+/********************************************************************************/
+/*                                                                              */
+/*      Page navigation assistance                                              */
+/*                                                                              */
+/********************************************************************************/
 
 void goto(BuildContext context, Widget w) {
   // if (!context.mounted) return;
-  Navigator.of(
-    context,
-  ).push(MaterialPageRoute(builder: (context) => w));
+  Navigator.of(context).push(MaterialPageRoute(builder: (context) => w));
 }
 
 Future<dynamic> gotoThen(BuildContext context, Widget w) async {
-  await Navigator.of(
-    context,
-  ).push(MaterialPageRoute(builder: (context) => w));
+  await Navigator.of(context).push(MaterialPageRoute(builder: (context) => w));
 }
 
 void gotoDirect(BuildContext context, Widget w) {
@@ -555,11 +535,11 @@ dynamic gotoResult(BuildContext context, Widget w) async {
   return goto(context, w);
 }
 
-///******************************************************************************/
-///                                                                             */
-///     Lists and list boxes                                                    */
-///                                                                             */
-///******************************************************************************/
+/********************************************************************************/
+/*                                                                              */
+/*      Lists and list boxes                                                    */
+/*                                                                              */
+/********************************************************************************/
 
 Widget listBox<T>(
   String what,
@@ -605,11 +585,11 @@ Widget listBox<T>(
   );
 }
 
-///******************************************************************************/
-///                                                                             */
-///     Date and time fields                                                    */
-///                                                                             */
-///******************************************************************************/
+/********************************************************************************/
+/*                                                                              */
+/*      Date and time fields                                                    */
+/*                                                                              */
+/********************************************************************************/
 
 class DateFormField {
   late final BuildContext context;
@@ -849,11 +829,11 @@ class DurationFormField {
   }
 } // end of DurationFormField
 
-///******************************************************************************/
-///                                                                             */
-///     Numeric fields                                                          */
-///                                                                             */
-///******************************************************************************/
+/********************************************************************************/
+/*                                                                              */
+/*      Numeric fields                                                          */
+/*                                                                              */
+/********************************************************************************/
 
 Widget integerField({
   required int min,
@@ -948,11 +928,11 @@ Widget numberField({
   return w4;
 }
 
-///******************************************************************************/
-///                                                                             */
-///     Dialog setup                                                            */
-///                                                                             */
-///******************************************************************************/
+/********************************************************************************/
+/*                                                                              */
+/*      Dialog setup                                                            */
+/*                                                                              */
+/********************************************************************************/
 
 Future<void> displayDialog(
   BuildContext context,
@@ -1009,10 +989,7 @@ PreferredSizeWidget appBar(String title) {
   return AppBar(
     title: Text(
       title,
-      style: const TextStyle(
-        fontWeight: FontWeight.bold,
-        color: Colors.black,
-      ),
+      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
     ),
   );
 }
@@ -1021,11 +998,11 @@ Widget circularProgressIndicator() {
   return const Center(child: CircularProgressIndicator());
 }
 
-///******************************************************************************/
-///                                                                             */
-///     Top level pages                                                         */
-///                                                                             */
-///******************************************************************************/
+/********************************************************************************/
+/*                                                                              */
+/*      Top level pages                                                         */
+/*                                                                              */
+/********************************************************************************/
 
 Widget topLevelPage(
   BuildContext context,
@@ -1095,11 +1072,11 @@ Widget topLevelNSPage(BuildContext context, Widget child) {
   );
 }
 
-///******************************************************************************/
-///                                                                             */
-///     Utility methods                                                         */
-///                                                                             */
-///******************************************************************************/
+/********************************************************************************/
+/*                                                                              */
+/*      Utility methods                                                         */
+/*                                                                              */
+/********************************************************************************/
 
 ThemeData getTheme() {
   return ThemeData(
@@ -1123,10 +1100,7 @@ InputDecoration getDecoration({
     labelStyle: getLabelStyle(),
     hoverColor: laf.decorationHoverColor,
     focusedBorder: const OutlineInputBorder(
-      borderSide: BorderSide(
-        width: 2,
-        color: laf.decorationBorderColor,
-      ),
+      borderSide: BorderSide(width: 2, color: laf.decorationBorderColor),
     ),
     border: const OutlineInputBorder(
       borderSide: BorderSide(width: 2, color: laf.decorationInputColor),
@@ -1140,10 +1114,7 @@ InputDecoration getDecoration({
 }
 
 TextStyle getLabelStyle() {
-  return const TextStyle(
-    color: laf.labelColor,
-    fontWeight: FontWeight.bold,
-  );
+  return const TextStyle(color: laf.labelColor, fontWeight: FontWeight.bold);
 }
 
 Widget getPadding(double size) {
@@ -1154,10 +1125,9 @@ Widget getTopLevelLogo(BuildContext context) {
   return SizedBox(
     width: MediaQuery.of(context).size.width * 0.3,
     height: MediaQuery.of(context).size.height * 0.25,
-    child: Center(
-      child: Image.asset(laf.topLevelImage, fit: BoxFit.contain),
-    ),
+    child: Center(child: Image.asset(laf.topLevelImage, fit: BoxFit.contain)),
   );
 }
 
 // end of widgets.dart
+

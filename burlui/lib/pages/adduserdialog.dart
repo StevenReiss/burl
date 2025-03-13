@@ -25,13 +25,7 @@ Future addUserDialog(BuildContext context, LibraryData libdata) async {
   BuildContext dcontext = context;
   String? emailError;
   String acclevel = "VIEWER";
-  List<String> acclevels = [
-    "NONE",
-    "VIEWER",
-    "EDITOR",
-    "LIBRARIAN",
-    "OWNER",
-  ];
+  List<String> acclevels = ["NONE", "VIEWER", "EDITOR", "LIBRARIAN", "OWNER"];
 
   void cancel() {
     Navigator.of(dcontext).pop("CANCEL");
@@ -89,10 +83,7 @@ Future addUserDialog(BuildContext context, LibraryData libdata) async {
           children: <Widget>[
             const Text(
               "Add/Remove User from Library",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             const SizedBox(height: 15),
             widgets.textFormField(
@@ -105,19 +96,14 @@ Future addUserDialog(BuildContext context, LibraryData libdata) async {
               value: acclevel,
               onChanged: setLevel,
               label: "Access Level",
-              tooltip:
-                  "Set User's access level.  Use NONE to remove the user",
+              tooltip: "Set User's access level.  Use NONE to remove the user",
             ),
             const SizedBox(height: 8),
             widgets.errorField(emailError),
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                cancelBtn,
-                const SizedBox(width: 15),
-                acceptBtn,
-              ],
+              children: [cancelBtn, const SizedBox(width: 15), acceptBtn],
             ),
           ],
         ),
@@ -133,3 +119,4 @@ Future addUserDialog(BuildContext context, LibraryData libdata) async {
     },
   );
 }
+

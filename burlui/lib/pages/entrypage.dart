@@ -25,6 +25,12 @@ import '../globals.dart' as globals;
 import 'loginpage.dart';
 import 'dart:convert';
 
+/********************************************************************************/
+/*                                                                              */
+/*      Top level widgets                                                       */
+/*                                                                              */
+/********************************************************************************/
+
 class BurlEntryWidget extends StatelessWidget {
   final LibraryData _libData;
   final ItemData _itemData;
@@ -46,6 +52,12 @@ class BurlEntryPage extends StatefulWidget {
   @override
   State<BurlEntryPage> createState() => _BurlEntryPageState();
 } // end of class BurlLibraryPage
+
+/********************************************************************************/
+/*                                                                              */
+/*      Entry page state: the actual worker                                     */
+/*                                                                              */
+/********************************************************************************/
 
 class _BurlEntryPageState extends State<BurlEntryPage> {
   LibraryData _libData = LibraryData.unknown();
@@ -193,10 +205,7 @@ class _BurlEntryPageState extends State<BurlEntryPage> {
       "library": _libData.getLibraryId().toString(),
       "entry": _itemData.getId().toString(),
     };
-    Map<String, dynamic> rslt = await util.postJson(
-      "removeentry",
-      body: data,
-    );
+    Map<String, dynamic> rslt = await util.postJson("removeentry", body: data);
     if (rslt["status"] == "OK") {
       if (dcontext.mounted) {
         Navigator.pop(dcontext, "OK");
@@ -264,10 +273,7 @@ class _BurlEntryPageState extends State<BurlEntryPage> {
         "entry": _itemData.getId().toString(),
         "edits": json.encode(edits),
       };
-      Map<String, dynamic> rslt = await util.postJson(
-        "editentry",
-        body: data,
-      );
+      Map<String, dynamic> rslt = await util.postJson("editentry", body: data);
       if (rslt["status"] == "OK") {
         Map<String, dynamic> data = rslt["entry"];
         _itemData.reload(data);
@@ -294,3 +300,4 @@ class _BurlEntryPageState extends State<BurlEntryPage> {
     }
   }
 } // end of class _BurlEntryPageState
+

@@ -28,8 +28,7 @@ class BurlForgotPasswordWidget extends StatefulWidget {
       _BurlForgotPasswordWidgetState();
 }
 
-class _BurlForgotPasswordWidgetState
-    extends State<BurlForgotPasswordWidget> {
+class _BurlForgotPasswordWidgetState extends State<BurlForgotPasswordWidget> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String? _emailGiven;
 
@@ -126,3 +125,4 @@ class _BurlForgotPasswordWidgetState
     await util.postJsonOnly("forgotpassword", body: body);
   }
 }
+

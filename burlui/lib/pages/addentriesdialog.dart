@@ -1,6 +1,6 @@
 /********************************************************************************/
 /*                                                                              */
-/*              addentriesdialog.dart                                                    */
+/*              addentriesdialog.dart                                           */
 /*                                                                              */
 /*      Dialog to add entries by isbn or lccn                                   */
 /*                                                                              */
@@ -40,10 +40,7 @@ Future addEntriesDialog(BuildContext context, LibraryData lib) async {
       "count": "TRUE",
       "isbnstr": isbncontroller.text,
     };
-    Map<String, dynamic> rslt = await util.postJson(
-      "addisbns",
-      body: data,
-    );
+    Map<String, dynamic> rslt = await util.postJson("addisbns", body: data);
     if (rslt["status"] == "OK") {
       if (dcontext.mounted) {
         Navigator.of(dcontext).pop("OK");
@@ -85,10 +82,7 @@ Future addEntriesDialog(BuildContext context, LibraryData lib) async {
           children: <Widget>[
             const Text(
               "Add Items to Library by ISBN/LCCN",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             widgets.fieldSeparator(15),
             widgets.dropDownWidget<String>(
@@ -96,8 +90,7 @@ Future addEntriesDialog(BuildContext context, LibraryData lib) async {
               value: mode,
               onChanged: setMode,
               label: "Update Mode",
-              tooltip:
-                  "Select update mode when item already exists in library",
+              tooltip: "Select update mode when item already exists in library",
             ),
             widgets.fieldSeparator(),
             Expanded(
@@ -133,3 +126,4 @@ Future addEntriesDialog(BuildContext context, LibraryData lib) async {
     },
   );
 }
+
