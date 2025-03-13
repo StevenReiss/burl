@@ -34,5 +34,5 @@
    </FIELDS>
    <CSV QUOTE='"' SEPARATOR="," />
    <MULTIPLE TEXT=" | " />
-   <LABEL CODE='LC Classification' AUTHOR='Personal Name,Related Names' />
+   <LABEL CODE='LC Classification' AUTHOR='Personal Name,Related Names' YEAR='Date' />
 </BURL>

@@ -30,7 +30,7 @@ import 'adduserdialog.dart';
 import 'printlabelsdialog.dart';
 import '../lookandfeel.dart' as laf;
 
-const String defaultSort = "<DEFAULT>";
+const String defaultSort = "Order Added";
 
 class BurlLibraryWidget extends StatelessWidget {
   final LibraryData _libData;

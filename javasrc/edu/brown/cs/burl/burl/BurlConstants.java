@@ -112,6 +112,7 @@ enum BurlRepoType {
  **/
 
 enum BurlUpdateMode {
+   NEW,                 // add new entry to database, no merge
    REPLACE,             // replace old data with new
    REPLACE_FORCE,       // replace old data even if new is empty
    AUGMENT,             // only replace if old is empty

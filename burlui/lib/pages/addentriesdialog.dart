@@ -25,7 +25,7 @@ import 'dart:io';
 Future addEntriesDialog(BuildContext context, LibraryData lib) async {
   TextEditingController isbncontroller = TextEditingController();
   BuildContext dcontext = context;
-  String mode = "AUGMENT";
+  String mode = "NEW";
 
   void cancel() {
     if (dcontext.mounted) {
@@ -72,7 +72,7 @@ Future addEntriesDialog(BuildContext context, LibraryData lib) async {
   Widget cancelBtn = widgets.submitButton("Cancel", cancel);
   Widget submitBtn = widgets.submitButton("Submit", submit);
   Widget fileBtn = widgets.submitButton("Add From File", addFile);
-  List<String> modes = ["SKIP", "AUGMENT", "REPLACE", "FORCE"];
+  List<String> modes = ["NEW", "SKIP", "AUGMENT", "REPLACE", "FORCE"];
 
   Dialog dlg = Dialog(
     child: Padding(

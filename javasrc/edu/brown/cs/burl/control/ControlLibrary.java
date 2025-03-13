@@ -175,7 +175,7 @@ private String getUsers(BurlUserAccess level,List<BurlLibraryAccess> acclst)
       
       // possibly do a broader search if bibentry is null here
       
-      if (row == null) {
+      if (row == null || mode == BurlUpdateMode.NEW) {
          row = repo.newRow();
          repo.setInitialValues(row,isbn);
        }

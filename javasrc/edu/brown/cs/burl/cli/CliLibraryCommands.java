@@ -380,7 +380,7 @@ private void badListUsersArgs()
 void handleAddIsbns(List<String> args)
 {
    List<String> isbns = new ArrayList<>();
-   BurlUpdateMode updmode = BurlUpdateMode.AUGMENT;
+   BurlUpdateMode updmode = BurlUpdateMode.NEW;
    boolean count = false;
    
    for (int i = 0; i < args.size(); ++i) {
@@ -389,6 +389,15 @@ void handleAddIsbns(List<String> args)
          if (s.startsWith("-f") && i+1 < args.size()) {
             addFileIsbns(args.get(++i),args);
           }
+         else if (s.startsWith("-c")) {
+            count = true;
+          }
+         else if (s.startsWith("-noc")) {
+            count = false;
+          }
+         else if (s.startsWith("-n")) {
+            updmode = BurlUpdateMode.NEW;
+          } 
          else if (s.startsWith("-r")) {
             updmode = BurlUpdateMode.REPLACE;
           } 
@@ -401,12 +410,7 @@ void handleAddIsbns(List<String> args)
          else if (s.startsWith("-s")) {
             updmode = BurlUpdateMode.SKIP;
           }
-         else if (s.startsWith("-c")) {
-            count = true;
-          }
-         else if (s.startsWith("-noc")) {
-            count = false;
-          }
+        
          else badAddIsbnArgs();
        }
       else isbns.add(s);
@@ -457,7 +461,7 @@ void addFileIsbns(String fnm,List<String> isbns)
 private void badAddIsbnArgs()
 {
    IvyLog.logI("BURLCLI",
-         "add [-f <file>] [ -replace | -augment | -Replace | -skip ] [ [no]count ]  [isbn|lccn ...]");
+         "add [-f <file>] [ -new | -replace | -augment | -Replace | -skip ] [ [no]count ]  [isbn|lccn ...]");
 }
 
 
@@ -471,7 +475,7 @@ void handleImport(List<String> args)
 {
    BurlExportFormat format = null;
    File file = null;
-   BurlUpdateMode updmode = BurlUpdateMode.REPLACE;
+   BurlUpdateMode updmode = BurlUpdateMode.NEW;
    boolean docounts = false;
    
    for (int i = 0; i < args.size(); ++i) {
@@ -489,8 +493,8 @@ void handleImport(List<String> args)
          else if (s.startsWith("-s")) {                         // -skip
             updmode = BurlUpdateMode.SKIP;
           }
-         else if (s.startsWith("-r")) {                         // -replace
-            updmode = BurlUpdateMode.REPLACE;
+         else if (s.startsWith("-n")) {                         // -new
+            updmode = BurlUpdateMode.NEW; 
           }
          else if (s.startsWith("-f")) {                         // -force
             updmode = BurlUpdateMode.SKIP;
@@ -576,7 +580,7 @@ void handleImport(List<String> args)
 private void badImportArgs()
 {
    IvyLog.logI("BURLCLI","import [ -csv | -json ] " +
-         "[ -skip | -replace | -force | -augment ] <file>");
+         "[ -new | -skip | -replace | -force | -augment ] <file>");
 }
 
 

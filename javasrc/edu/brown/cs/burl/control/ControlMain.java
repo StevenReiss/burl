@@ -263,6 +263,9 @@ private boolean setUpdateMode()
    if (md == null || md.isEmpty()) md = "r";
    char c = Character.toLowerCase(md.charAt(0));
    switch (c) {
+      case 'n' :
+         update_mode = BurlUpdateMode.NEW;
+         break;
       case 'r' :                       
          update_mode = BurlUpdateMode.REPLACE;
          break;

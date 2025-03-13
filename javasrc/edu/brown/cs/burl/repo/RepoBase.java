@@ -303,8 +303,6 @@ protected static String getMultiplePattern()
 @Override public void computeEntry(BurlRepoRow brr,String isbn, 
       BurlBibEntry bib,BurlUpdateMode updmode,boolean count)
 {
-   if (updmode == BurlUpdateMode.SKIP) return;
-   
    String visbn = BurlUtil.getValidISBN(isbn);
    
    for (BurlRepoColumn brc : repo_columns) {
@@ -878,7 +876,6 @@ private class ImportJsonEntry implements BurlBibEntry {
    int cntidx = 0;
    boolean more = false;
    List<Number> done = new ArrayList<>();
-   BurlRepoColumn datecol = getColumn("Date");
    
    for (Number id : ids) {
       BurlRepoRow brr = getRowForId(id);
@@ -902,10 +899,10 @@ private class ImportJsonEntry implements BurlBibEntry {
       if (idx > 0) author = author.substring(0,idx);
       if (author.length() > 12) author = author.substring(0,12);
       author = fixUnicode(author);
-      String date = null;
-      if (datecol != null) date = brr.getData(datecol);
       
-      List<String> items = getLabelElements(code,date);
+      String year = findLabelData(lbldata,"YEAR",brr);
+      
+      List<String> items = getLabelElements(code,year);
       
       cntidx = insertLabelText(cnts,cntidx,"nnnnnnnnnnnn",items.get(0));
       if (cntidx < 0) {
@@ -992,7 +989,7 @@ List<String> getLabelElements(String lcc,String date)
        }
     }
    
-   if (year.isEmpty() && date != null) year = date;
+   if (date != null && !date.isEmpty()) year = date;
    
    rslt.add(add);
    rslt.add(year);
