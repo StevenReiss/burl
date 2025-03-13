@@ -39,7 +39,12 @@ private int     column_number;
 private BurlFieldData field_data;
 
 private static final Pattern PRE_ZERO = Pattern.compile("[A-Za-z](0+)[1-9]");
-private static final Pattern POST_ZERO = Pattern.compile(".[0-9]*[1-9](0+)[ .,A-Z]");
+private static final Pattern POST_ZERO = Pattern.compile("\\.[0-9]*[1-9](0+)[ .,A-Z]");
+private static final Pattern POST_ZERO_A = Pattern.compile("(\\.0+)[ .,A-Z]");
+private static final Pattern POST_ZERO_B = Pattern.compile("\\.[0-9]*[1-9](0+)$");
+private static final Pattern POST_ZERO_C =
+   Pattern.compile("(\\.0+)$");
+
 
 
 
@@ -215,6 +220,28 @@ static String fixLccCode(String code)
       int start = m.start(1);
       int end = m.end(1);
       code = code.substring(0,start) + code.substring(end);
+    }
+   
+   for ( ; ; ) {
+      Matcher m = POST_ZERO_A.matcher(code);
+      if (!m.find()) break;
+      int start = m.start(1);
+      int end = m.end(1);
+      code = code.substring(0,start) + code.substring(end);
+    }
+   
+   for ( ; ; ) {
+      Matcher m = POST_ZERO_B.matcher(code);
+      if (!m.find()) break;
+      int start = m.start(1);
+      code = code.substring(0,start);
+    }
+   
+   for ( ; ; ) {
+      Matcher m = POST_ZERO_C.matcher(code);
+      if (!m.find()) break;
+      int start = m.start(1);
+      code = code.substring(0,start);
     }
    
    return code;
