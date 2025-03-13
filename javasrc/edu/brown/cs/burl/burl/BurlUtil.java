@@ -320,7 +320,7 @@ public static String fixFirstLast(String val)
 {
    // might want to split on | first and do each component individually
    
-   if (val.contains(",")) return val;
+   if (val == null || val.contains(",")) return val;
    
    String [] names = val.split("\\s");
    if (names.length == 1) return val;
