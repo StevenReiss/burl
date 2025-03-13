@@ -342,6 +342,7 @@ String handleRemoveLibrary(HttpExchange he,ControlSession session)
     }
    
    burl_main.removeLibrary(lib);
+   // remove from ControlRepoManager
    
    return BowerRouter.jsonOKResponse(session);
 }

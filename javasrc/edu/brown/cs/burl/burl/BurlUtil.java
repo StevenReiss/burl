@@ -217,6 +217,8 @@ public static JSONArray buildJsonArray(Object... val)
 
 public static String getValidISBN(String s0)
 {
+   if (s0 == null) return null;
+   
    String s = s0;
    
    s = s.toUpperCase();

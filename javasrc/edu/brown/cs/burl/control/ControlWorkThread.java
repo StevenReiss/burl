@@ -80,8 +80,10 @@ void addTask(Number lid,List<String> isbns,BurlUpdateMode mode,boolean count)
 
 @Override public void run() {
    for ( ; ; ) {
+      String id = null;
       try {
          BurlWorkItem wi = getNextItem();
+         id = wi.getItem();
          ControlLibrary lib = burl_store.findLibraryById(wi.getLibraryId());
          try {
             if (lib != null) {
@@ -95,7 +97,7 @@ void addTask(Number lid,List<String> isbns,BurlUpdateMode mode,boolean count)
        }
       catch (InterruptedException e) { }
       catch (Throwable t) {
-         IvyLog.logE("BURL","Problem working on item",t);
+         IvyLog.logE("BURL","Problem working on item " + id,t);
        }
     }
 }

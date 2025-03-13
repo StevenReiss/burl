@@ -323,9 +323,11 @@ ControlStorage(ControlMain ctrl)
 @Override public void removeLibrary(Number lid)
 {
    String q1 = "DELETE FROM BurlUserAccess WHERE libraryid = $1";
+   String q1a = "DELETE FROM BurlWorkQueue WHERE libraryid = $1";
    String q2 = "DELETE FROM BurlLibraries WHERE id = $1";
    
    sql_database.sqlUpdate(q1,lid);
+   sql_database.sqlUpdate(q1a,lid);
    sql_database.sqlUpdate(q2,lid);
 }
 
