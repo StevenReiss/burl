@@ -12,7 +12,7 @@ if test -d $LIB; then
 else
    LIB=/pro/ivy/lib
 fi
-RES=$SRC/../resources
+RES=$SRD/../resources
 
 
 CP=$LIB/jakarta.mail.jar:$LIB/jakarta.activation.jar:$SRD1/burl.jar:$RES

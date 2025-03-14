@@ -37,6 +37,7 @@ Future printLabelsDialog(BuildContext context, LibraryData lib) async {
     Map<String, String?> data = {
       "library": lib.getLibraryId().toString(),
     };
+    dcontext = context;
     await util.postJsonDownload("labels", fileControl.text, body: data);
     if (dcontext.mounted) {
       Navigator.of(dcontext).pop("OK");
