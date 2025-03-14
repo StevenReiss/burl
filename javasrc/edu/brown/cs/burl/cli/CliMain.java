@@ -348,7 +348,6 @@ void updateLibrary(String lib)
 
 
 
-
 /********************************************************************************/
 /*                                                                              */
 /*      Processing methods                                                      */
@@ -372,6 +371,8 @@ private void process()
          for ( ; ; ) {
             System.out.print("BurlCLI> ");
             String ln = rdr.readLine();
+            ln = ln.replace("&quot;","\"");
+            
             if (ln == null) {
                System.out.println();
                break;
@@ -379,7 +380,7 @@ private void process()
             ln = ln.trim();
             if (ln.isEmpty()) continue;
             if (ln.startsWith("#")) continue;
-            List<String> cmdlist = tokenize(ln);
+            List<String> cmdlist = BurlUtil.tokenize(ln); 
             if (cmdlist.size() == 0) continue;
             String cmd = cmdlist.remove(0);
             processCommand(cmd,cmdlist);
@@ -389,41 +390,6 @@ private void process()
        }
     }
 }
-
-
-public static List<String> tokenize(String cmd)
-{
-   List<String> argv = new ArrayList<String>();
-   
-   if (cmd == null) return argv;
-   
-   char quote = 0;
-   StringBuffer buf = new StringBuffer();
-   for (int i = 0; i < cmd.length(); ++i) {
-      char c = cmd.charAt(i);
-      if (quote != 0 && c == quote) {
-         quote = 0;
-         continue;
-       }
-      else if (quote == 0 && (c == '"' || c == '\'')) {
-         quote = c;
-         continue;
-       }
-      else if (quote == 0 && (c == ' ' || c == '\n')) {
-         if (buf.length() > 0) {
-            argv.add(buf.toString());
-            buf = new StringBuffer();
-          }
-       }
-      else buf.append(c);
-    }
-   if (buf.length() > 0) {
-      argv.add(buf.toString());
-    }
-   
-   return argv;
-}
-
 
 
 
@@ -835,11 +801,6 @@ boolean checkResponse(JSONObject obj,String cmd)
    
    return false;
 }
-
-
-
-
-
 
 
 

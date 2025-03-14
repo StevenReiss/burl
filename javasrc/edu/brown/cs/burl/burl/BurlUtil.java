@@ -24,7 +24,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 import java.util.Properties;
 import java.util.Random;
 import java.util.regex.Matcher;
@@ -208,7 +210,6 @@ public static JSONArray buildJsonArray(Object... val)
    
 
 
-
 /********************************************************************************/
 /*                                                                              */
 /*      ISBN methods                                                            */
@@ -385,6 +386,46 @@ public static boolean sendEmail(String sendto,String subj,String body)
    return fg;
 }
 
+
+
+/********************************************************************************/
+/*                                                                              */
+/*      Tokenizer                                                               */
+/*                                                                              */
+/********************************************************************************/
+
+public static List<String> tokenize(String cmd)
+{
+   List<String> argv = new ArrayList<String>();
+   
+   if (cmd == null) return argv;
+   
+   char quote = 0;
+   StringBuffer buf = new StringBuffer();
+   for (int i = 0; i < cmd.length(); ++i) {
+      char c = cmd.charAt(i);
+      if (quote != 0 && c == quote) {
+         quote = 0;
+         continue;
+       }
+      else if (quote == 0 && (c == '"' || c == '\'')) {
+         quote = c;
+         continue;
+       }
+      else if (quote == 0 && (c == ' ' || c == '\n')) {
+         if (buf.length() > 0) {
+            argv.add(buf.toString());
+            buf = new StringBuffer();
+          }
+       }
+      else buf.append(c);
+    }
+   if (buf.length() > 0) {
+      argv.add(buf.toString());
+    }
+   
+   return argv;
+}
 
 
 

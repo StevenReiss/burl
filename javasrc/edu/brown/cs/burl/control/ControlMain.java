@@ -66,7 +66,6 @@ public static void main(String [] args)
 private Properties	base_properties;
 private ControlStorage	control_storage;
 private File            base_directory;
-private ControlRepoManager repo_manager;
 private BurlRepoFactory repo_factory;
 private BurlUpdateMode  update_mode;
 private boolean         do_counts;
@@ -89,7 +88,6 @@ private ControlMain(String [] args)
    scanArgs(args);
 
    control_storage = new ControlStorage(this);
-   repo_manager = new ControlRepoManager(this); 
    repo_factory = new RepoFactory(this);   
    bibentry_factory = new BibEntryFactory(this);
    
@@ -155,7 +153,6 @@ Properties getProperties()			{ return base_properties; }
    return control_storage; 
 }
 
-ControlRepoManager getRepoManager()             { return repo_manager; }
 
 BurlRepoFactory getRepoFactory()                { return repo_factory; }
 

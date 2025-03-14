@@ -313,7 +313,7 @@ void handleEditEntry(List<String> args)
          else if (idx2 < 0) idx = idx1;
          else idx = Math.min(idx1,idx2);
          
-         key = s.substring(0,idx).trim();
+         key = s.substring(0,idx).trim().toLowerCase();
          if (!field_data.isValidField(key)) { 
             badEditEntryArgs();
             return;

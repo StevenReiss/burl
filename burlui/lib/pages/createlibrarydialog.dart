@@ -20,7 +20,10 @@ import '../widgets.dart' as widgets;
 import '../util.dart' as util;
 import '../librarydata.dart';
 
-Future createLibraryDialog(BuildContext context, List<LibraryData> libdata) async {
+Future createLibraryDialog(
+  BuildContext context,
+  List<LibraryData> libdata,
+) async {
   TextEditingController namecontroller = TextEditingController();
   String repotype = "DATABASE";
   BuildContext dcontext = context;
@@ -50,7 +53,10 @@ Future createLibraryDialog(BuildContext context, List<LibraryData> libdata) asyn
       return;
     }
     var data = {"name": libname, "repotype": repotype};
-    Map<String, dynamic> rslt = await util.postJson("createlibrary", body: data);
+    Map<String, dynamic> rslt = await util.postJson(
+      "createlibrary",
+      body: data,
+    );
     if (rslt['status'] == "OK") {
       LibraryData ld = LibraryData(rslt);
       libdata.add(ld);
@@ -80,10 +86,7 @@ Future createLibraryDialog(BuildContext context, List<LibraryData> libdata) asyn
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              "Create new Library",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
+            widgets.largeBoldText("Create new Library", scaler: 1.25),
             const SizedBox(height: 15),
             widgets.textFormField(
               label: "Library Name",
@@ -100,14 +103,19 @@ Future createLibraryDialog(BuildContext context, List<LibraryData> libdata) asyn
               onChanged: setRepoType,
               label: "Repository Type: ",
               hint: "Choose the type of repository for this library",
-              tooltip: "Choose how the repository for this library will be stored",
+              tooltip:
+                  "Choose how the repository for this library will be stored",
             ),
             const SizedBox(height: 8),
             widgets.errorField(libError),
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
-              children: [cancelBtn, const SizedBox(width: 15), acceptBtn],
+              children: [
+                cancelBtn,
+                const SizedBox(width: 15),
+                acceptBtn,
+              ],
             ),
           ],
         ),

@@ -90,10 +90,10 @@ class _SplashWidgetState extends State<SplashWidget> {
               height: MediaQuery.of(context).size.height * 0.6,
             ),
             widgets.fieldSeparator(),
-            Text(
+            widgets.largeBoldText(
               _curStep,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              scaler: 1.25,
             ),
           ],
         ),

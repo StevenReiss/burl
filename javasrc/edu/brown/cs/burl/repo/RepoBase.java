@@ -198,7 +198,7 @@ BurlLibrary getLibrary()
 }
 
 
-protected void noteIsbnChange(String oldval,String val,Number idx)
+protected void updateIsbnLccnMap(String oldval,String val,Number idx)
 {
    if (isbn_lccn_map == null) isbn_lccn_map = new HashMap<>();
    
@@ -210,10 +210,7 @@ protected void noteIsbnChange(String oldval,String val,Number idx)
     }
 }
 
-protected void noteLccnChange(String oldval,String val,Number idx)
-{
-   noteIsbnChange(oldval,val,idx);
-}
+
 
 
 /********************************************************************************/
@@ -869,6 +866,8 @@ private class ImportJsonEntry implements BurlBibEntry {
       IvyLog.logE("Problem reading label template",e);
       return false;
     }
+   
+   if (cntstr == null) return false;
    
    BurlRepoColumn lbld = getLabeledField();
    

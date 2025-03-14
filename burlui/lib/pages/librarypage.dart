@@ -28,7 +28,6 @@ import 'changepassworddialog.dart';
 import 'addentriesdialog.dart';
 import 'adduserdialog.dart';
 import 'printlabelsdialog.dart';
-import '../lookandfeel.dart' as laf;
 
 const String defaultSort = "Order Added";
 
@@ -88,13 +87,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          _libData.getName(),
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
+        title: widgets.largeBoldText(_libData.getName(), scaler: 1.25),
         actions: [widgets.topMenuAction(_getMenuActions())],
       ),
       body: widgets.topLevelNSPage(
@@ -136,17 +129,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         widgets.fieldSeparator(),
-        widgets.textFormField(
-          hint: "Search Terms for items",
-          label: "Search Terms",
-          controller: _findControl,
-          textInputAction: TextInputAction.done,
-          onEditingComplete: _handleSearch,
-          suffixIcon: IconButton(
-            icon: Icon(Icons.clear),
-            onPressed: _clearSearch,
-          ),
-        ),
+        _getSearchBox(),
         widgets.fieldSeparator(),
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -165,12 +148,26 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
             ),
           ],
         ),
-        Divider(height: 8, thickness: 8, color: laf.topLevelBackground),
+        widgets.fieldDivider(),
         widgets.fieldSeparator(),
         Expanded(child: list),
       ],
     );
     return w;
+  }
+
+  Widget _getSearchBox() {
+    return widgets.textFormField(
+      hint: "Search Terms for items",
+      label: "Search Terms",
+      controller: _findControl,
+      textInputAction: TextInputAction.done,
+      onEditingComplete: _handleSearch,
+      suffixIcon: IconButton(
+        icon: Icon(Icons.clear),
+        onPressed: _clearSearch,
+      ),
+    );
   }
 
   List<widgets.MenuAction> _getMenuActions() {

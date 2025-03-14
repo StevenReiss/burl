@@ -119,7 +119,7 @@ congressSearch(String isbn)
    
    BibEntryBase marc = null;
    BibEntryLOCResult search = searchForLOCInfo(isbn);
-   if (search == null || search.getIdURL(isbn) == null)  return null;
+   if (search == null)  return null;
    if (search != null) {
       String idurl = search.getIdURL(isbn);
       if (idurl != null) {
@@ -140,13 +140,13 @@ private BibEntryLOCResult searchForLOCInfo(String isbn)
    HttpRequest req = builder.build();
    
    try {
-      for ( ; ; ) {
+      for (int i = 0; ; ++i) {
          try {
             HttpResponse<String> resp = client.send(req,
                   HttpResponse.BodyHandlers.ofString());
             String body = resp.body();
             int vcode = resp.statusCode();
-            if (vcode == 429 || vcode == 503) {
+            if (vcode == 429 || vcode == 503 || vcode == 524) {
                IvyLog.logE("BIBENTRY","Waiting for LOC server " + vcode);
                waitFor(60);
                continue;
@@ -161,11 +161,14 @@ private BibEntryLOCResult searchForLOCInfo(String isbn)
           }
          catch (InterruptedException e) { 
             IvyLog.logE("BIBENTRY","HTTP interrupted searching Library of Congress",e);
+            waitFor(10);
             continue;
           }
          catch (IOException e) {
             IvyLog.logE("BIBENTRY","HTTP Error searching Library of Congress",e); 
-            break;
+            if (i >= 2) break;
+            waitFor(10);
+            continue;
           }
        }
     }
@@ -342,7 +345,8 @@ private BibEntryBase searchForMarcItemXml(String isbn,String url)
          if (rcode >= 400) return null;
          if (body.contains("<!DOCTYPE html>")) {
             IvyLog.logD("BIBENTRY","Waiting for MARC server");
-            if (!body.contains("No Connections Available")) {
+            if (!body.contains("No Connections Available") &&
+                  !body.contains("Permalink Error")) {
                IvyLog.logD("RESULT:\n" + body);
              }
             waitFor(110);

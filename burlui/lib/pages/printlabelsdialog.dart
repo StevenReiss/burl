@@ -66,19 +66,15 @@ Future printLabelsDialog(BuildContext context, LibraryData lib) async {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
+            widgets.largeBoldText(
               "Print the Next Set of Labels",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
+              scaler: 1.5,
             ),
             widgets.fieldSeparator(15),
             const Text(
               "BURL will print labels for the next set of items "
               "and save it to a rtf file that can be loaded into Word "
-              "or similar system and printed onto adhesive paper. "
-              "Select the file to download into.",
+              "or similar system and printed onto adhesive paper. ",
             ),
             widgets.fieldSeparator(),
             widgets.textField(

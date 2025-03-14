@@ -60,7 +60,7 @@ String getIdURL(String isbn)
 {
    if (results_data.length() == 0) return null;
    if (results_data.length() > 1) {
-      IvyLog.logD("BIBENTRY","Need to check which result is correct for " + isbn);
+      IvyLog.logD("BIBENTRY","Need to check which result is correct for LOC " + isbn);
       IvyLog.logD("BIBENTRY",results_data.toString(2));
     }
    

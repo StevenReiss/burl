@@ -123,8 +123,10 @@ Widget textField({
 
   InputDecoration deco = getDecoration(hint: hint, label: label);
   if (collapse) {
-    deco = InputDecoration.collapsed(
+    deco = InputDecoration(
       hintText: hint,
+      isCollapsed: true,
+      contentPadding: EdgeInsets.only(left: 8, right: 4),
       border: const OutlineInputBorder(),
     );
   }
@@ -152,10 +154,10 @@ Widget textField({
 
 Widget errorField(String? text) {
   String t1 = (text ?? "");
-  return Text(
+  return largeText(
     t1,
-    style: const TextStyle(
-        color: laf.errorColor, fontSize: laf.errorFontSize),
+    color: laf.errorColor,
+    scaler: laf.errorFontScale,
   );
 }
 
@@ -226,7 +228,8 @@ Widget itemWithMenu<T>(
 }
 
 List<PopupMenuItem<MenuAction>> _itemMenuBuilder(
-    List<MenuAction> acts) {
+  List<MenuAction> acts,
+) {
   return acts.map<PopupMenuItem<MenuAction>>(_menuItemAction).toList();
 }
 
@@ -282,8 +285,10 @@ Widget submitButton(
     child: Text(name),
   );
   Widget w = Padding(
-    padding:
-        const EdgeInsets.symmetric(vertical: 16.0, horizontal: 6.0),
+    padding: const EdgeInsets.symmetric(
+      vertical: 16.0,
+      horizontal: 6.0,
+    ),
     child: eb,
   );
   w = tooltipWidget(tooltip, w);
@@ -336,7 +341,8 @@ Widget topMenuAction(List<MenuAction> labels) {
 }
 
 List<PopupMenuItem<MenuAction>> _topMenuActionBuilder(
-    List<MenuAction> labels) {
+  List<MenuAction> labels,
+) {
   return labels
       .map<PopupMenuItem<MenuAction>>(_menuItemAction)
       .toList();
@@ -398,6 +404,15 @@ Widget fieldSeparator([double ht = 8]) {
   return SizedBox(height: ht);
 }
 
+Widget fieldDivider({
+  double height = 8,
+  double? thickness,
+  Color color = laf.topLevelBackground,
+}) {
+  thickness ??= height;
+  return Divider(height: height, thickness: thickness, color: color);
+}
+
 /********************************************************************************/
 /*                                                                              */
 /*      Text fields                                                             */
@@ -409,9 +424,12 @@ Widget largeText(
   TextStyle? style,
   TextAlign? textAlign,
   int? maxLines,
+  Color? color,
+  Color? backgroundColor,
   Color? selectionColor,
   double scaler = 1.75,
 }) {
+  style ??= TextStyle(color: color, backgroundColor: backgroundColor);
   return Text(
     data,
     textScaler: TextScaler.linear(scaler),
@@ -442,6 +460,7 @@ Widget largeBoldText(
     textAlign: textAlign,
     maxLines: maxLines,
     selectionColor: selectionColor,
+    scaler: scaler,
   );
 }
 
@@ -462,12 +481,13 @@ Widget dropDown(
   Widget w = DropdownButton<String>(
     value: value,
     onChanged: onChanged,
-    items: items.map<DropdownMenuItem<String>>((String value) {
-      return DropdownMenuItem<String>(
-        value: value,
-        child: Text(value, textAlign: textAlign),
-      );
-    }).toList(),
+    items:
+        items.map<DropdownMenuItem<String>>((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(value, textAlign: textAlign),
+          );
+        }).toList(),
   );
   w = tooltipWidget(tooltip, w);
   return w;
@@ -486,8 +506,8 @@ Widget dropDownMenu(
     onSelected: onChanged,
     dropdownMenuEntries:
         items.map<DropdownMenuEntry<String>>((String value) {
-      return DropdownMenuEntry<String>(value: value, label: value);
-    }).toList(),
+          return DropdownMenuEntry<String>(value: value, label: value);
+        }).toList(),
   );
 }
 
@@ -519,7 +539,10 @@ Widget dropDownWidget<T>(
   itmlst.addAll(
     items.map<DropdownMenuItem<T>>((T v) {
       return DropdownMenuItem<T>(
-          value: v, enabled: true, child: Text(lbl(v)));
+        value: v,
+        enabled: true,
+        child: Text(lbl(v)),
+      );
     }).toList(),
   );
 
@@ -566,13 +589,15 @@ Widget booleanField({
 
 void goto(BuildContext context, Widget w) {
   // if (!context.mounted) return;
-  Navigator.of(context)
-      .push(MaterialPageRoute(builder: (context) => w));
+  Navigator.of(
+    context,
+  ).push(MaterialPageRoute(builder: (context) => w));
 }
 
 Future<dynamic> gotoThen(BuildContext context, Widget w) async {
-  await Navigator.of(context)
-      .push(MaterialPageRoute(builder: (context) => w));
+  await Navigator.of(
+    context,
+  ).push(MaterialPageRoute(builder: (context) => w));
 }
 
 void gotoDirect(BuildContext context, Widget w) {
@@ -999,9 +1024,10 @@ Future<void> displayDialog(
     builder: (BuildContext context) {
       return AlertDialog(
         title: Text(title),
-        content: description.isNotEmpty
-            ? Text(description, maxLines: 10)
-            : null,
+        content:
+            description.isNotEmpty
+                ? Text(description, maxLines: 10)
+                : null,
         actions: <Widget>[
           TextButton(
             child: const Text("OK"),
@@ -1025,9 +1051,10 @@ Future<bool> getValidation(
     builder: (BuildContext context) {
       return AlertDialog(
         title: Text(title),
-        content: description.isNotEmpty
-            ? Text(description, maxLines: 10)
-            : null,
+        content:
+            description.isNotEmpty
+                ? Text(description, maxLines: 10)
+                : null,
         actions: <Widget>[
           TextButton(
             child: const Text("YES"),
@@ -1049,7 +1076,9 @@ Future<bool> getValidation(
 }
 
 Future<bool> getValidationOld(
-    BuildContext context, String title) async {
+  BuildContext context,
+  String title,
+) async {
   bool? sts = await showDialog<bool>(
     context: context,
     builder: (BuildContext context) {
@@ -1081,7 +1110,9 @@ PreferredSizeWidget appBar(String title) {
     title: Text(
       title,
       style: const TextStyle(
-          fontWeight: FontWeight.bold, color: Colors.black),
+        fontWeight: FontWeight.bold,
+        color: Colors.black,
+      ),
     ),
   );
 }
@@ -1192,8 +1223,10 @@ InputDecoration getDecoration({
     labelStyle: getLabelStyle(),
     hoverColor: laf.decorationHoverColor,
     focusedBorder: const OutlineInputBorder(
-      borderSide:
-          BorderSide(width: 2, color: laf.decorationBorderColor),
+      borderSide: BorderSide(
+        width: 2,
+        color: laf.decorationBorderColor,
+      ),
     ),
     border: const OutlineInputBorder(
       borderSide: BorderSide(width: 2, color: laf.decorationInputColor),
@@ -1208,7 +1241,9 @@ InputDecoration getDecoration({
 
 TextStyle getLabelStyle() {
   return const TextStyle(
-      color: laf.labelColor, fontWeight: FontWeight.bold);
+    color: laf.labelColor,
+    fontWeight: FontWeight.bold,
+  );
 }
 
 Widget getPadding(double size) {
@@ -1220,7 +1255,8 @@ Widget getTopLevelLogo(BuildContext context) {
     width: MediaQuery.of(context).size.width * 0.3,
     height: MediaQuery.of(context).size.height * 0.25,
     child: Center(
-        child: Image.asset(laf.topLevelImage, fit: BoxFit.contain)),
+      child: Image.asset(laf.topLevelImage, fit: BoxFit.contain),
+    ),
   );
 }
 

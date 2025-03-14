@@ -40,7 +40,10 @@ Future addEntriesDialog(BuildContext context, LibraryData lib) async {
       "count": "TRUE",
       "isbnstr": isbncontroller.text,
     };
-    Map<String, dynamic> rslt = await util.postJson("addisbns", body: data);
+    Map<String, dynamic> rslt = await util.postJson(
+      "addisbns",
+      body: data,
+    );
     if (rslt["status"] == "OK") {
       if (dcontext.mounted) {
         Navigator.of(dcontext).pop("OK");
@@ -80,9 +83,9 @@ Future addEntriesDialog(BuildContext context, LibraryData lib) async {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
+            widgets.largeBoldText(
               "Add Items to Library by ISBN/LCCN",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              scaler: 1.25,
             ),
             widgets.fieldSeparator(15),
             widgets.dropDownWidget<String>(
@@ -90,7 +93,8 @@ Future addEntriesDialog(BuildContext context, LibraryData lib) async {
               value: mode,
               onChanged: setMode,
               label: "Update Mode",
-              tooltip: "Select update mode when item already exists in library",
+              tooltip:
+                  "Select update mode when item already exists in library",
             ),
             widgets.fieldSeparator(),
             Expanded(
@@ -126,4 +130,3 @@ Future addEntriesDialog(BuildContext context, LibraryData lib) async {
     },
   );
 }
-

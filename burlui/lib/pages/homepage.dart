@@ -90,7 +90,11 @@ class _BurlHomePageState extends State<BurlHomePage> {
               "Delete you Burl account and all associated information.  "
                   "This cannot be undone",
             ),
-            widgets.MenuAction("Log Out", _logoutAction, "Log out from Burl"),
+            widgets.MenuAction(
+              "Log Out",
+              _logoutAction,
+              "Log out from Burl",
+            ),
           ]),
         ],
       ),
@@ -108,8 +112,12 @@ class _BurlHomePageState extends State<BurlHomePage> {
       Widget w2 = Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          Text("YOUR LIBRARIES:", textScaler: TextScaler.linear(2.0)),
-          Divider(height: 8, thickness: 8, color: laf.topLevelBackground),
+          widgets.largeBoldText("YOUR LIBRARIES:", scaler: 2.0),
+          Divider(
+            height: 8,
+            thickness: 8,
+            color: laf.topLevelBackground,
+          ),
           Expanded(child: w1),
         ],
       );
@@ -122,12 +130,15 @@ class _BurlHomePageState extends State<BurlHomePage> {
   ListTile _getTile(context, int i) {
     LibraryData ld = _libraryData[i];
     return ListTile(
-      title: Text(
-        ld.getName(),
-        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+      title: widgets.largeBoldText(ld.getName(), scaler: 1.2),
+      subtitle: Text(
+        ld.getOwner(),
+        style: const TextStyle(fontSize: 14),
       ),
-      subtitle: Text(ld.getOwner(), style: const TextStyle(fontSize: 14)),
-      trailing: Text("Access: ${ld.getUserAccess()}"),
+      trailing: widgets.largeText(
+        "Access: ${ld.getUserAccess()}",
+        scaler: 1.25,
+      ),
       onTap: () => {_gotoLibraryPage(ld)},
     );
   }
@@ -170,8 +181,10 @@ class _BurlHomePageState extends State<BurlHomePage> {
   }
 
   Future<bool> _handleRemoveUser() async {
-    String msg = "Thank you for trying Burl. We are sorry to see you go.\n";
-    msg += "If you really meant to leave, then click YES.  If this was a ";
+    String msg =
+        "Thank you for trying Burl. We are sorry to see you go.\n";
+    msg +=
+        "If you really meant to leave, then click YES.  If this was a ";
     msg += "mistake then click NO";
 
     bool fg = await widgets.getValidation(context, msg);
@@ -200,4 +213,3 @@ Future<List<LibraryData>> getLibraries() async {
   }
   return rslt;
 }
-

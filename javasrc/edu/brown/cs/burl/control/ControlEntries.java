@@ -19,6 +19,7 @@ package edu.brown.cs.burl.control;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
@@ -138,7 +139,7 @@ String handleAddEntry(HttpExchange he,ControlSession session)
       return BowerRouter.errorResponse(he,session,402,"Problem adding row");
     }
    
-   JSONObject jobj = BurlUtil.buildJson("entityid",row.getRowId());
+   JSONObject jobj = BurlUtil.buildJson("burl_id",row.getRowId());
    return BowerRouter.jsonOKResponse(session,"entry",jobj);
 }
 
@@ -187,7 +188,7 @@ String handleFindEntries(HttpExchange he,ControlSession session)
          jsonfilter = new JSONObject(filterstr);
        }
       else {
-         jsonfilter = BurlUtil.buildJson("all",filterstr);
+         jsonfilter = buildFilterObject(repo,filterstr);
        }
       EntityFilter filter = new EntityFilter(jsonfilter,repo,sortfld,invert);
       iter = repo.getRows(filter);
@@ -225,6 +226,50 @@ String handleFindEntries(HttpExchange he,ControlSession session)
 }
 
 
+
+private JSONObject buildFilterObject(BurlRepo repo,String filterstr)
+{
+   List<String> tokens = BurlUtil.tokenize(filterstr);
+   JSONObject filters = new JSONObject();
+   
+   for (String s : tokens) {
+      String key = null;
+      String value = null;
+      if (s.contains(":") || s.contains("=")) {
+         int idx1 = s.indexOf(":");
+         int idx2 = s.indexOf("=");
+         int idx;
+         if (idx1 < 0) idx = idx2;
+         else if (idx2 < 0) idx = idx1;
+         else idx = Math.min(idx1,idx2);
+         key = s.substring(0,idx).trim();
+         BurlRepoColumn brc = repo.getColumn(key);
+         if (brc == null) key = null;
+         value = s.substring(idx+1).trim();
+       }
+      else {
+         value = s;
+       }
+      if (key == null) key = "all";
+      Object prev = filters.opt(key);
+      if (prev == null) {
+         filters.put(key,value);
+       }
+      else if (prev instanceof String) {
+         JSONArray nval = new JSONArray();
+         nval.put(prev);
+         nval.put(value);
+         filters.put(key,nval);
+       }
+      else if (prev instanceof JSONArray) {
+         JSONArray nval = (JSONArray) prev;
+         nval.put(value);
+       }
+    }
+   
+   return filters;
+// return BurlUtil.buildJson("all",filterstr);
+}
 
 
 /********************************************************************************/

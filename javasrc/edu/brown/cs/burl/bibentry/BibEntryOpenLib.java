@@ -62,7 +62,6 @@ BibEntryOpenLib(JSONObject data)
 /*                                                                              */
 /********************************************************************************/
 
-
 @Override 
 public String computeEntry(BurlRepoColumn brc)
 {

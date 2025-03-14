@@ -60,7 +60,7 @@ String getIdURL(String isbn)
 {
    if (results_data == null || results_data.length() == 0) return null;
    if (results_data.length() > 1) {
-      IvyLog.logD("BIBENTRY","Need to check which result is correct for " + isbn);
+      IvyLog.logD("BIBENTRY","Need to check which result is correct for google " + isbn);
     }
    
    JSONObject r1 = results_data.getJSONObject(0);

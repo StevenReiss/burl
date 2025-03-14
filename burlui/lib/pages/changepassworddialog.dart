@@ -66,13 +66,7 @@ Future changePasswordDialog(BuildContext context) async {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              "Change Password",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
+            widgets.largeBoldText("Change Password", scaler: 1.25),
             const SizedBox(height: 15),
             widgets.textFormField(
               label: "New Password",

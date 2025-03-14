@@ -18,12 +18,13 @@
 import 'package:flutter/material.dart';
 
 const Color errorColor = Colors.red;
+const double errorFontScale = 1.25;
 const double errorFontSize = 16;
 
 final Color toolTipLeftColor = Colors.yellow.shade50;
 final Color toolTipRightColor = Colors.yellow.shade200;
 const double toolTipHeight = 50;
-const double toolTipFontSize = 18;
+const double toolTipFontSize = 16;
 
 const Color submitForegroundColor = Colors.black;
 const double buttonFontSize = 14;

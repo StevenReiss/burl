@@ -80,12 +80,9 @@ class _BurlEntryPageState extends State<BurlEntryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: widgets.largeBoldText(
           "View/Edit Library Entry",
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
+          scaler: 1.1,
         ),
         actions: [widgets.topMenuAction(_getMenuActions())],
       ),
@@ -205,7 +202,10 @@ class _BurlEntryPageState extends State<BurlEntryPage> {
       "library": _libData.getLibraryId().toString(),
       "entry": _itemData.getId().toString(),
     };
-    Map<String, dynamic> rslt = await util.postJson("removeentry", body: data);
+    Map<String, dynamic> rslt = await util.postJson(
+      "removeentry",
+      body: data,
+    );
     if (rslt["status"] == "OK") {
       if (dcontext.mounted) {
         Navigator.pop(dcontext, "OK");
@@ -273,7 +273,10 @@ class _BurlEntryPageState extends State<BurlEntryPage> {
         "entry": _itemData.getId().toString(),
         "edits": json.encode(edits),
       };
-      Map<String, dynamic> rslt = await util.postJson("editentry", body: data);
+      Map<String, dynamic> rslt = await util.postJson(
+        "editentry",
+        body: data,
+      );
       if (rslt["status"] == "OK") {
         Map<String, dynamic> data = rslt["entry"];
         _itemData.reload(data);
@@ -300,4 +303,3 @@ class _BurlEntryPageState extends State<BurlEntryPage> {
     }
   }
 } // end of class _BurlEntryPageState
-
