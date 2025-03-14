@@ -454,7 +454,11 @@ String handlePrintLabels(HttpExchange he,ControlSession session)
       return BowerRouter.errorResponse(he,session,500,"Problem with temp file");
     }
    
-   repo.printLabels(f1,todo); 
+   boolean fg = repo.printLabels(f1,todo); 
+   
+   if (!fg) {
+      return BowerRouter.errorResponse(he,session,500,"Problem setting up labels");
+    }
    
    String resp = BowerRouter.sendFileResponse(he,f1); 
    

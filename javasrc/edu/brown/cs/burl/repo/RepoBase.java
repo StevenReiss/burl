@@ -854,7 +854,7 @@ private class ImportJsonEntry implements BurlBibEntry {
 {
    Element lbldata = field_data.getLabelData();
    if (lbldata == null) {
-      IvyLog.logE("Missing label data");
+      IvyLog.logT("REPO","Missing label data");
       return false;
     }
    
@@ -863,11 +863,14 @@ private class ImportJsonEntry implements BurlBibEntry {
       cntstr = IvyFile.loadFile(ins);
     } 
    catch (IOException e) {
-      IvyLog.logE("Problem reading label template",e);
+      IvyLog.logE("REPO","Problem reading label template",e);
       return false;
     }
    
-   if (cntstr == null) return false;
+   if (cntstr == null) {
+      IvyLog.logE("REPO","No template read " + System.getProperty("java.class.path"));
+      return false;
+    }
    
    BurlRepoColumn lbld = getLabeledField();
    
@@ -929,10 +932,11 @@ private class ImportJsonEntry implements BurlBibEntry {
       fw.write(cnts.toString());
     }
    catch (IOException e) {
-      IvyLog.logE("Problem writing temp label file",e);
+      IvyLog.logE("REPO","Problem writing temp label file",e);
       return false;
     }
    
+   IvyLog.logD("REPO","Labels updated");
   
    for (Number id : done) {
       BurlRepoRow rr = getRowForId(id);
