@@ -82,14 +82,14 @@ void handleFindEntries(List<String> args)
             sortby = args.get(++i);
             invert = false;
           }
-         else if (s.startsWith("-i") && i+1 < args.size()) {    // -o <sort field> 
-            sortby = args.get(++i);
-            invert = false;
+         else if (s.startsWith("-i")) {    // -i <invert>
+            invert = true;
           }
          else {
             badFindEntriesArgs();
             return;
           }
+         continue;
        }
       else if (s.contains(":") || s.contains("=")) {
          int idx1 = s.indexOf(":");
@@ -132,8 +132,8 @@ void handleFindEntries(List<String> args)
          "count",4,"filter",filters);
    if (sortby != null) {
       data.put("orderby",sortby);
-      data.put("invert",invert);
     }
+   data.put("invert",invert);
    
    JSONObject rslt = cli_main.createHttpPost("entries",data);
    

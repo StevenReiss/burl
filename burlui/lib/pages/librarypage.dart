@@ -468,6 +468,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     // also set _isdone to true if returned iterator id is null
     // this should also be called by _handleSearch
     if (_iterId != null) {
+      // remove old iterator
       Map<String, String?> dd = {
         "library": _libData.getLibraryId().toString(),
         "count": "-1",

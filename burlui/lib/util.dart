@@ -20,7 +20,7 @@ import 'package:crypto/crypto.dart' as crypto;
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'globals.dart' as globals;
-import 'filemanagerinterface.dart';
+import 'filemanager.dart';
 // import 'dart:io';
 
 String hasher(String msg) {
