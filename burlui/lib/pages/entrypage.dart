@@ -81,7 +81,7 @@ class _BurlEntryPageState extends State<BurlEntryPage> {
     return Scaffold(
       appBar: AppBar(
         title: widgets.largeBoldText(
-          "View/Edit Library Entry",
+          "View/Edit Library Entry (${_itemData.getId()})",
           scaler: 1.1,
         ),
         actions: [widgets.topMenuAction(_getMenuActions())],
@@ -109,17 +109,8 @@ class _BurlEntryPageState extends State<BurlEntryPage> {
     List<TableRow> rows = [];
     String acc = _libData.getUserAccess();
     for (String fld in globals.fieldData.getFieldNames()) {
-      TextEditingController? ctrl = _controllers[fld];
       Widget lbl = Text(globals.fieldData.getLabel(fld));
-      Widget fldw = widgets.textField(
-        controller: ctrl,
-        enabled: globals.fieldData.canEdit(acc, fld),
-        maxLines: 0,
-        onChanged: (String s) {
-          _fieldEdited(fld, s);
-        },
-        collapse: true,
-      );
+      Widget fldw = _getFieldWidget(fld, acc);
       TableRow row = TableRow(children: <Widget>[lbl, fldw]);
       rows.add(row);
       TableRow spacer = TableRow(
@@ -170,6 +161,52 @@ class _BurlEntryPageState extends State<BurlEntryPage> {
     );
 
     return w3;
+  }
+
+  Widget _getFieldWidget(String fld, String acc) {
+    String? disp = globals.fieldData.getDisplay(fld);
+    TextEditingController? ctrl = _controllers[fld];
+    bool en = globals.fieldData.canEdit(acc, fld);
+    if (disp == 'YES_NO' && en) {
+      Widget fldw = widgets.textField(
+        controller: ctrl,
+        enabled: false,
+        maxLines: 0,
+        collapse: true,
+      );
+      bool value = (ctrl?.text == 'yes');
+      Widget toggle = widgets.booleanField(
+        value: value,
+        onChanged: (bool? fg) {
+          _updateYesNo(fg, ctrl);
+        },
+      );
+      Widget w1 = Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[toggle, Expanded(child: fldw)],
+      );
+      return w1;
+    } else {
+      Widget fldw = widgets.textField(
+        controller: ctrl,
+        enabled: en,
+        maxLines: 0,
+        onChanged: (String s) {
+          _fieldEdited(fld, s);
+        },
+        collapse: true,
+      );
+      return fldw;
+    }
+  }
+
+  void _updateYesNo(bool? fg, TextEditingController? ctrl) {
+    if (fg == null) return;
+    String val = (fg ? "yes" : "no");
+    ctrl?.text = val;
+    setState(() {
+      _hasChanged = true;
+    });
   }
 
   bool _canRemove() {

@@ -20,7 +20,8 @@ import 'package:crypto/crypto.dart' as crypto;
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'globals.dart' as globals;
-import 'dart:io';
+import 'filemanagerinterface.dart';
+// import 'dart:io';
 
 String hasher(String msg) {
   final bytes = convert.utf8.encode(msg);
@@ -91,6 +92,7 @@ Future<void> postJsonDownload(
   String path, {
   Map<String, String?>? body,
 }) async {
+  FileManager fm = FileManager();
   Uri u = _getServerUri(url);
   Map<String, String> headers = {};
   if (globals.burlSession != null) {
@@ -101,7 +103,7 @@ Future<void> postJsonDownload(
     }
   }
   dynamic resp = await http.post(u, body: body, headers: headers);
-  await File(path).writeAsBytes(resp.bodyBytes);
+  fm.downloadFile(resp, path);
 }
 
 Future<Map<String, dynamic>> getJson(

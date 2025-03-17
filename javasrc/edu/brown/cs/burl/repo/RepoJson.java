@@ -92,7 +92,7 @@ RepoJson(BurlControl bc,BurlLibrary lib)
 @Override public void outputRepository()
 {
    // might want to handle backups
-   exportRepository(repo_file,BurlExportFormat.CSV,false);
+   exportRepository(repo_file,BurlExportFormat.CSV,null);
 }
 
 

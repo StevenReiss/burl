@@ -1,8 +1,8 @@
 /********************************************************************************/
 /*                                                                              */
-/*              printlabelsdialog.dart                                          */
+/*              exportdialog.dart                                               */
 /*                                                                              */
-/*      Dialog to print a set of labels                                         */
+/*      Dialog to export all or part of a library                               */
 /*                                                                              */
 /********************************************************************************/
 /*      Copyright 2025 Brown University -- Steven P. Reiss                      */
@@ -21,11 +21,22 @@ import '../librarydata.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 
-Future printLabelsDialog(BuildContext context, LibraryData lib) async {
+Future exportDialog(
+  BuildContext context,
+  LibraryData lib,
+  String exporttype, {
+  String? sortby,
+  bool sortInvert = false,
+  String? filter,
+}) async {
   BuildContext dcontext = context;
   TextEditingController fileControl = TextEditingController();
 
-  fileControl.text = "labels.rtf";
+  fileControl.text = "export.${exporttype.toLowerCase()}";
+  String what =
+      (sortby == null && filter == null)
+          ? "All Entries"
+          : "Selected Entries";
 
   void cancel() {
     if (dcontext.mounted) {
@@ -36,8 +47,15 @@ Future printLabelsDialog(BuildContext context, LibraryData lib) async {
   void submit() async {
     Map<String, String?> data = {
       "library": lib.getLibraryId().toString(),
+      "invert": sortInvert.toString(),
     };
-    await util.postJsonDownload("labels", fileControl.text, body: data);
+    if (sortby != null) data['orderby'] = sortby;
+    if (filter != null) data['filter'] = filter;
+    await util.postJsonDownload(
+      "exportlibrary",
+      fileControl.text,
+      body: data,
+    );
     if (dcontext.mounted) {
       Navigator.of(dcontext).pop("OK");
     }
@@ -45,7 +63,7 @@ Future printLabelsDialog(BuildContext context, LibraryData lib) async {
 
   void chooseFile() async {
     String? output = await FilePicker.platform.saveFile(
-      dialogTitle: 'Please select output rtf file: ',
+      dialogTitle: 'Please select output $exporttype file: ',
       fileName: fileControl.text,
     );
     if (output != null) {
@@ -55,7 +73,7 @@ Future printLabelsDialog(BuildContext context, LibraryData lib) async {
 
   Widget fileBtn = widgets.submitButton("Choose File", chooseFile);
   Widget cancelBtn = widgets.submitButton("Cancel", cancel);
-  Widget submitBtn = widgets.submitButton("Get Labels", submit);
+  Widget submitBtn = widgets.submitButton("Do Export", submit);
 
   Dialog dlg = Dialog(
     child: Padding(
@@ -67,14 +85,14 @@ Future printLabelsDialog(BuildContext context, LibraryData lib) async {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             widgets.largeBoldText(
-              "Print the Next Set of Labels",
+              "Export $what as $exporttype",
               scaler: 1.5,
             ),
             widgets.fieldSeparator(15),
-            const Text(
-              "BURL will print labels for the next set of items "
-              "and save it to a rtf file that can be loaded into Word "
-              "or similar system and printed onto adhesive paper. ",
+            Text(
+              "BURL will export the data as a $exporttype file.  This file "
+              "can be edited and then later imported into this or another "
+              "library.",
             ),
             widgets.fieldSeparator(16),
             widgets.textField(

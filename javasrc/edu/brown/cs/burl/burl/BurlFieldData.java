@@ -185,7 +185,7 @@ public String getCountField()
 }
 
 
-public String getLabeledField()
+public String getPrintLabelsField()
 { 
    return labeled_field;
 }

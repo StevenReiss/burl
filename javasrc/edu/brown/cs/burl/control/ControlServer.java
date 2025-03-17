@@ -152,7 +152,6 @@ BowerRouter<ControlSession> setupRouter()
    br.addRoute("POST","/rest/createlibrary",this::handleCreateLibrary);
    br.addRoute("POST","/rest/findlibraries",this::handleFindAllLibraries);
    br.addRoute("POST","/rest/removelibrary",this::handleRemoveLibrary);
-   br.addRoute("POST","/rest/exportlibrary",this::handleExportLibrary); 
    br.addRoute("POST","/rest/labels",this::handlePrintLabels);
    
    br.addRoute("POST","/rest/addisbns",this::handleAddIsbns);
@@ -163,6 +162,7 @@ BowerRouter<ControlSession> setupRouter()
    br.addRoute("POST","/rest/editentry",entry_manager::handleEditEntry); 
    br.addRoute("POST","/rest/removeentry",entry_manager::handleRemoveEntry); 
    br.addRoute("POST","/rest/addentry",entry_manager::handleAddEntry); 
+   br.addRoute("POST","/rest/exportlibrary",entry_manager::handleExportEntries); 
    br.addRoute("POST","/rest/fixfields",entry_manager::handleFixFields); 
    
 // br.addRoute("POST","/rest/removeentry",this::handleRemoveEntry);
@@ -374,7 +374,7 @@ String handleExportLibrary(HttpExchange he,ControlSession session)
       case LIBRARIAN :
          break; 
     }
-   boolean internalfmt = BowerRouter.getBooleanParameter(he,"internal",false);
+   
    String sfx = null;
    switch (exp) {
       default :
@@ -399,7 +399,7 @@ String handleExportLibrary(HttpExchange he,ControlSession session)
       return BowerRouter.errorResponse(he,session,400,"Bad repository");
     }  
    
-   repo.exportRepository(f1,exp,!internalfmt);  
+   repo.exportRepository(f1,exp,null);  
    
    String resp = BowerRouter.sendFileResponse(he,f1); 
    
@@ -429,7 +429,7 @@ String handlePrintLabels(HttpExchange he,ControlSession session)
    if (repo == null) { 
       return BowerRouter.errorResponse(he,session,400,"Bad repository");
     }  
-   BurlRepoColumn brc = repo.getLabeledField();
+   BurlRepoColumn brc = repo.getPrintLabelsField();
    if (brc == null) {
       return BowerRouter.errorResponse(he,session,400,"No labeled field");
     }
@@ -444,7 +444,7 @@ String handlePrintLabels(HttpExchange he,ControlSession session)
          break;
     }
    
-   List<Number> todo = burl_store.dataFieldSearch(repo,brc.getFieldName(),"no");
+   List<Number> todo = burl_store.dataFieldSearch(repo,brc.getFieldName(),"yes");
    
    File f1 = null;
    try {
@@ -462,6 +462,9 @@ String handlePrintLabels(HttpExchange he,ControlSession session)
    
    return resp;
 }
+
+
+
 
 
    
@@ -529,7 +532,7 @@ String handleImport(HttpExchange he,ControlSession session)
    
    BurlRepo repo =  lib.getRepository();
    
-   JSONObject cindata = BowerRouter.getJson(he,"cvsdata");
+   JSONObject cindata = BowerRouter.getJson(he,"csvdata");
    if (cindata != null) {
       JSONArray dataarr = cindata.getJSONArray("rows");
       Map<BurlRepoColumn,Integer> colmap = null;

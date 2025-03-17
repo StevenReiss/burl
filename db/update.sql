@@ -10,49 +10,17 @@ $run $host $db <<EOF
 
 $runcmd
 
-DROP TABLE IF EXISTS BurlWorkQueue;
+-- ALTER TABLE burlrepo_aitywpomcdqj;
 
-CREATE TABLE BurlWorkQueue (
-   id $iddeftype NOT NULL PRIMARY KEY,
-   libraryid $idtype NOT NULL,
-   item text NOT NULL,
-   count bool NOT NULL DEFAULT true,
-   mode int DEFAULT 0
-$ENDTABLE;
+
+-- ALTER TABLE burlrepo_hbhulrcyfrmw RENAME COLUMN labeled TO print_labels;
+-- ALTER TABLE burlrepo_hbhulrcyfrmw ADD COLUMN verified text;
+-- ALTER TABLE burlrepo_hbhulrcyfrmw ALTER COLUMN verified SET DEFAULT 'no';
+UPDATE burlrepo_hbhulrcyfrmw SET print_labels = "no";
+
+
 
 EOF
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

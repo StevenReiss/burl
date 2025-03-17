@@ -490,7 +490,7 @@ ControlSession checkSession(BowerSessionStore<ControlSession> bss,String sid)
    List<Number> ids = new ArrayList<>();
    String kname = repo.getNameKey(); 
    String rname = "BurlRepo_" + kname;
-   String q1 = "SELECT burl_id FROM " + rname + " WHERE " + fld + " = $1";
+   String q1 = "SELECT burl_id FROM " + rname + " WHERE " + fld + " = $1 ORDER BY burl_id";
    
    List<JSONObject> rslts = sql_database.sqlQueryN(q1,val);
    for (JSONObject rslt : rslts) {

@@ -29,7 +29,7 @@ foreach i ( $ivylib )
 end
 
 
-ssh sherpa.cs.brown.edu mkdir /vol/burl/secret
+ssh sherpa.cs.brown.edu mkdir -p /vol/burl/secret
 pushd secret
 update.csh
 popd

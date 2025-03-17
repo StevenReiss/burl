@@ -259,9 +259,9 @@ private void addHeader(String name)
 }
 
 
-@Override public RepoColumn getLabeledField()
+@Override public RepoColumn getPrintLabelsField() 
 {
-   return getColumn(field_data.getLabeledField());
+   return getColumn(field_data.getPrintLabelsField());
 }
 
 
@@ -485,19 +485,21 @@ private static void addIsbn(String isbn,int len,Set<String> rslt)
 /*                                                                              */
 /********************************************************************************/
 
-@Override public boolean exportRepository(File otf,BurlExportFormat format,boolean external)
-{
+@Override public boolean exportRepository(File otf,BurlExportFormat format,BurlRowIter rowiter)
+{ 
+   if (rowiter == null) rowiter = getRows();
+
    try (PrintWriter pw = new PrintWriter(otf)) { 
       switch (format) {
          case CSV :
-            pw.println(getCSVHeader(external));
-            for (BurlRepoRow brr : getRows()) { 
+            pw.println(getCSVHeader());
+            for (BurlRepoRow brr : rowiter) { 
                pw.println(getCSVForRow(brr));
              }
             break;
          case JSON : 
             JSONArray rslt = new JSONArray();
-            for (BurlRepoRow brr : getRows()) {
+            for (BurlRepoRow brr : rowiter) {
                JSONObject jo = getJsonForRow(brr);
                rslt.put(jo);
              }
@@ -523,20 +525,14 @@ private static void addIsbn(String isbn,int len,Set<String> rslt)
 /*                                                                              */
 /********************************************************************************/
 
-private String getCSVHeader(boolean external)
+private String getCSVHeader()
 {
    String sep = field_data.getCSVSeparator();
    String quote = field_data.getCSVQuote();
    
    StringBuffer buf = new StringBuffer();
    for (BurlRepoColumn brc : getColumns()) {
-      String lbl = null;
-      if (external) {
-        lbl = brc.getLabel();
-       }
-      else {
-         lbl = brc.getName();
-       }
+      String lbl = brc.getName();
       if (!buf.isEmpty()) buf.append(field_data.getCSVSeparator()); 
       if (lbl.contains(sep)) {
          String v0 = lbl.replace(quote,quote+quote);
@@ -544,6 +540,8 @@ private String getCSVHeader(boolean external)
        }
       buf.append(lbl);  
     }
+   if (!buf.isEmpty()) buf.append(field_data.getCSVSeparator()); 
+   buf.append("burl_id");
    return buf.toString();
 }
 
@@ -571,6 +569,8 @@ String getCSVForRow(BurlRepoRow rr)
       buf.append(v);
       sepneeded = true;
     }
+   if (sepneeded) buf.append(sep);
+   buf.append(rr.getRowId().toString());
    
    return buf.toString();
 }
@@ -623,6 +623,7 @@ JSONObject getJsonForRow(BurlRepoRow rr)
       List<String> flds = splitCsv(pr);
       for (int i = 0; i < flds.size(); ++i) {
          String fld = flds.get(i);
+         if (fld.equals("burl_id")) continue;
          BurlRepoColumn brc = getColumn(fld);
          if (brc == null) {
             if (error == null) error = fld;
@@ -872,7 +873,7 @@ private class ImportJsonEntry implements BurlBibEntry {
       return false;
     }
    
-   BurlRepoColumn lbld = getLabeledField();
+   BurlRepoColumn print = getPrintLabelsField();
    
    StringBuffer cnts = new StringBuffer(cntstr);
    int cntidx = 0;
@@ -882,8 +883,8 @@ private class ImportJsonEntry implements BurlBibEntry {
    for (Number id : ids) {
       BurlRepoRow brr = getRowForId(id);
       if (brr == null) continue;
-      String flg = brr.getData(lbld);
-      if (flg != null && flg.equals("yes")) continue;
+      String flg = brr.getData(print);
+      if (flg != null && flg.equals("no")) continue;
        
       String code = findLabelData(lbldata,"CODE",brr);
       if (code == null) {
@@ -903,6 +904,10 @@ private class ImportJsonEntry implements BurlBibEntry {
       author = fixUnicode(author);
       
       String year = findLabelData(lbldata,"YEAR",brr);
+      if (year != null) {
+         int idx1 = year.indexOf(" ");
+         if (idx1 > 0) year = year.substring(0,idx1);
+       }
       
       List<String> items = getLabelElements(code,year);
       
@@ -940,7 +945,7 @@ private class ImportJsonEntry implements BurlBibEntry {
   
    for (Number id : done) {
       BurlRepoRow rr = getRowForId(id);
-      rr.setData(lbld,"yes");
+      rr.setData(print,"no");
     }
 
    return more;
@@ -1039,7 +1044,7 @@ private String findLabelData(Element lbldata,String key,BurlRepoRow brr)
       BurlRepoColumn brc = getColumn(fldnm);
       if (brc == null) continue;
       String data = brr.getData(brc); 
-      if (data != null && !data.isEmpty()) return data;
+      if (data != null && !data.isEmpty()) return data.trim();
     }
    
    return null;

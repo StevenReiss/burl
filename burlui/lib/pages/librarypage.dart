@@ -28,6 +28,8 @@ import 'changepassworddialog.dart';
 import 'addentriesdialog.dart';
 import 'adduserdialog.dart';
 import 'printlabelsdialog.dart';
+import 'exportdialog.dart';
+import 'importdialog.dart';
 
 const String defaultSort = "Order Added";
 
@@ -205,6 +207,31 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
         ),
       );
     }
+    if (_canExport()) {
+      rslt.add(
+        widgets.MenuAction(
+          "Export Library as CSV",
+          _exportAll,
+          "Export the whole library as a CSV file",
+        ),
+      );
+      rslt.add(
+        widgets.MenuAction(
+          "Export Current Display as CSV",
+          _exportDisplay,
+          "Export the currently selected and sorted items as CSV",
+        ),
+      );
+    }
+    if (_canAddToLibrary()) {
+      rslt.add(
+        widgets.MenuAction(
+          "Import Entries from CSV File",
+          _importEntries,
+          "Import new or changed values from a CSV file",
+        ),
+      );
+    }
     if (_canAddUsers()) {
       rslt.add(
         widgets.MenuAction(
@@ -267,6 +294,15 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
       case "NONE":
       case "VIEWER":
       case "EDITOR":
+        return false;
+      default:
+        return true;
+    }
+  }
+
+  bool _canExport() {
+    switch (_libData.getUserAccess()) {
+      case "NONE":
         return false;
       default:
         return true;
@@ -390,6 +426,25 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     _sortInvert = !_sortInvert;
     await _fetchInitialData();
     setState(() {});
+  }
+
+  void _exportAll() async {
+    await exportDialog(context, _libData, "CSV");
+  }
+
+  void _exportDisplay() async {
+    await exportDialog(
+      context,
+      _libData,
+      "CSV",
+      sortby: _sortOn,
+      sortInvert: _sortInvert,
+      filter: _findControl.text,
+    );
+  }
+
+  void _importEntries() async {
+    await importDialog(context, _libData);
   }
 
   void _loadMore() {

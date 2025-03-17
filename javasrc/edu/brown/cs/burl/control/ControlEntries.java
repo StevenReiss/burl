@@ -17,6 +17,8 @@
 
 package edu.brown.cs.burl.control;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -155,8 +157,6 @@ String handleFindEntries(HttpExchange he,ControlSession session)
 {
    Number libid = burl_server.getIdParameter(he,"library");
    int count = BowerRouter.getIntParameter(he,"count",20);
-   String filterstr = BowerRouter.getParameter(he,"filter");
-   String filterid = BowerRouter.getParameter(he,"filterid");
    
    BurlLibrary lib = burl_store.findLibraryById(libid);
    if (lib == null) {
@@ -164,17 +164,9 @@ String handleFindEntries(HttpExchange he,ControlSession session)
     }
    BurlRepo repo = lib.getRepository();
    
-   String orderby = BowerRouter.getParameter(he,"orderby");
-   boolean invert = BowerRouter.getBooleanParameter(he,"invert",false);
-   BurlRepoColumn sortfld = null;
-   if (orderby != null && !orderby.isBlank()) {
-      sortfld = repo.getColumn(orderby);
-      if (sortfld == null) {
-         return BowerRouter.errorResponse(he,session,400,"Bad sort field");
-       }
-    } 
    
    BurlRowIter iter = null; 
+   String filterid = BowerRouter.getParameter(he,"filterid");
    if (filterid != null) {
       iter = known_filters.remove(filterid);
       if (count < 0) {
@@ -182,22 +174,17 @@ String handleFindEntries(HttpExchange he,ControlSession session)
        }
     }
    
-   if (iter == null && filterstr != null) {
-      JSONObject jsonfilter = null;
-      if (filterstr.startsWith("{")) {
-         jsonfilter = new JSONObject(filterstr);
+   if (iter == null) {
+      String filterstr = BowerRouter.getParameter(he,"filter");
+      String orderby = BowerRouter.getParameter(he,"orderby");
+      boolean invert = BowerRouter.getBooleanParameter(he,"invert",false);
+      iter = getRowIterator(repo,filterstr,orderby,invert);
+      if (iter == null) {
+         return BowerRouter.errorResponse(he,session,400,"Bad sort field");
        }
-      else {
-         jsonfilter = buildFilterObject(repo,filterstr);
-       }
-      EntityFilter filter = new EntityFilter(jsonfilter,repo,sortfld,invert);
-      iter = repo.getRows(filter);
     }
-   else if (iter == null) {
-      iter = repo.getRows(sortfld,invert);  
-    }
-   JSONArray results = new JSONArray();
    
+   JSONArray results = new JSONArray();
    int ct = 0;
    
    if (filterid == null) {
@@ -223,6 +210,38 @@ String handleFindEntries(HttpExchange he,ControlSession session)
    
    return BowerRouter.jsonOKResponse(session,"count",itcnt,
          "data",results,"filterid",filterid);
+}
+
+
+
+private BurlRowIter getRowIterator(BurlRepo repo,String filterstr,String orderby,boolean invert)
+{
+   BurlRepoColumn sortfld = null;
+   if (orderby != null && !orderby.isBlank()) {
+      sortfld = repo.getColumn(orderby);
+      if (sortfld == null) {
+         return null;
+       }
+    } 
+   
+   BurlRowIter iter = null; 
+   
+   if (filterstr != null) {
+      JSONObject jsonfilter = null;
+      if (filterstr.startsWith("{")) {
+         jsonfilter = new JSONObject(filterstr);
+       }
+      else {
+         jsonfilter = buildFilterObject(repo,filterstr);
+       }
+      EntityFilter filter = new EntityFilter(jsonfilter,repo,sortfld,invert);
+      iter = repo.getRows(filter);
+    }
+   else if (iter == null) {
+      iter = repo.getRows(sortfld,invert);  
+    }
+   
+   return iter;
 }
 
 
@@ -374,6 +393,84 @@ String handleRemoveEntry(HttpExchange he,ControlSession session)
    return BowerRouter.jsonOKResponse(session);
 }
 
+
+
+
+/********************************************************************************/
+/*                                                                              */
+/*      Handle export entries                                                   */
+/*                                                                              */
+/********************************************************************************/
+
+String handleExportEntries(HttpExchange he,ControlSession session)
+{
+   Number uid = session.getUserId();
+   if (uid == null) {
+      return BowerRouter.errorResponse(he,session,400,"Bad user");
+    }
+   Number lid = burl_server.getIdParameter(he,"library");
+   if (lid == null) lid = session.getLibraryId();
+   if (lid == null) {
+      return BowerRouter.errorResponse(he,session,400,"No library given");
+    }
+   ControlLibrary lib = burl_store.findLibraryById(lid);
+   if (lib == null) {
+      return BowerRouter.errorResponse(he,session,400,"No library given");
+    }
+   BurlRepo repo = lib.getRepository();
+   if (repo == null) { 
+      return BowerRouter.errorResponse(he,session,400,"Bad repository");
+    }  
+   
+   BurlExportFormat exp = BowerRouter.getEnumParameter(he,"format",BurlExportFormat.CSV);
+   BurlUserAccess useracc = burl_server.validateLibrary(session,lid);
+   switch (useracc) {
+      case NONE :
+         return BowerRouter.errorResponse(he,session,400,"Not authorized");
+      case VIEWER :
+      case EDITOR :
+      case OWNER :
+      case LIBRARIAN :
+         break; 
+    }
+   
+   String filterstr = BowerRouter.getParameter(he,"filter");
+   String orderby = BowerRouter.getParameter(he,"orderby");
+   boolean invert = BowerRouter.getBooleanParameter(he,"invert",false);
+   BurlRowIter iter = getRowIterator(repo,filterstr,orderby,invert);
+   if (iter == null) {
+      return BowerRouter.errorResponse(he,session,400,"Bad sort field");
+    }
+   
+   String sfx = null;
+   switch (exp) {
+      default :
+      case CSV :
+         sfx = ".csv";
+         break;
+      case JSON :
+         sfx = ".json";
+         sfx = ".txt";
+         break;
+    }
+   File f1 = null;
+   try {
+      f1 = File.createTempFile("Burl_" + lib.getName(),sfx);
+    }
+   catch (IOException e) {
+      return BowerRouter.errorResponse(he,session,500,"Problem with temp file");
+    }
+   
+  
+   
+   repo.exportRepository(f1,exp,iter);  
+   
+   String resp = BowerRouter.sendFileResponse(he,f1); 
+   
+   f1.delete();
+   
+   return resp;
+}
 
 /********************************************************************************/
 /*                                                                              */

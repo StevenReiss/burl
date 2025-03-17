@@ -549,7 +549,7 @@ void handleImport(List<String> args)
           }
          JSONArray arr = new JSONArray(lines);
          JSONObject jdata = BurlUtil.buildJson("rows",arr);
-         data.put("cvsdata",jdata);
+         data.put("csvdata",jdata);
        }
       catch (IOException e) {
          IvyLog.logI("BURLCLI","Problem reading file " + file);
@@ -595,7 +595,6 @@ void handleExportLibrary(List<String> args)
 {
    BurlExportFormat format = null;
    File file = null;
-   boolean internal = false;
    
    for (int i = 0; i < args.size(); ++i) {
       String s = args.get(i);
@@ -605,9 +604,6 @@ void handleExportLibrary(List<String> args)
           }
          else if (s.startsWith("-j")) {                         // -json
             format = BurlExportFormat.JSON;                     
-          }
-         else if (s.startsWith("-i")) {                         // -internal
-            internal = true;
           }
          else if (s.startsWith("-f") && i+1 < args.size()) {    // -file <file>
             if (file != null) {
@@ -639,7 +635,6 @@ void handleExportLibrary(List<String> args)
     }
    
    JSONObject data = BurlUtil.buildJson("library",cli_main.getLibraryId(),
-         "internal",internal,
          "format",format.toString());
      
    JSONObject rslt = cli_main.createHttpPost("exportlibrary",data,file);

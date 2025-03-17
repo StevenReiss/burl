@@ -30,9 +30,12 @@
       <FIELD NAME="Copy" DEFAULT="1" />
       <FIELD NAME="Shelf" SORT='T' />
       <FIELD NAME="Status" />
-      <FIELD NAME="Labeled" LABELED="T" FIX="YES_NO" DEFAULT="no" />
+      <FIELD NAME="Print Labels" LABELED="T" FIX="YES_NO" DEFAULT="no" DISPLAY="YES_NO" />
+      <FIELD NAME="Verified" FIX="YES_NO" DEFAULT="no" DISPLAY="YES_NO" />
    </FIELDS>
    <CSV QUOTE='"' SEPARATOR="," />
    <MULTIPLE TEXT=" | " />
    <LABEL CODE='LC Classification' AUTHOR='Personal Name,Related Names' YEAR='Date' />
 </BURL>
+
+

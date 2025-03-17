@@ -59,7 +59,7 @@ BurlRepoColumn getLccnField();
  *      Return the field containing labeled flag
  **/
 
-BurlRepoColumn getLabeledField();
+BurlRepoColumn getPrintLabelsField();
 
 
 /**
@@ -197,7 +197,8 @@ void closeRepository();
  *      Export the repository
  **/
 
-boolean exportRepository(File otf,BurlExportFormat format,boolean external); 
+boolean exportRepository(File otf,BurlExportFormat format,
+      BurlRowIter rowiter); 
 
 
 /**

@@ -107,6 +107,12 @@ class FieldData {
     return _fieldNames;
   }
 
+  String? getDisplay(String id) {
+    Map<String, dynamic>? fd = _fieldData[id];
+    String? disp = fd?["DISPLAY"];
+    return disp;
+  }
+
   bool canEdit(String useracc, String fld) {
     switch (useracc) {
       case "NONE":

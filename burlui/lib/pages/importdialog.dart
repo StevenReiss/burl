@@ -1,8 +1,8 @@
 /********************************************************************************/
 /*                                                                              */
-/*              printlabelsdialog.dart                                          */
+/*              importdialog.dart                                               */
 /*                                                                              */
-/*      Dialog to print a set of labels                                         */
+/*      Dialog to import data from a CSV file                                   */
 /*                                                                              */
 /********************************************************************************/
 /*      Copyright 2025 Brown University -- Steven P. Reiss                      */
@@ -20,12 +20,15 @@ import '../util.dart' as util;
 import '../librarydata.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'dart:convert';
 
-Future printLabelsDialog(BuildContext context, LibraryData lib) async {
+Future importDialog(BuildContext context, LibraryData lib) async {
   BuildContext dcontext = context;
   TextEditingController fileControl = TextEditingController();
-
-  fileControl.text = "labels.rtf";
+  PlatformFile? resultFile;
+  String mode = "REPLACE";
+  List<String> modes = ["NEW", "SKIP", "AUGMENT", "REPLACE", "FORCE"];
+  bool hadfocus = false;
 
   void cancel() {
     if (dcontext.mounted) {
@@ -34,28 +37,63 @@ Future printLabelsDialog(BuildContext context, LibraryData lib) async {
   }
 
   void submit() async {
+    PlatformFile? rf = resultFile;
+    if (rf == null) return;
+    Stream<List<int>>? fileReadStream = rf.readStream;
+    if (fileReadStream == null) {
+      return;
+    }
+
+    List<String> lines = [];
+    await fileReadStream
+        .transform(utf8.decoder)
+        .transform(LineSplitter())
+        .forEach((line) {
+          if (line.isNotEmpty) lines.add(line);
+        });
+    Map<String, Object> filedata = {"rows": lines};
+    String d = jsonEncode(filedata);
+
     Map<String, String?> data = {
       "library": lib.getLibraryId().toString(),
+      "update": mode,
+      "csvdata": d,
     };
-    await util.postJsonDownload("labels", fileControl.text, body: data);
+    await util.postJson("import", body: data);
     if (dcontext.mounted) {
       Navigator.of(dcontext).pop("OK");
     }
   }
 
   void chooseFile() async {
-    String? output = await FilePicker.platform.saveFile(
-      dialogTitle: 'Please select output rtf file: ',
-      fileName: fileControl.text,
+    hadfocus = true;
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      withData: true,
+      withReadStream: true,
+      dialogTitle: "Select CSV file to Import",
+      allowedExtensions: ["csv"],
     );
-    if (output != null) {
-      fileControl.text = output;
-    }
+    if (result == null) return;
+    PlatformFile file = result.files.first;
+    String? p = file.path;
+    p ??= file.name;
+    fileControl.text = p;
+    resultFile = file;
   }
 
-  Widget fileBtn = widgets.submitButton("Choose File", chooseFile);
+  void setMode(String? md) {
+    if (md != null) mode = md;
+    hadfocus = false;
+  }
+
+  //   Widget fileBtn = widgets.submitButton("Choose File", chooseFile);
   Widget cancelBtn = widgets.submitButton("Cancel", cancel);
-  Widget submitBtn = widgets.submitButton("Get Labels", submit);
+  Widget submitBtn = widgets.submitButton(
+    "Do Import",
+    submit,
+    //  enabled: resultFile != null,
+  );
 
   Dialog dlg = Dialog(
     child: Padding(
@@ -67,27 +105,46 @@ Future printLabelsDialog(BuildContext context, LibraryData lib) async {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             widgets.largeBoldText(
-              "Print the Next Set of Labels",
+              "Import Data into Library",
               scaler: 1.5,
             ),
             widgets.fieldSeparator(15),
+            widgets.dropDownWidget<String>(
+              modes,
+              value: mode,
+              onChanged: setMode,
+              label: "Update Mode",
+              tooltip:
+                  "Select update mode when item already exists in library",
+            ),
+            widgets.fieldSeparator(15),
             const Text(
-              "BURL will print labels for the next set of items "
-              "and save it to a rtf file that can be loaded into Word "
-              "or similar system and printed onto adhesive paper. ",
+              "BURL will import data in CSV format.  The "
+              "file should be one that has been previously exported by BURL, "
+              "but can be edited or otherwise modified by the user.",
             ),
             widgets.fieldSeparator(16),
-            widgets.textField(
-              label: "Save in File",
-              controller: fileControl,
+            Focus(
+              child: widgets.textField(
+                label: "Import from File",
+                controller: fileControl,
+                //  enabled: false,
+                readOnly: true,
+              ),
+              onFocusChange: (hasfocus) {
+                if (hasfocus && !hadfocus) {
+                  chooseFile();
+                  hadfocus = true;
+                }
+              },
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
                 cancelBtn,
                 const SizedBox(width: 15),
-                fileBtn,
-                const SizedBox(width: 15),
+                //  fileBtn,
+                //  const SizedBox(width: 15),
                 submitBtn,
               ],
             ),
