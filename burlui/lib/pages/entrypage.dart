@@ -170,20 +170,26 @@ class _BurlEntryPageState extends State<BurlEntryPage> {
     if (disp == 'YES_NO' && en) {
       Widget fldw = widgets.textField(
         controller: ctrl,
+        readOnly: true,
         enabled: false,
         maxLines: 0,
-        collapse: true,
+        collapse: false,
       );
       bool value = (ctrl?.text == 'yes');
       Widget toggle = widgets.booleanField(
         value: value,
+        compact: true,
         onChanged: (bool? fg) {
           _updateYesNo(fg, ctrl);
         },
       );
       Widget w1 = Row(
         mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[toggle, Expanded(child: fldw)],
+        children: <Widget>[
+          toggle,
+          SizedBox(width: 5),
+          Expanded(child: fldw),
+        ],
       );
       return w1;
     } else {

@@ -567,16 +567,22 @@ Widget booleanField({
   bool value = false,
   void Function(bool?)? onChanged,
   String tooltip = "",
+  compact = false,
 }) {
   label ??= "";
+  Widget w1 = Checkbox(value: value, onChanged: onChanged);
+  if (compact) {
+    w1 = SizedBox(
+      height: 24.0,
+      width: 24.0,
+      child: Transform.scale(scale: 0.8, child: w1),
+    );
+  }
   Widget w = Row(
     mainAxisSize: MainAxisSize.min,
     mainAxisAlignment: MainAxisAlignment.center,
     crossAxisAlignment: CrossAxisAlignment.center,
-    children: <Widget>[
-      Checkbox(value: value, onChanged: onChanged),
-      Text(label),
-    ],
+    children: <Widget>[w1, Text(label)],
   );
   return tooltipWidget(tooltip, w);
 }
