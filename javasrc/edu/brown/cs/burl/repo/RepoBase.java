@@ -74,7 +74,7 @@ private static BurlFieldData field_data;
 private static final String [] EMPTY_STRINGS = new String [0];
 
 private static final Pattern LCC_ELEMENT = Pattern.compile(
-      "(([A-Za-z]+)([0-9]+)(\\.[0-9]+)?)|([0-9]{4})");
+      "(([A-Za-z]+)([0-9]+))|([0-9]{4})");
 
 
       
@@ -1015,18 +1015,8 @@ List<String> getLccElements(String lcc)
    
    while (m.find()) {
       String x = m.group(0);
-      String x5 = m.group(5);
+      String x5 = m.group(4);
       if (x5 != null && x5.isEmpty()) x5 = null;
-      if (x.contains("00") && x5 == null) {
-         String x0 = m.group(1);
-         String x1 = m.group(3);
-         String x2 = m.group(4);
-         while (x1.startsWith("0")) x1 = x1.substring(1);
-         while (x2 != null && x2.endsWith("0")) x2 = x2.substring(0,x2.length()-1);
-         if (x2 != null && x2.equals(".")) x2 = null;
-         if (x2 == null) x2 = "";
-         x = x0 + x1 + x2;
-       }
       if (x.length() >= 12) x = x.substring(0,12);
       rslt.add(x);
       if (x5 != null) break; 

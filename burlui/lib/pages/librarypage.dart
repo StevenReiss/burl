@@ -599,8 +599,8 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     }
 
     String txt = "";
-    if (ttl.contains("/")) {
-      txt = ttl.replaceAll("/", "\n");
+    if (ttl.contains(" /")) {
+      txt = ttl.replaceAll(" /", "\n");
     } else {
       txt = "$ttl\n$aut";
     }
