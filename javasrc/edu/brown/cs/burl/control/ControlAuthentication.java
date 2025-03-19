@@ -20,6 +20,7 @@ package edu.brown.cs.burl.control;
 import com.sun.net.httpserver.HttpExchange;
 
 import edu.brown.cs.burl.burl.BurlException;
+import edu.brown.cs.burl.burl.BurlUser;
 import edu.brown.cs.burl.burl.BurlUtil;
 import edu.brown.cs.ivy.bower.BowerRouter;
 import edu.brown.cs.ivy.bower.BowerUtil;
@@ -80,6 +81,19 @@ String handlePreRegister(HttpExchange he,ControlSession session)
    session.setCode(salt);
    session_store.updateSession(session);
    
+   return BowerRouter.jsonOKResponse(session,"salt",salt,
+         "code",session.getCode());
+}
+
+
+String handlePreChangePassword(HttpExchange he,ControlSession session)
+{
+   BurlUser bu = session.getUser();
+   if (bu == null) {
+      return BowerRouter.errorResponse(he,session,402,"No User");
+    }
+   
+   String salt = bu.getSalt();
    return BowerRouter.jsonOKResponse(session,"salt",salt,
          "code",session.getCode());
 }
@@ -311,14 +325,15 @@ String handleChangePassword(HttpExchange he,ControlSession session)
 {
    Number uid = session.getUserId();
    String pwd = BowerRouter.getParameter(he,"userpwd");
-   
-   ControlUser user = burl_store.findUserById(uid);
+   String salt = BowerRouter.getParameter(he,"salt");
+   ControlUser user = session.getUser();
    if (user == null) {
       return BowerRouter.errorResponse(he,session,402,"Bad user");
     }
-   String salt = user.getSalt();
-   pwd = BurlUtil.secureHash(pwd + salt);
-   
+   if (salt == null) {
+      salt = user.getSalt();
+      pwd = BurlUtil.secureHash(pwd + salt);
+    }
    burl_store.updatePassword(uid,pwd);  
    
    return BowerRouter.jsonOKResponse(session);

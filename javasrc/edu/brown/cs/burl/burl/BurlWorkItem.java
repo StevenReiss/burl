@@ -50,11 +50,7 @@ String getItem();
 BurlUpdateMode getUpdateMode();
 
 
-/**
- *      Tell if count is enabled
- **/
 
-boolean doCount();
 
 
 }       // end of interface BurlWorkItem

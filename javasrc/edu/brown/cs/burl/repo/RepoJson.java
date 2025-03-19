@@ -47,7 +47,7 @@ class RepoJson extends RepoBase
 
 private Map<Integer,BurlRepoRow> repo_data;
 private File                    repo_file;
-private int                     max_id;
+private int                     max_id; 
 
 
 /********************************************************************************/

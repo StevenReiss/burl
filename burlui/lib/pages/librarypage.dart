@@ -124,9 +124,20 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
       separatorBuilder: _getItemSeparator,
       controller: _scrollController,
     );
+    Widget l1 = Scrollbar(
+      trackVisibility: true,
+      thumbVisibility: true,
+      controller: _scrollController,
+      child: list,
+    );
+    list = l1;
+
     if (_numItems == 0) {
       list = const Text("No Results Found");
     }
+    String count =
+        _isDone ? "$_numItems Entries" : "<= $_numItems Entries";
+
     Widget w = Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
@@ -147,6 +158,12 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
               (_sortInvert ? "Inverse Order" : "Normal Order"),
               _changeSortOrder,
               tooltip: "Push to invert the sort order",
+            ),
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[Text(count)],
+              ),
             ),
           ],
         ),
@@ -337,7 +354,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
   }
 
   void _refreshList() async {
-    await _fetchInitialData();
+    await _fetchInitialData(true);
     setState(() {});
   }
 
@@ -408,7 +425,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
   }
 
   Future<void> _handleSearch() async {
-    await _fetchInitialData();
+    await _fetchInitialData(true);
     setState(() {});
   }
 
@@ -418,13 +435,13 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     } else {
       _sortOn = on;
     }
-    await _fetchInitialData();
+    await _fetchInitialData(true);
     setState(() {});
   }
 
   void _changeSortOrder() async {
     _sortInvert = !_sortInvert;
-    await _fetchInitialData();
+    await _fetchInitialData(true);
     setState(() {});
   }
 
@@ -445,6 +462,8 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
 
   void _importEntries() async {
     await importDialog(context, _libData);
+    await _fetchInitialData(true);
+    setState(() {});
   }
 
   void _loadMore() {
@@ -463,7 +482,9 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     }
   }
 
-  Future<List<ItemData>>? _fetchInitialData() async {
+  Future<List<ItemData>>? _fetchInitialData([
+    bool resetscroll = false,
+  ]) async {
     // do a find on the library, save the iterator id, set the first elements
     // also set _isdone to true if returned iterator id is null
     // this should also be called by _handleSearch
@@ -482,7 +503,9 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     _numItems = 0;
     _maxRead = 0;
     _scrollext = 0;
-    //  _scrollController.jumpTo(_scrollController.initialScrollOffset);
+    if (resetscroll) {
+      _scrollController.jumpTo(0);
+    }
     Map<String, String?> data = {
       "library": _libData.getLibraryId().toString(),
       "count": "20",
@@ -509,15 +532,19 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
       }
       _iterId = rslts["filterid"];
       _numItems = rslts["count"];
-      if (_iterId != null) _isDone = false;
+      _isDone = _iterId == null;
     }
 
     return _itemList;
   }
 
   Future<List<ItemData>> _fetchMoreData() async {
-    if (_maxRead < _itemList.length) return _itemList;
-
+    if (_maxRead < _itemList.length) {
+      if (_isDone && _itemList.length > _numItems) {
+        _itemList.removeRange(_numItems, _itemList.length);
+      }
+      return _itemList;
+    }
     while (_maxRead >= _itemList.length &&
         _maxRead < _numItems &&
         !_isDone) {
@@ -540,9 +567,11 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
           _itemList.add(id);
         }
         _iterId = rslts["filterid"];
-        if (_iterId != null) _isDone = false;
+        _isDone = _iterId == null;
         continue;
       } else {
+        _iterId = null;
+        _isDone = true;
         break;
       }
     }

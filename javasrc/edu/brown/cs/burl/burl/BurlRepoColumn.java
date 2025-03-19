@@ -92,11 +92,7 @@ BurlIsbnType getIsbnType();
 String getOtherIsbn();
 
 
-/**
- *      Specify whether this is the count (# copies) field
- **/
 
-boolean isCountField();
 
 
 
@@ -149,11 +145,19 @@ String getLabel();
 
 BurlFixType getFixType();
 
+
 /**
  *      Handle corrections based on field type
  **/
 
 String fixFieldValue(String val);
+
+
+/**
+ *      Get the sort type for this field
+ **/
+
+BurlSortType getSortType();
 
 
 /**

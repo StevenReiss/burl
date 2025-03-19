@@ -26,7 +26,7 @@ Future importDialog(BuildContext context, LibraryData lib) async {
   BuildContext dcontext = context;
   TextEditingController fileControl = TextEditingController();
   PlatformFile? resultFile;
-  String mode = "REPLACE";
+  String mode = "NEW";
   List<String> modes = ["NEW", "SKIP", "AUGMENT", "REPLACE", "FORCE"];
   bool hadfocus = false;
 
@@ -115,13 +115,22 @@ Future importDialog(BuildContext context, LibraryData lib) async {
               onChanged: setMode,
               label: "Update Mode",
               tooltip:
-                  "Select update mode when item already exists in library",
+                  "Select update mode when item already exists in library."
+                  "Items will be matched on burl_id if that is in the import. "
+                  "Ohterwise they will be matched on isbn or lccn.  Modes "
+                  "include: NEW (add new item even it there is a match), "
+                  "SKIP (ignore import if previous existed), "
+                  "AUGMENT (add data from import if original was empty), "
+                  "REPLACE (use data from import unless it is empty) "
+                  "and FORCE (always use data from import) ",
             ),
             widgets.fieldSeparator(15),
             const Text(
               "BURL will import data in CSV format.  The "
               "file should be one that has been previously exported by BURL, "
-              "but can be edited or otherwise modified by the user.",
+              "but can be edited or otherwise modified by the user.  It can "
+              "also be a CSV file you created that looks like a BURL export. "
+              "There should be a header line with field names.",
             ),
             widgets.fieldSeparator(16),
             Focus(

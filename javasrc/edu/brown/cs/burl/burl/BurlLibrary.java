@@ -84,7 +84,7 @@ void changeUserAccess(String email,BurlUserAccess access);
  *      Add books (entries) to a library
  **/
 
-void addToLibrary(Collection<String> isbns,BurlUpdateMode mode,boolean count); 
+void addToLibrary(Collection<String> isbns,BurlUpdateMode mode); 
 
 
 

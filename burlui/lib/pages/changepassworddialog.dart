@@ -46,7 +46,14 @@ Future changePasswordDialog(BuildContext context) async {
       pwdError = err;
       return;
     }
-    var data = {'userpwd': util.hasher(p1)};
+    Map<String, dynamic> saltd = await util.getJson("changepassword");
+    String? salt;
+    if (saltd["status"]) {
+      salt = saltd["salt"];
+    }
+    String p3 = util.hasher(p1);
+    if (salt != null) p3 = util.hasher(p3 + salt);
+    Map<String, String?> data = {'userpwd': p3, 'salt': salt};
 
     await util.postJsonOnly("changepassword", body: data);
     if (dcontext.mounted) {

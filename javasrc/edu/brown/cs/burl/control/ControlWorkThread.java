@@ -88,7 +88,7 @@ void addTask(Number lid,List<String> isbns,BurlUpdateMode mode,boolean count)
          try {
             if (lib != null) {
                List<String> itms = Collections.singletonList(wi.getItem());
-               lib.addToLibrary(itms,wi.getUpdateMode(),wi.doCount());
+               lib.addToLibrary(itms,wi.getUpdateMode());
              }
           }
          finally {

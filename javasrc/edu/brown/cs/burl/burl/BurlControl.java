@@ -60,11 +60,7 @@ Collection<BurlLibrary> getLibraries(BurlUser user);
 BurlUpdateMode getUpdateMode();
 
 
-/**
- *      return the default count mode
- **/
 
-boolean getDoCount();
 
 
 /**

@@ -75,11 +75,6 @@ ControlWorkItem(JSONObject jo)
    return BurlUpdateMode.values()[umod];
 }
 
-@Override public boolean doCount()
-{
-   return base_data.getBoolean("count");
-}
-
 
 
 }       // end of class ControlWorkItem

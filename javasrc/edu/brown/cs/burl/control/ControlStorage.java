@@ -517,11 +517,12 @@ ControlSession checkSession(BowerSessionStore<ControlSession> bss,String sid)
 @Override public BurlCountIter<JSONObject> getAllDataRows(BurlRepo repo,
       BurlRepoColumn sort,boolean invert)
 {
-   String orderby = (sort == null ? "burl_id" : sort.getFieldName());
-   String desc = (invert ? " DESC" : "");
+// String orderby = (sort == null ? "burl_id" : sort.getFieldName());
+// String desc = (invert ? " DESC" : "");
+   String orderby = getOrderBy(sort,invert);
    String kname = repo.getNameKey();
    String rname = "BurlRepo_" + kname;
-   String q1 = "SELECT * FROM " + rname + " ORDER BY " + orderby + desc;
+   String q1 = "SELECT * FROM " + rname + orderby;
    String q2 = "SELECT COUNT(burl_id) FROM " + rname;
 
    try {
@@ -534,6 +535,32 @@ ControlSession checkSession(BowerSessionStore<ControlSession> bss,String sid)
       IvyLog.logE("BURL","SQL problem",e);
     }
    return null;
+}
+
+
+private String getOrderBy(BurlRepoColumn sort,boolean invert)
+{
+   String pfx = " ORDER BY ";
+   String sfx = (invert ? " DESC" : "");
+   String body = "burl_id";
+   if (sort != null) {
+      BurlSortType sorttype = sort.getSortType();
+      switch (sorttype) {
+         case NORMAL :
+            body = sort.getFieldName();
+            break;
+         case NOCASE :
+            body = "LOWER(" + sort.getFieldName() +")";
+            break;
+         case TITLE :
+            body = "TRIM(LEADING 'a ' FROM TRIM(LEADING 'an ' FROM " +
+               "TRIM(LEADING 'the ' FROM LOWER(" +
+               sort.getFieldName() + "))))";
+            break;
+       }
+    }
+   
+   return pfx + body + sfx;
 }
 
 

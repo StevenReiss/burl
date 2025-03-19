@@ -68,7 +68,6 @@ private ControlStorage	control_storage;
 private File            base_directory;
 private BurlRepoFactory repo_factory;
 private BurlUpdateMode  update_mode;
-private boolean         do_counts;
 private BibEntryFactory bibentry_factory;
 private Map<Number,BurlRepo> repo_map;
 private String          url_prefix;
@@ -168,7 +167,7 @@ String getUrlPrefix()                           { return url_prefix; }
    return update_mode; 
 }
 
-@Override public boolean getDoCount()           { return do_counts; }
+
  
 @Override public File getDataDirectory() 
 {
@@ -280,11 +279,6 @@ private boolean setUpdateMode()
          rslt = false;
          break;
     }
-   
-   String cnt = base_properties.getProperty("doCounts");
-   if (cnt == null || cnt.isEmpty()) cnt = "Fburl";
-   if ("nN0fF".indexOf(cnt.charAt(0)) >= 0) do_counts = false;
-   else do_counts = true;
    
    return rslt;
 }

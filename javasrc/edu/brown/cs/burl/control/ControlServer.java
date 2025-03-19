@@ -167,6 +167,7 @@ BowerRouter<ControlSession> setupRouter()
    
 // br.addRoute("POST","/rest/removeentry",this::handleRemoveEntry);
    
+   br.addRoute("GET","/rest/changepassword",burl_auth::handlePreChangePassword); 
    br.addRoute("POST","/rest/changepassword",burl_auth::handleChangePassword);
    br.addRoute("POST","/rest/removeuser",burl_auth::handleRemoveUser); 
    
@@ -528,7 +529,6 @@ String handleImport(HttpExchange he,ControlSession session)
       return BowerRouter.errorResponse(he,session,400,"Bad library id");
     }
    BurlUpdateMode updmode = BowerRouter.getEnumParameter(he,"update",burl_main.getUpdateMode());
-   boolean docount = BowerRouter.getBooleanParameter(he,"count",false);
    
    BurlRepo repo =  lib.getRepository();
    
@@ -542,11 +542,11 @@ String handleImport(HttpExchange he,ControlSession session)
             colmap = new HashMap<>();
             String err = repo.importCSVHeader(row,colmap);
             if (err != null) {
-               return BowerRouter.errorResponse(he,session,400,err);
+               return BowerRouter.errorResponse(he,session,400,err); 
              }
             continue;
           }
-         repo.importCSV(row,updmode,docount,colmap);
+         repo.importCSV(row,updmode,colmap);
        }
       
       return BowerRouter.jsonOKResponse(session);
@@ -557,7 +557,7 @@ String handleImport(HttpExchange he,ControlSession session)
       JSONArray dataarr = jindata.getJSONArray("rows");
       for (int i = 0; i < dataarr.length(); ++i) {
          JSONObject row = dataarr.getJSONObject(i);
-         repo.importJSON(row,updmode,docount);  
+         repo.importJSON(row,updmode);  
        }
       return BowerRouter.jsonOKResponse(session);
     }

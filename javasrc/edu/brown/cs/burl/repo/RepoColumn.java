@@ -104,10 +104,7 @@ RepoColumn(String name,int no,BurlFieldData fd)
    return field_data.getDefault(column_name); 
 }
 
-@Override public boolean isCountField()
-{
-   return column_name.equals(field_data.getCountField());
-}
+
 
 @Override public boolean isOriginalIsbnField() 
 {
@@ -155,6 +152,12 @@ RepoColumn(String name,int no,BurlFieldData fd)
 @Override public BurlFixType getFixType()
 {
    return field_data.getFixType(column_name);
+}
+
+
+@Override public BurlSortType getSortType()
+{
+   return field_data.getSortType(column_name); 
 }
 
 

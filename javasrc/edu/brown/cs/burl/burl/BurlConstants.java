@@ -137,6 +137,18 @@ enum BurlFixType {
 
 
 /**
+ *      Type of sort desired based on field
+ **/
+
+enum BurlSortType {
+   NORMAL,              // normal sorting, nothing fancy                              
+   NOCASE,              // ignore case while sorting
+   TITLE,               // ignore leading articles (the, a, an, ...)
+}
+
+
+
+/**
  *      Generic iterator that knows its count
  **/
 

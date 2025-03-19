@@ -26,7 +26,6 @@ import edu.brown.cs.burl.burl.BurlBibEntry;
 import edu.brown.cs.burl.burl.BurlLibrary;
 import edu.brown.cs.burl.burl.BurlLibraryAccess;
 import edu.brown.cs.burl.burl.BurlRepo;
-import edu.brown.cs.burl.burl.BurlRepoColumn;
 import edu.brown.cs.burl.burl.BurlRepoRow;
 import edu.brown.cs.burl.burl.BurlUser;
 import edu.brown.cs.burl.burl.BurlUtil;
@@ -148,18 +147,14 @@ private String getUsers(BurlUserAccess level,List<BurlLibraryAccess> acclst)
 
 
 @Override public void addToLibrary(Collection<String> isbns, 
-      BurlUpdateMode mode,boolean count)
-{
+      BurlUpdateMode mode)
+{ 
    BurlRepo repo = getRepository();
-   if (repo.getCountField() == null) count = false;
    
    for (String isbn : isbns) {
       BurlRepoRow row = findOldRow(repo,isbn);
       if (row != null) {
          if (mode == BurlUpdateMode.SKIP) {
-            if (count) {
-               incrementCount(row);
-             }
             continue;
           }
        }
@@ -179,7 +174,7 @@ private String getUsers(BurlUserAccess level,List<BurlLibraryAccess> acclst)
          row = repo.newRow();
          repo.setInitialValues(row,isbn);
        }
-      repo.computeEntry(row,isbn,bibentry,mode,count);
+      repo.computeEntry(row,isbn,bibentry,mode); 
       
       if (bibentry != null) {
          IvyLog.logD("BURL","Computed BIB ENTRY for " + isbn);
@@ -211,23 +206,7 @@ BurlRepoRow findOldRow(BurlRepo repo,String isbn)
 }
 
 
-private void incrementCount(BurlRepoRow row)
-{
-   BurlRepo repo = getRepository();
-   BurlRepoColumn col = repo.getCountField();
-   if (col == null) return;
-   String v = row.getData(col);
-   if (v == null || v.isEmpty()) v = "1";
-   else {
-      int ct = 0;
-      try {
-         ct = Integer.parseInt(v);
-       }
-      catch (NumberFormatException e) { }
-      v = String.valueOf(ct+1);
-    }
-   row.setData(col,v);
-}
+
 
 
 

@@ -172,6 +172,9 @@ String handleFindEntries(HttpExchange he,ControlSession session)
       if (count < 0) {
          return BowerRouter.jsonOKResponse(session);
        }
+      else if (iter == null) {
+         return BowerRouter.errorResponse(he,session,400,"Bad iterator");
+       }
     }
    
    if (iter == null) {

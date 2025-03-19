@@ -2,9 +2,9 @@
    <FIELDS>
       <FIELD NAME="LCCN" MARC="010a" OPENLIB="lccn" GOOGLE="lccn" LCCN='T' />
       <FIELD NAME="Personal Name" MARC="100 aqbcde" OPENLIB="author_name" GOOGLE="authors"
-		ALTNAMES="Primary,Primary Author" FIX="LAST_FIRST" SORT='T' />
+		ALTNAMES="Primary,Primary Author,personalname" FIX="LAST_FIRST" SORT='T' />
       <FIELD NAME="Main Title" MARC="245 abc" OPENLIB="title" GOOGLE="title: subtitle"
-		ALTNAMES="Title" SORT='T' />
+		ALTNAMES="Title" SORT='T' SORTTYPE='TITLE' />
       <FIELD NAME="Edition" MARC="250a b" />
       <FIELD NAME="Imprint" MARC="260 abc+264 abc" OPENLIB="publisher : publish_year"
 		GOOGLE="publisher : publishedDate" MULTIPLE="T" ALTNAMES='Publisher' SORT='T' />
@@ -14,10 +14,11 @@
 		ALTNAMES="Desc" />
       <FIELD NAME="ISBN" ISBN="ORIGINAL" FIX="ISBN"  SORT='T' />
       <FIELD NAME="All ISBNs" ISBN='ALL' MARC="020a" OPENLIB="isbn" FIX="ISBN"
-	       GOOGLE="industryIdentifiers.identifier" MULTIPLE="T" ALTNAMES="ISBNs" />
-      <FIELD NAME="LC Classification" MARC="050 ab" OPENLIB="lcc" ALTNAMES="LCC" FIX="LCC_CODE" SORT='T' />
+	       GOOGLE="industryIdentifiers.identifier" MULTIPLE="T" ALTNAMES="ISBNs,allisbns" />
+      <FIELD NAME="LC Classification" MARC="050 ab" OPENLIB="lcc" ALTNAMES="LCC,lcclassifaction"
+		FIX="LCC_CODE" SORT='T' />
       <FIELD NAME="Related Names" MARC="700 aqbcde" OPENLIB="author_name" GOOGLE="authors" MULTIPLE="T"
-		ALTNAMES='Author,Authors' SORT='T' />
+		ALTNAMES='Author,Authors,relatednames' SORT='T' />
       <FIELD NAME="Contents" MARC="505a" MULTIPLE='T' />
       <FIELD NAME="Subjects" MARC="630 -- axv+650 -- axv+651 -- aeg4vxyz"
 		OPENLIB="subject" GOOGLE="categories" MULTIPLE="T" ALTNAMES='Subject,subj' SORT='T' VIEWMULT='T' />
@@ -25,17 +26,16 @@
       <FIELD NAME="Series" MARC="440 anv+490 avx+830 anv" MULTIPLE="T" />
       <FIELD NAME="Version" MARC="251a" />
       <FIELD NAME="Dewey Class No." MARC="082--a2" OPENLIB="ddc" FIELDNAME="dewey"
-		ALTNAMES='Dewey,ddn' SORT='T' />
+		ALTNAMES='Dewey,ddn,deweyclassno' SORT='T' />
       <FIELD NAME="OCLC" MARC="035a" OPENLIB="oclc" GOOGLE="oclc" />
       <FIELD NAME="Copy" DEFAULT="1" />
       <FIELD NAME="Shelf" SORT='T' />
       <FIELD NAME="Status" />
-      <FIELD NAME="Print Labels" LABELED="T" FIX="YES_NO" DEFAULT="no" DISPLAY="YES_NO" />
+      <FIELD NAME="Print Labels" LABELED="T" FIX="YES_NO" DEFAULT="no"
+		ALTNAMES='printlabels' DISPLAY="YES_NO" />
       <FIELD NAME="Verified" FIX="YES_NO" DEFAULT="no" DISPLAY="YES_NO" />
    </FIELDS>
    <CSV QUOTE='"' SEPARATOR="," />
    <MULTIPLE TEXT=" | " />
    <LABEL CODE='LC Classification' AUTHOR='Personal Name,Related Names' YEAR='Date' />
 </BURL>
-
-

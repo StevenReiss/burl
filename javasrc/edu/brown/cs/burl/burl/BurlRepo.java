@@ -34,11 +34,7 @@ public interface BurlRepo extends BurlConstants
 Collection<BurlRepoColumn> getColumns();
 
 
-/**
- *      Return the COUNT field for the repository if there is one
- **/
 
-BurlRepoColumn getCountField();
 
 
 /**
@@ -103,7 +99,7 @@ BurlRepoColumn getColumn(String name);
  **/
 
 void computeEntry(BurlRepoRow row,String isbn,BurlBibEntry entry,
-      BurlUpdateMode updmode,boolean count);
+      BurlUpdateMode updmode);
 
 
 /**
@@ -221,7 +217,7 @@ String importCSVHeader(String hdr,Map<BurlRepoColumn,Integer> columnmap);
  *      Import methods: add data from a CSV line
  **/
 
-void importCSV(String csvline,BurlUpdateMode updmode,boolean count,
+void importCSV(String csvline,BurlUpdateMode updmode,
       Map<BurlRepoColumn,Integer> columns);
 
 
@@ -229,7 +225,7 @@ void importCSV(String csvline,BurlUpdateMode updmode,boolean count,
  *      Import data from a json line
  **/
 
-void importJSON(JSONObject json,BurlUpdateMode updmode,boolean count);
+void importJSON(JSONObject json,BurlUpdateMode updmode);
 
 
 

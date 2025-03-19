@@ -48,7 +48,6 @@ public class BurlFieldData implements BurlConstants
 private Map<String,Element> field_map;
 private List<String> field_names;
 private List<String> isbn_fields;
-private String count_field;
 private String isbn_field;
 private String lccn_field;
 private String labeled_field;
@@ -70,7 +69,6 @@ public BurlFieldData()
    field_map = new LinkedHashMap<>(); 
    isbn_fields = new ArrayList<>();
    field_names = new ArrayList<>();
-   count_field = null;
    isbn_field = null;
    lccn_field = null;
    labeled_field = null;
@@ -99,9 +97,6 @@ public BurlFieldData()
       if (isbntype != BurlIsbnType.NONE) {
          isbn_fields.add(nm);
          if (isbntype == BurlIsbnType.ORIGINAL) isbn_field = nm;
-       }
-      if (IvyXml.getAttrBool(fldelt,"COUNT")) {
-         count_field = nm; 
        }
       if (IvyXml.getAttrBool(fldelt,"LCCN")) {
          lccn_field = nm; 
@@ -179,12 +174,6 @@ public BurlUserAccess getAccessLevel(String nm)
 }
 
 
-public String getCountField()
-{
-   return count_field;
-}
-
-
 public String getPrintLabelsField()
 { 
    return labeled_field;
@@ -223,7 +212,6 @@ public String getDefault(String nm)
 {
    Element felt = field_map.get(nm);
    String dflt = null;
-   if (nm.equals(count_field)) dflt = "0";
    
    return IvyXml.getAttrString(felt,"DEFAULT",dflt);
 }
@@ -237,12 +225,17 @@ public String getLabel(String nm)
 }
 
 
-
-
 public BurlFixType getFixType(String nm)
 {
    Element felt = field_map.get(nm);
    return IvyXml.getAttrEnum(felt,"FIX",BurlFixType.NONE); 
+}
+
+
+public BurlSortType getSortType(String nm)
+{
+   Element felt = field_map.get(nm);
+   return IvyXml.getAttrEnum(felt,"SORTTYPE",BurlSortType.NORMAL); 
 }
 
 
