@@ -470,6 +470,8 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     if (_scrollController.position.pixels >= _scrollext) {
       _scrollext = _scrollController.position.pixels;
       setState(() {});
+    } else if (_isDone) {
+      setState(() {});
     }
   }
 
@@ -508,7 +510,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     }
     Map<String, String?> data = {
       "library": _libData.getLibraryId().toString(),
-      "count": "20",
+      "count": globals.itemCount.toString(),
     };
     if (_findControl.text.isNotEmpty) {
       data["filter"] = _findControl.text;
@@ -543,6 +545,9 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
       if (_isDone && _itemList.length > _numItems) {
         _itemList.removeRange(_numItems, _itemList.length);
       }
+      if (_iterId == null) {
+        _isDone = true;
+      }
       return _itemList;
     }
     while (_maxRead >= _itemList.length &&
@@ -552,7 +557,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
       Map<String, String?> data = {
         "library": _libData.getLibraryId().toString(),
         "filterid": _iterId,
-        "count": "20",
+        "count": globals.itemCount.toString(),
       };
 
       Map<String, dynamic> rslts = await util.postJson(
@@ -581,11 +586,10 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
 
   Widget? _getItemTile(BuildContext ctx, int index) {
     if (index < 0 || index >= _numItems) return null;
-
+    if (index > _maxRead) {
+      _maxRead = index;
+    }
     if (index >= _itemList.length && !_isDone) {
-      if (index > _maxRead) {
-        _maxRead = index;
-      }
       return const Text("Loading...");
     }
 

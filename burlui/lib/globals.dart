@@ -21,3 +21,5 @@ String? burlSession;
 
 bool debugServer = false;
 FieldData fieldData = FieldData();
+
+int itemCount = 100;
