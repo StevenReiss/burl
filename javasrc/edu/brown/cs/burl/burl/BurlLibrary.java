@@ -17,8 +17,6 @@
 
 package edu.brown.cs.burl.burl;
 
-import java.util.Collection;
-
 import org.json.JSONObject;
 
 public interface BurlLibrary extends BurlConstants
@@ -84,7 +82,7 @@ void changeUserAccess(String email,BurlUserAccess access);
  *      Add books (entries) to a library
  **/
 
-void addToLibrary(Collection<String> isbns,BurlUpdateMode mode); 
+String addToLibrary(String isbn,BurlUpdateMode mode); 
 
 
 

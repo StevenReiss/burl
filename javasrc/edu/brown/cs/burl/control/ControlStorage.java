@@ -625,12 +625,13 @@ private String getOrderBy(BurlRepoColumn sort,boolean invert)
 /*                                                                              */ 
 /********************************************************************************/
 
-@Override public void addToWorkQueue(Number libid,String isbn,BurlUpdateMode upd,boolean count)
+@Override public void addToWorkQueue(Number libid,Number uid, 
+      String isbn,BurlUpdateMode upd,boolean count)
 {
-   String q1 = "INSERT INTO BurlWorkQueue ( id, libraryid, item, count, mode ) " +
-      "VALUES ( DEFAULT, $1, $2, $3, $4 )";
+   String q1 = "INSERT INTO BurlWorkQueue ( id, libraryid, userid, item, count, mode ) " +
+      "VALUES ( DEFAULT, $1, $2, $3, $4, $5 )";
    
-   sql_database.sqlUpdate(q1,libid,isbn,count,upd.ordinal());
+   sql_database.sqlUpdate(q1,libid,uid,isbn,count,upd.ordinal());
 }
 
 
@@ -656,6 +657,18 @@ private String getOrderBy(BurlRepoColumn sort,boolean invert)
     }
    
    return rslt;
+}
+
+
+@Override public int getPendingCount(Number libid,Number userid)
+{
+   String q1 = "SELECT COUNT(id) FROM BurlWorkQueue WHERE " +
+      "libraryid = $1 and userid = $2";
+   
+   JSONObject cntj = sql_database.sqlQuery1(q1,libid,userid);
+   if (cntj == null) return 0;
+   int cnt = cntj.getInt("count");
+   return cnt;
 }
 
 

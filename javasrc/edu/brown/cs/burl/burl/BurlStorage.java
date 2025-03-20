@@ -217,7 +217,7 @@ void removeDataRow(BurlRepo repo,Number id);
  *      Add to work queue
  **/
 
-void addToWorkQueue(Number libraryid,String isbn,BurlUpdateMode upd,boolean count);
+void addToWorkQueue(Number libraryid,Number uid,String isbn,BurlUpdateMode upd,boolean count);
 
 
 /**
@@ -232,6 +232,13 @@ void removeFromWorkQueue(Number queueid);
  */
 
 List<BurlWorkItem> getWorkQueue(); 
+
+
+/**
+ *      Get count of items for user/library in work queue
+ **/
+
+int getPendingCount(Number libraryid,Number userid);
 
 
 

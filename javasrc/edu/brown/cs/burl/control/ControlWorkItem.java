@@ -64,6 +64,12 @@ ControlWorkItem(JSONObject jo)
 }
 
 
+@Override public Number getUserId()
+{
+   return base_data.getNumber("userid");
+}
+
+
 @Override public String getItem()
 {
    return base_data.getString("item");

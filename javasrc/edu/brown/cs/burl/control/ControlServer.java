@@ -511,7 +511,7 @@ String handleAddIsbns(HttpExchange he,ControlSession session)
       return BowerRouter.errorResponse(he,session,400,"Bad library");
     }
    
-   work_thread.addTask(lid,isbns,upd,count);
+   work_thread.addTask(lid,session.getUserId(),isbns,upd,count); 
    
    return BowerRouter.jsonOKResponse(session);
 }

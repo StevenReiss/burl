@@ -17,7 +17,6 @@
 
 package edu.brown.cs.burl.control;
 
-import java.util.Collection;
 import java.util.List;
 
 import org.json.JSONObject;
@@ -146,45 +145,45 @@ private String getUsers(BurlUserAccess level,List<BurlLibraryAccess> acclst)
 
 
 
-@Override public void addToLibrary(Collection<String> isbns, 
-      BurlUpdateMode mode)
+@Override public String addToLibrary(String isbn,BurlUpdateMode mode)
 { 
    BurlRepo repo = getRepository();
    
-   for (String isbn : isbns) {
-      BurlRepoRow row = findOldRow(repo,isbn);
-      if (row != null) {
-         if (mode == BurlUpdateMode.SKIP) {
-            continue;
-          }
-       }
-      else {
-         if (BurlUtil.getValidISBN(isbn) == null && 
-               BurlUtil.getValidLCCN(isbn) == null) {
-            IvyLog.logE("CONTROL","ISBN/LCCN " + isbn + " IS INVALID -- IGNORED");
-            continue;
-          }
-       }
-      
-      BurlBibEntry bibentry = burl_control.findBibEntry(isbn);
-      
-      // possibly do a broader search if bibentry is null here
-      
-      if (row == null || mode == BurlUpdateMode.NEW) {
-         row = repo.newRow();
-         repo.setInitialValues(row,isbn);
-       }
-      repo.computeEntry(row,isbn,bibentry,mode); 
-      
-      if (bibentry != null) {
-         IvyLog.logD("BURL","Computed BIB ENTRY for " + isbn);
-       }
-      else {
-         String altisbn = BurlUtil.computeAlternativeISBN(isbn);
-         IvyLog.logI("BURL",
-               "Can't find any information on " + isbn + " " + altisbn);
+   BurlRepoRow row = findOldRow(repo,isbn);
+   if (row != null) {
+      if (mode == BurlUpdateMode.SKIP) {
+         return "Item " + isbn + " already in database";
        }
     }
+   else {
+      if (BurlUtil.getValidISBN(isbn) == null && 
+            BurlUtil.getValidLCCN(isbn) == null) {
+         IvyLog.logE("CONTROL","ISBN/LCCN " + isbn + " IS INVALID -- IGNORED");
+         return "Item " + isbn + " is not a valid ISBN/LCCN";
+       }
+    }
+   
+   BurlBibEntry bibentry = burl_control.findBibEntry(isbn);
+   
+   // possibly do a broader search if bibentry is null here
+   
+   if (row == null || mode == BurlUpdateMode.NEW) {
+      row = repo.newRow();
+      repo.setInitialValues(row,isbn);
+    }
+   repo.computeEntry(row,isbn,bibentry,mode); 
+   
+   if (bibentry != null) {
+      IvyLog.logD("BURL","Computed BIB ENTRY for " + isbn);
+    }
+   else {
+      String altisbn = BurlUtil.computeAlternativeISBN(isbn);
+      IvyLog.logI("BURL",
+            "Can't find any information on " + isbn + " " + altisbn);
+//    return "No information available for " + isbn;
+    }
+   
+   return null;
 }
 
 

@@ -98,6 +98,7 @@ $ENDTABLE;
 CREATE TABLE BurlWorkQueue (
    id $iddeftype NOT NULL PRIMARY KEY,
    libraryid $idtype NOT NULL,
+   userid $idtype,
    item text NOT NULL,
    count bool NOT NULL DEFAULT true
 $ENDTABLE;

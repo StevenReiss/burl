@@ -135,8 +135,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     if (_numItems == 0) {
       list = const Text("No Results Found");
     }
-    String count =
-        _isDone ? "$_numItems Entries" : "<= $_numItems Entries";
+    String count = "$_numItems Entries";
 
     Widget w = Column(
       mainAxisAlignment: MainAxisAlignment.center,

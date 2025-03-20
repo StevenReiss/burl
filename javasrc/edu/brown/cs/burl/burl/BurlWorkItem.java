@@ -37,6 +37,13 @@ Number getLibraryId();
 
 
 /**
+ *      Return user id of requester
+ **/
+
+Number getUserId();
+
+
+/**
  *      Get the item to work on
  **/
 

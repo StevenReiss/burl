@@ -17,11 +17,12 @@
 
 package edu.brown.cs.burl.control;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import edu.brown.cs.burl.burl.BurlUser;
+import edu.brown.cs.burl.burl.BurlUtil;
 import edu.brown.cs.burl.burl.BurlWorkItem;
 import edu.brown.cs.ivy.file.IvyLog;
 
@@ -61,10 +62,10 @@ ControlWorkThread(ControlMain cm)
 /*                                                                              */
 /********************************************************************************/
 
-void addTask(Number lid,List<String> isbns,BurlUpdateMode mode,boolean count)
+void addTask(Number lid,Number uid,List<String> isbns,BurlUpdateMode mode,boolean count)
 {
    for (String isbn : isbns) {
-      burl_store.addToWorkQueue(lid,isbn,mode,count);
+      burl_store.addToWorkQueue(lid,uid,isbn,mode,count);
     }
    synchronized (this) {
       notifyAll();
@@ -87,12 +88,27 @@ void addTask(Number lid,List<String> isbns,BurlUpdateMode mode,boolean count)
          ControlLibrary lib = burl_store.findLibraryById(wi.getLibraryId());
          try {
             if (lib != null) {
-               List<String> itms = Collections.singletonList(wi.getItem());
-               lib.addToLibrary(itms,wi.getUpdateMode());
+               String err = lib.addToLibrary(wi.getItem(),wi.getUpdateMode()); 
+               if (err != null) {
+                  BurlUser user = burl_store.findUserById(wi.getUserId());
+                  if (user != null) {
+                     String subj = "Status of BURL upload request";
+                     String body = "Problem with upload.  " + err;
+                     BurlUtil.sendEmail(user.getEmail(),subj,body);
+                   }
+                }
              }
           }
          finally {
             burl_store.removeFromWorkQueue(wi.getItemId());
+          }
+         BurlUser user = burl_store.findUserById(wi.getUserId());
+         if (user != null) {
+            if (!workPending(wi)) {
+               String subj = "Finished BURL upload request";
+               String body = "All the ISBNs/LCCNs you requested have been processed.";
+               BurlUtil.sendEmail(user.getEmail(),subj,body);
+             }
           }
        }
       catch (InterruptedException e) { }
@@ -108,10 +124,23 @@ private BurlWorkItem getNextItem() throws InterruptedException
    for ( ; ; ) {
       BurlWorkItem wi = work_queue.poll();
       if (wi != null) return wi;
-      loadItems();                      // waits for next item
+      loadItems(true);                      // waits for next item
     }
 }
 
+
+
+private boolean workPending(BurlWorkItem itm)
+{
+   for (BurlWorkItem wi : work_queue) {
+      if (wi.getUserId() == itm.getUserId() &&
+            wi.getLibraryId() == itm.getLibraryId()) return true;
+    }
+   int ct = burl_store.getPendingCount(itm.getLibraryId(),itm.getUserId());
+   if (ct > 0) return true;
+   
+   return false;
+}
 
 
 /********************************************************************************/
@@ -120,13 +149,14 @@ private BurlWorkItem getNextItem() throws InterruptedException
 /*                                                                              */
 /********************************************************************************/
 
-private void loadItems()
+private void loadItems(boolean wait)
 {
    List<BurlWorkItem> items;
    for ( ; ; ) {
       synchronized (this) {
          items = burl_store.getWorkQueue();
          if (items != null && !items.isEmpty()) break;
+         if (!wait) break;
          try {
             wait();
           }

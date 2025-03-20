@@ -1089,14 +1089,15 @@ protected static class RowIter implements BurlRowIter {
 
 
   
-private class FilterIter implements Iterable<BurlRepoRow>, BurlRowIter {
+@SuppressWarnings("unused")
+private class FilterIterOld implements Iterable<BurlRepoRow>, BurlRowIter {
    
    private BurlFilter item_filter;
    private BurlRowIter base_iter;
    private BurlRepoRow next_item;
    private int  item_count;
    
-   FilterIter(BurlRowIter base,BurlFilter filter) {
+   FilterIterOld(BurlRowIter base,BurlFilter filter) {
       item_filter = filter;
       base_iter = base;
       next_item = null;
@@ -1139,6 +1140,43 @@ private class FilterIter implements Iterable<BurlRepoRow>, BurlRowIter {
     }
    
 }       // end of FilterIter
+
+
+private class FilterIter implements Iterable<BurlRepoRow>, BurlRowIter {
+   
+   private List<BurlRepoRow> filtered_rows;
+   private Iterator<BurlRepoRow> row_iter;
+   
+   FilterIter(BurlRowIter base,BurlFilter filter) {
+      filtered_rows = new ArrayList<>();
+      while (base.hasNext()) {
+         BurlRepoRow brr = base.next();
+         if (filter.matches(brr)) {
+            filtered_rows.add(brr);
+          }
+       }
+      row_iter = filtered_rows.iterator();
+    }
+   
+   @Override public Iterator<BurlRepoRow> iterator() {
+      return this;
+    }
+   
+   @Override public int getRowCount() {
+      return filtered_rows.size();
+    }
+   
+   @Override public boolean hasNext() {
+      return row_iter.hasNext();
+    }
+   
+   @Override public BurlRepoRow next() {
+      return row_iter.next();
+    }
+   
+}       // end of FilerIter
+
+
 
 
 
