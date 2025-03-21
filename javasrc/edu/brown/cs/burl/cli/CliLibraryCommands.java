@@ -659,6 +659,7 @@ private void badExportArgs()
 void handlePrintLabels(List<String> args)
 {
    File file = null;
+   boolean reset = false;
    
    for (int i = 0; i < args.size(); ++i) {
       String s = args.get(i);
@@ -672,6 +673,9 @@ void handlePrintLabels(List<String> args)
             if (!fn.endsWith(".rtf")) fn = fn + ".rtf";
             file = new File(fn);
           }
+         else if (s.startsWith("-r")) {                         // -reset
+            reset = true;
+          }
        }
       else if (file == null) {
          file = new File(s);
@@ -684,7 +688,8 @@ void handlePrintLabels(List<String> args)
       return;
     }
    
-   JSONObject data = BurlUtil.buildJson("library",cli_main.getLibraryId());
+   JSONObject data = BurlUtil.buildJson("library",cli_main.getLibraryId(),
+         "reset",reset);
    
    JSONObject rslt = cli_main.createHttpPost("labels",data,file);
    if (cli_main.checkResponse(rslt,"labels")) {
@@ -696,7 +701,7 @@ void handlePrintLabels(List<String> args)
 
 private void badPrintLabelsArgs()
 {
-   IvyLog.logI("BURLCLI","labels <file[.rtf]>");
+   IvyLog.logI("BURLCLI","labels [-reset] <file[.rtf]>");
 }
 
 

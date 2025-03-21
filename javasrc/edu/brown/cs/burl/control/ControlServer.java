@@ -434,6 +434,7 @@ String handlePrintLabels(HttpExchange he,ControlSession session)
    if (brc == null) {
       return BowerRouter.errorResponse(he,session,400,"No labeled field");
     }
+   boolean reset = BowerRouter.getBooleanParameter(he,"reset",false);
    
    BurlUserAccess useracc = validateLibrary(session,lid);
    switch (useracc) {
@@ -455,7 +456,7 @@ String handlePrintLabels(HttpExchange he,ControlSession session)
       return BowerRouter.errorResponse(he,session,500,"Problem with temp file");
     }
    
-   repo.printLabels(f1,todo); 
+   repo.printLabels(f1,todo,reset);  
    
    String resp = BowerRouter.sendFileResponse(he,f1); 
    

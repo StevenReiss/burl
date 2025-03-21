@@ -201,7 +201,7 @@ boolean exportRepository(File otf,BurlExportFormat format,
  *      Print labels for a set of entries
  **/
 
-boolean printLabels(File otf,List<Number> ids);
+boolean printLabels(File otf,List<Number> ids,boolean reset);
  
 /**
  *      Import header line from CSV

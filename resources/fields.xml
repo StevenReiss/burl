@@ -17,12 +17,13 @@
 	       GOOGLE="industryIdentifiers.identifier" MULTIPLE="T" ALTNAMES="ISBNs,allisbns" />
       <FIELD NAME="LC Classification" MARC="050 ab" OPENLIB="lcc" ALTNAMES="LCC,lcclassifaction"
 		FIX="LCC_CODE" SORT='T' />
+      <FIELD NAME="Volume" MARC="490v|440v" />
       <FIELD NAME="Related Names" MARC="700 aqbcde" OPENLIB="author_name" GOOGLE="authors" MULTIPLE="T"
 		ALTNAMES='Author,Authors,relatednames' SORT='T' />
       <FIELD NAME="Contents" MARC="505a" MULTIPLE='T' />
       <FIELD NAME="Subjects" MARC="630 -- axv+650 -- axv+651 -- aeg4vxyz"
 		OPENLIB="subject" GOOGLE="categories" MULTIPLE="T" ALTNAMES='Subject,subj' SORT='T' VIEWMULT='T' />
-      <FIELD NAME="Notes" MARC="504a" MULTIPLE="T" />
+      <FIELD NAME="Notes" MARC="500a+504a" MULTIPLE="T" />
       <FIELD NAME="Series" MARC="440 anv+490 avx+830 anv" MULTIPLE="T" />
       <FIELD NAME="Version" MARC="251a" />
       <FIELD NAME="Dewey Class No." MARC="082--a2" OPENLIB="ddc" FIELDNAME="dewey"
@@ -37,5 +38,8 @@
    </FIELDS>
    <CSV QUOTE='"' SEPARATOR="," />
    <MULTIPLE TEXT=" | " />
-   <LABEL CODE='LC Classification' AUTHOR='Personal Name,Related Names' YEAR='Date' />
+   <LABEL CODE='LC Classification' AUTHOR='Personal Name,Related Names' YEAR='Date'
+		VOLUME='Volume' COPY='Copy' />
 </BURL>
+
+

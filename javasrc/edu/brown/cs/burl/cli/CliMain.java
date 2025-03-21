@@ -371,13 +371,12 @@ private void process()
          for ( ; ; ) {
             System.out.print("BurlCLI> ");
             String ln = rdr.readLine();
-            ln = ln.replace("&quot;","\"");
-            
             if (ln == null) {
                System.out.println();
                break;
              }
             ln = ln.trim();
+            ln = ln.replace("&quot;","\"");
             if (ln.isEmpty()) continue;
             if (ln.startsWith("#")) continue;
             List<String> cmdlist = BurlUtil.tokenize(ln); 
@@ -462,6 +461,7 @@ private void processCommand(String cmd,List<String> args)
           }
          break;
       case "labels" :
+      case "printlabels" :
          if (checkLibrary(cmd)) {
             lib_commands.handlePrintLabels(args); 
           }

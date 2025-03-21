@@ -74,7 +74,10 @@ private static BurlFieldData field_data;
 private static final String [] EMPTY_STRINGS = new String [0];
 
 private static final Pattern LCC_ELEMENT = Pattern.compile(
-      "(([A-Za-z]+)([0-9]+))|([0-9]{4})");
+      "(([A-Za-z]+)([0-9]+)(\\.[0-9]+)?)|([0-9]{4})");
+
+private static final Pattern VOL_PATTERN = Pattern.compile(
+      "v(ol)?(\\.)?\\s([-a-z0-9A-Z]+)");
 
 private static BurlRepoColumn burlid_column;
 
@@ -850,7 +853,7 @@ private class ImportJsonEntry implements BurlBibEntry {
 /*                                                                              */
 /********************************************************************************/
 
-@Override public boolean printLabels(File otf,List<Number> ids)
+@Override public boolean printLabels(File otf,List<Number> ids,boolean reset)
 {
    Element lbldata = field_data.getLabelData();
    if (lbldata == null) {
@@ -907,8 +910,10 @@ private class ImportJsonEntry implements BurlBibEntry {
          int idx1 = year.indexOf(" ");
          if (idx1 > 0) year = year.substring(0,idx1);
        }
+      String volume = findLabelData(lbldata,"VOLUME",brr);
+      String copy = findLabelData(lbldata,"COPY",brr);
       
-      List<String> items = getLabelElements(code,year);
+      List<String> items = getLabelElements(code,year,volume,copy);
       
       cntidx = insertLabelText(cnts,cntidx,"nnnnnnnnnnnn",items.get(0));
       if (cntidx < 0) {
@@ -917,10 +922,12 @@ private class ImportJsonEntry implements BurlBibEntry {
        }
       cntidx = insertLabelText(cnts,cntidx,"cccccccccccc",items.get(1));
       cntidx = insertLabelText(cnts,cntidx,"yyyy",items.get(2));
+      cntidx = insertLabelText(cnts,cntidx,"vvvvvvvvvddd",items.get(3));
       cntidx = insertLabelText(cnts,cntidx,"aaaaaaaaaaaa",author);
 
       done.add(id);
     }
+   
    
    if (!more) {
       for ( ; ; ) {
@@ -928,6 +935,7 @@ private class ImportJsonEntry implements BurlBibEntry {
          if (cntidx < 0) break;
          cntidx = insertLabelText(cnts,cntidx,"cccccccccccc","");
          cntidx = insertLabelText(cnts,cntidx,"yyyy","");
+         cntidx = insertLabelText(cnts,cntidx,"vvvvvvvvvddd","");
          cntidx = insertLabelText(cnts,cntidx,"aaaaaaaaaaaa","");
        }
     }
@@ -942,9 +950,11 @@ private class ImportJsonEntry implements BurlBibEntry {
    
    IvyLog.logD("REPO","Labels updated");
   
-   for (Number id : done) {
-      BurlRepoRow rr = getRowForId(id);
-      rr.setData(print,"no");
+   if (reset) {
+      for (Number id : done) {
+         BurlRepoRow rr = getRowForId(id);
+         rr.setData(print,"no");
+       }
     }
 
    return more;
@@ -970,7 +980,7 @@ private String fixUnicode(String s)
 }
 
 
-List<String> getLabelElements(String lcc,String date)
+List<String> getLabelElements(String lcc,String date,String vol,String copy)
 {
    List<String> lcclets = getLccElements(lcc);
    List<String> rslt = new ArrayList<>();
@@ -998,8 +1008,51 @@ List<String> getLabelElements(String lcc,String date)
    
    if (date != null && !date.isEmpty()) year = date;
    
+  
+   if (vol == null || vol.isEmpty()) {
+     Matcher m = VOL_PATTERN.matcher(lcc);
+     if (m.matches()) vol = m.group(0);
+    }
+   if (vol != null) {
+      if (vol.startsWith("v")) {
+         int idx2 = vol.indexOf(" ");
+         if (idx2 > 0) {
+            vol = vol.substring(idx2+1).trim();
+          }
+       }
+    }
+   
+   if (copy != null && !copy.isEmpty()) {
+      try {
+         Integer iv = Integer.parseInt(copy);
+         if (iv > 1 && iv < 10) copy = "c " + iv;
+         else if (iv >= 10) copy = "c #";
+         else copy = "";
+       }
+      catch (NumberFormatException e) {
+         copy = null;
+       }
+    }
+   else {
+      if (copy != null) copy = null;
+    }
+   
+   String x = "";
+   if (vol != null) {
+      x = "v. " + vol;
+    }
+   if (copy != null) {
+      x = x + "          ";
+      if (x.length() > 8) x = x.substring(0,8);
+      x += " " + copy;
+    }
+   else {
+      if (x.length() > 12) x = x.substring(0,12);
+    }
+   
    rslt.add(add);
    rslt.add(year);
+   rslt.add(x);
    
    return rslt;
 }
@@ -1014,7 +1067,7 @@ List<String> getLccElements(String lcc)
    
    while (m.find()) {
       String x = m.group(0);
-      String x5 = m.group(4);
+      String x5 = m.group(5);
       if (x5 != null && x5.isEmpty()) x5 = null;
       if (x.length() >= 12) x = x.substring(0,12);
       rslt.add(x);
@@ -1028,6 +1081,7 @@ List<String> getLccElements(String lcc)
 private String findLabelData(Element lbldata,String key,BurlRepoRow brr)
 {
    String flds = IvyXml.getAttrString(lbldata,key);
+   if (flds == null) return null;
    String [] alts = flds.split("\\,");
    for (String fldnm : alts) {
       BurlRepoColumn brc = getColumn(fldnm);

@@ -24,6 +24,7 @@ import 'package:file_picker/file_picker.dart';
 Future printLabelsDialog(BuildContext context, LibraryData lib) async {
   BuildContext dcontext = context;
   TextEditingController fileControl = TextEditingController();
+  bool reset = false;
 
   fileControl.text = "labels.rtf";
 
@@ -36,6 +37,7 @@ Future printLabelsDialog(BuildContext context, LibraryData lib) async {
   void submit() async {
     Map<String, String?> data = {
       "library": lib.getLibraryId().toString(),
+      "reset": reset.toString(),
     };
     await util.postJsonDownload("labels", fileControl.text, body: data);
     if (dcontext.mounted) {
@@ -50,6 +52,12 @@ Future printLabelsDialog(BuildContext context, LibraryData lib) async {
     );
     if (output != null) {
       fileControl.text = output;
+    }
+  }
+
+  void handleReset(bool? v) {
+    if (v != null) {
+      reset = v;
     }
   }
 
@@ -80,6 +88,14 @@ Future printLabelsDialog(BuildContext context, LibraryData lib) async {
             widgets.textField(
               label: "Save in File",
               controller: fileControl,
+            ),
+            widgets.fieldSeparator(15),
+            widgets.booleanField(
+              label: "Reset Print Labels",
+              value: reset,
+              onChanged: handleReset,
+              tooltip:
+                  "Reset the Print Labels field to no for all items printed",
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
