@@ -1016,7 +1016,7 @@ List<String> getLabelElements(String lcc,String date,String vol,String copy)
        }
     }
    if (vol != null) {
-      if (vol.startsWith("v")) {
+      if (vol.toLowerCase().startsWith("v")) {
          int idx2 = vol.indexOf(" ");
          if (idx2 > 0) {
             vol = vol.substring(idx2+1).trim();
