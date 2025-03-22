@@ -106,7 +106,8 @@ void addTask(Number lid,Number uid,List<String> isbns,BurlUpdateMode mode,boolea
          if (user != null) {
             if (!workPending(wi)) {
                String subj = "Finished BURL upload request";
-               String body = "All the ISBNs/LCCNs you requested have been processed.";
+               String body = "All the ISBNs/LCCNs you requested have been processed " +
+                     "ending with " + wi.getItem() + ".";
                BurlUtil.sendEmail(user.getEmail(),subj,body);
              }
           }

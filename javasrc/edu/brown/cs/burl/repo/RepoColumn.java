@@ -173,8 +173,13 @@ RepoColumn(String name,int no,BurlFieldData fd)
    String nval = val;
    
    switch (fixtype) {
-      default :
       case NONE :
+         break;
+      case DEFAULT :
+         if (val == null || val.isEmpty()) {
+            String dflt = getDefault();
+            if (dflt != null && !dflt.isEmpty() && !dflt.equals("NULL")) nval = dflt;
+          }
          break;
       case LCCN :
          nval = BurlUtil.getValidLCCN(val);

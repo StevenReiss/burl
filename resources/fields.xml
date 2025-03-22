@@ -29,7 +29,7 @@
       <FIELD NAME="Dewey Class No." MARC="082--a2" OPENLIB="ddc" FIELDNAME="dewey"
 		ALTNAMES='Dewey,ddn,deweyclassno' SORT='T' />
       <FIELD NAME="OCLC" MARC="035a" OPENLIB="oclc" GOOGLE="oclc" />
-      <FIELD NAME="Copy" DEFAULT="1" />
+      <FIELD NAME="Copy" DEFAULT="1" FIX="DEFAULT" />
       <FIELD NAME="Shelf" SORT='T' />
       <FIELD NAME="Status" />
       <FIELD NAME="Print Labels" LABELED="T" FIX="YES_NO" DEFAULT="no"
@@ -41,5 +41,18 @@
    <LABEL CODE='LC Classification' AUTHOR='Personal Name,Related Names' YEAR='Date'
 		VOLUME='Volume' COPY='Copy' />
 </BURL>
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

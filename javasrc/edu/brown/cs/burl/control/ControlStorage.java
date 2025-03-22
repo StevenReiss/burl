@@ -581,7 +581,8 @@ private String getOrderBy(BurlRepoColumn sort,boolean invert)
 {
    String fld = null;
    for (BurlRepoColumn brc : repo.getColumns()) {
-      if (brc.getDefault() == null || brc.getDefault().equals("NULL")) {
+      String dflt = brc.getDefault();
+      if (dflt == null || dflt.equals("NULL")) {
          fld = brc.getFieldName();
          break;
        }

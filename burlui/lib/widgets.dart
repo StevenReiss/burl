@@ -1230,7 +1230,7 @@ InputDecoration getDecoration({
     hoverColor: laf.decorationHoverColor,
     focusedBorder: const OutlineInputBorder(
       borderSide: BorderSide(
-        width: 2,
+        width: 4,
         color: laf.decorationBorderColor,
       ),
     ),

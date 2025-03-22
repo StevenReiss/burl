@@ -77,7 +77,7 @@ private static final Pattern LCC_ELEMENT = Pattern.compile(
       "(([A-Za-z]+)([0-9]+)(\\.[0-9]+)?)|([0-9]{4})");
 
 private static final Pattern VOL_PATTERN = Pattern.compile(
-      "v(ol)?(\\.)?\\s([-a-z0-9A-Z]+)");
+      "([-a-z0-9A-Z]+)");
 
 private static BurlRepoColumn burlid_column;
 
@@ -1008,10 +1008,12 @@ List<String> getLabelElements(String lcc,String date,String vol,String copy)
    
    if (date != null && !date.isEmpty()) year = date;
    
-  
+   
    if (vol == null || vol.isEmpty()) {
-     Matcher m = VOL_PATTERN.matcher(lcc);
-     if (m.matches()) vol = m.group(0);
+      Matcher m = VOL_PATTERN.matcher(lcc);
+      if (m.find()){
+         vol = m.group(0);
+       }
     }
    if (vol != null) {
       if (vol.startsWith("v")) {
@@ -1022,12 +1024,12 @@ List<String> getLabelElements(String lcc,String date,String vol,String copy)
        }
     }
    
-   if (copy != null && !copy.isEmpty()) {
+   if (copy != null && !copy.isBlank()) {
       try {
          Integer iv = Integer.parseInt(copy);
          if (iv > 1 && iv < 10) copy = "c " + iv;
          else if (iv >= 10) copy = "c #";
-         else copy = "";
+         else copy = null;
        }
       catch (NumberFormatException e) {
          copy = null;
@@ -1041,7 +1043,7 @@ List<String> getLabelElements(String lcc,String date,String vol,String copy)
    if (vol != null) {
       x = "v. " + vol;
     }
-   if (copy != null) {
+   if (copy != null && !copy.isBlank()) {
       x = x + "          ";
       if (x.length() > 8) x = x.substring(0,8);
       x += " " + copy;
