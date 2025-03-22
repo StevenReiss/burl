@@ -79,6 +79,13 @@ private static final Pattern LCC_ELEMENT = Pattern.compile(
 private static final Pattern VOL_PATTERN = Pattern.compile(
       "v(ol)?(\\.)?\\s([-a-z0-9A-Z]+)"); 
 
+private static Set<String> VOL_PREFIX = Set.of(
+      "v","v.","vol","vol.","volume"
+);
+
+private static Pattern VOLNUM_PATTERN = Pattern.compile(
+      "[0-9ivxl]+");
+
 private static BurlRepoColumn burlid_column;
 
 
@@ -1015,41 +1022,25 @@ List<String> getLabelElements(String lcc,String date,String vol,String copy)
          vol = m.group(0);
        }
     }
-   if (vol != null) {
-      if (vol.toLowerCase().startsWith("v")) {
-         int idx2 = vol.indexOf(" ");
-         if (idx2 > 0) {
-            vol = vol.substring(idx2+1).trim();
-          }
-       }
-    }
-   
-   if (copy != null && !copy.isBlank()) {
-      try {
-         Integer iv = Integer.parseInt(copy);
-         if (iv > 1 && iv < 10) copy = "c " + iv;
-         else if (iv >= 10) copy = "c #";
-         else copy = null;
-       }
-      catch (NumberFormatException e) {
-         copy = null;
-       }
-    }
-   else {
-      if (copy != null) copy = null;
-    }
+   vol = fixVolume(vol);
+   copy = fixCopy(copy);
    
    String x = "";
-   if (vol != null) {
-      x = "v. " + vol;
+   if (vol == null && copy == null) x = "";
+   else if (vol == null) x = "   " + copy;
+   else if (copy == null) {
+      x = " " + vol;
     }
-   if (copy != null && !copy.isBlank()) {
-      x = x + "          ";
-      if (x.length() > 8) x = x.substring(0,8);
-      x += " " + copy;
+   else if (vol.length() + 1 + copy.length() + 2 <= 12) {
+      x = " " + vol + "  " + copy;
     }
    else {
-      if (x.length() > 12) x = x.substring(0,12);
+      if (copy.length() > 2) copy = "c#";
+      int len = 12 - copy.length() - 2 - 1;
+      if (vol.length() > len) {
+         vol = vol.substring(0,len);
+       }
+      x = " " + vol + "  " + copy;
     }
    
    rslt.add(add);
@@ -1057,6 +1048,59 @@ List<String> getLabelElements(String lcc,String date,String vol,String copy)
    rslt.add(x);
    
    return rslt;
+}
+
+
+
+private String fixVolume(String vol0)
+{
+   if (vol0 == null || vol0.isBlank()) return null;
+   
+   String vol = vol0.trim();
+   
+   // first remove any prefix (vol. ...)
+   int idx1 = vol.indexOf(" ");
+   if (idx1 > 0) {
+      String pfx = vol.substring(0,idx1).toLowerCase();
+      if (VOL_PREFIX.contains(pfx)) {
+         vol = vol.substring(idx1+1).trim();
+       }
+    }
+   
+   // next determine if a number and add v. in front if so
+   // if not, enclose in braces
+   String main = vol.toLowerCase();
+   int idx2 = main.indexOf(" ");
+   if (idx2 > 0) {
+      main = main.substring(0,idx2);
+    }
+   Matcher m = VOLNUM_PATTERN.matcher(main);
+   if (m.find() && m.start(0) == 0) {
+      vol = "v. " + vol;
+    }
+   else vol = "[" + vol + "]";
+   
+   return vol;
+}
+
+
+private String fixCopy(String copy0)
+{
+   if (copy0 == null|| copy0.isBlank()) return null;
+   
+   String copy = copy0;
+   if (copy.matches("[0-9]+")) {
+      Integer iv = Integer.parseInt(copy);
+      if (iv <= 1) return null;
+      else if (iv > 1 && iv < 10) {
+         return "c" + iv;
+       }
+      else {
+         return "c" + iv;
+       }
+    }
+   
+   return null;
 }
 
 List<String> getLccElements(String lcc)

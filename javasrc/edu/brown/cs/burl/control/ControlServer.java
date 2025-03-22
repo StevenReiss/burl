@@ -491,9 +491,19 @@ String handleAddIsbns(HttpExchange he,ControlSession session)
       if (isbns == null) isbns = new ArrayList<>();
       for (StringTokenizer tok = new StringTokenizer(isbnstr); tok.hasMoreTokens(); ) {
          String s = tok.nextToken();
-         String s1 = BurlUtil.getValidISBN(s);
-         if (s1 == null) s1 = BurlUtil.getValidLCCN(s);
-         if (s1 != null) isbns.add(s1);
+         if (s.startsWith("@")) {
+            StringBuffer buf = new StringBuffer();
+            buf.append(s);
+            String s1 = tok.nextToken("\r\n");
+            buf.append(" ");
+            buf.append(s1);
+            isbns.add(s1);
+          }
+         else {
+            String s1 = BurlUtil.getValidISBN(s);
+            if (s1 == null) s1 = BurlUtil.getValidLCCN(s);
+            if (s1 != null) isbns.add(s1);
+          }
        }
     }
    

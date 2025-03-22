@@ -98,11 +98,17 @@ Future addEntriesDialog(BuildContext context, LibraryData lib) async {
             ),
             widgets.fieldSeparator(),
             Expanded(
-              child: widgets.textField(
-                label: "Entry IDs",
-                hint: "Enter ISBNs or LCCNs",
-                controller: isbncontroller,
-                maxLines: 0,
+              child: widgets.tooltipWidget(
+                "Enter ISBN or LCCN numbers.  There can be one or more per line "
+                "and multiple lines.  A line starting with a @ will cause an "
+                "email to be sent to you with the remainder of the line to "
+                "indicate the status of the upload.",
+                widgets.textField(
+                  label: "Entry IDs",
+                  hint: "Enter ISBNs or LCCNs",
+                  controller: isbncontroller,
+                  maxLines: 0,
+                ),
               ),
             ),
             widgets.fieldSeparator(),

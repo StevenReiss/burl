@@ -252,7 +252,10 @@ Widget tooltipWidget(String tooltip, Widget w) {
     height: laf.toolTipHeight,
     padding: const EdgeInsets.all(8.0),
     preferBelow: true,
-    textStyle: const TextStyle(fontSize: laf.toolTipFontSize),
+    textStyle: const TextStyle(
+      fontSize: laf.toolTipFontSize,
+      color: Colors.black,
+    ),
     showDuration: const Duration(seconds: 2),
     waitDuration: const Duration(seconds: 1),
     child: w,

@@ -87,7 +87,14 @@ void addTask(Number lid,Number uid,List<String> isbns,BurlUpdateMode mode,boolea
          id = wi.getItem();
          ControlLibrary lib = burl_store.findLibraryById(wi.getLibraryId());
          try {
-            if (lib != null) {
+            if (id.startsWith("@")) {
+               BurlUser user = burl_store.findUserById(wi.getUserId());
+               String subj = "BURL upload request status";
+               String body = "BURL upload requested email:\n\t" + id.substring(1).trim() +
+                     "\n for library " + lib.getName();
+               BurlUtil.sendEmail(user.getEmail(),subj,body);
+             }
+            else if (lib != null) {
                String err = lib.addToLibrary(wi.getItem(),wi.getUpdateMode()); 
                if (err != null) {
                   BurlUser user = burl_store.findUserById(wi.getUserId());
@@ -102,15 +109,15 @@ void addTask(Number lid,Number uid,List<String> isbns,BurlUpdateMode mode,boolea
          finally {
             burl_store.removeFromWorkQueue(wi.getItemId());
           }
-         BurlUser user = burl_store.findUserById(wi.getUserId());
-         if (user != null) {
-            if (!workPending(wi)) {
-               String subj = "Finished BURL upload request";
-               String body = "All the ISBNs/LCCNs you requested have been processed " +
-                     "ending with " + wi.getItem() + ".";
-               BurlUtil.sendEmail(user.getEmail(),subj,body);
-             }
-          }
+//       BurlUser user = burl_store.findUserById(wi.getUserId());
+//       if (user != null) {
+//          if (!workPending(wi)) {
+//             String subj = "Finished BURL upload request";
+//             String body = "All the ISBNs/LCCNs you requested have been processed " +
+//                   "ending with " + wi.getItem() + ".";
+//             BurlUtil.sendEmail(user.getEmail(),subj,body);
+//           }
+//        }
        }
       catch (InterruptedException e) { }
       catch (Throwable t) {
@@ -131,18 +138,18 @@ private BurlWorkItem getNextItem() throws InterruptedException
 
 
 
-private boolean workPending(BurlWorkItem itm)
-{
-   for (BurlWorkItem wi : work_queue) {
-      if (wi.getUserId() == itm.getUserId() &&
-            wi.getLibraryId() == itm.getLibraryId()) return true;
-    }
-   int ct = burl_store.getPendingCount(itm.getLibraryId(),itm.getUserId());
-   if (ct > 0) return true;
-   
-   return false;
-}
-
+// private boolean workPending(BurlWorkItem itm)
+// {
+// for (BurlWorkItem wi : work_queue) {
+//    if (wi.getUserId() == itm.getUserId() &&
+//          wi.getLibraryId() == itm.getLibraryId()) return true;
+//  }
+// int ct = burl_store.getPendingCount(itm.getLibraryId(),itm.getUserId());
+// if (ct > 0) return true;
+// 
+// return false;
+// }
+// 
 
 /********************************************************************************/
 /*                                                                              */
