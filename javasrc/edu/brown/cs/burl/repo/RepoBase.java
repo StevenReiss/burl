@@ -77,7 +77,7 @@ private static final Pattern LCC_ELEMENT = Pattern.compile(
       "(([A-Za-z]+)([0-9]+)(\\.[0-9]+)?)|([0-9]{4})");
 
 private static final Pattern VOL_PATTERN = Pattern.compile(
-      "([-a-z0-9A-Z]+)");
+      "v(ol)?(\\.)?\\s([-a-z0-9A-Z]+)"); 
 
 private static BurlRepoColumn burlid_column;
 
