@@ -55,69 +55,74 @@ Future printLabelsDialog(BuildContext context, LibraryData lib) async {
     }
   }
 
-  void handleReset(bool? v) {
-    if (v != null) {
-      reset = v;
-    }
-  }
-
   Widget fileBtn = widgets.submitButton("Choose File", chooseFile);
   Widget cancelBtn = widgets.submitButton("Cancel", cancel);
   Widget submitBtn = widgets.submitButton("Get Labels", submit);
 
-  Dialog dlg = Dialog(
-    child: Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: SizedBox(
-        width: MediaQuery.of(context).size.width * 0.8,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            widgets.largeBoldText(
-              "Print the Next Set of Labels",
-              scaler: 1.5,
-            ),
-            widgets.fieldSeparator(15),
-            const Text(
-              "BURL will print labels for the next set of items "
-              "and save it to a rtf file that can be loaded into Word "
-              "or similar system and printed onto adhesive paper. ",
-            ),
-            widgets.fieldSeparator(16),
-            widgets.textField(
-              label: "Save in File",
-              controller: fileControl,
-            ),
-            widgets.fieldSeparator(15),
-            widgets.booleanField(
-              label: "Reset Print Labels",
-              value: reset,
-              onChanged: handleReset,
-              tooltip:
-                  "Reset the Print Labels field to no for all items printed",
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+  Widget w = StatefulBuilder(
+    builder: (context, setState) {
+      void handleReset(bool? v) {
+        if (v != null) {
+          setState(() {
+            reset = v;
+          });
+        }
+      }
+
+      return Dialog(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width * 0.8,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                cancelBtn,
-                const SizedBox(width: 15),
-                fileBtn,
-                const SizedBox(width: 15),
-                submitBtn,
+                widgets.largeBoldText(
+                  "Print the Next Set of Labels",
+                  scaler: 1.5,
+                ),
+                widgets.fieldSeparator(15),
+                const Text(
+                  "BURL will print labels for the next set of items "
+                  "and save it to a rtf file that can be loaded into Word "
+                  "or similar system and printed onto adhesive paper. ",
+                ),
+                widgets.fieldSeparator(16),
+                widgets.textField(
+                  label: "Save in File",
+                  controller: fileControl,
+                ),
+                widgets.fieldSeparator(15),
+                widgets.booleanField(
+                  label: "Reset Print Labels",
+                  value: reset,
+                  onChanged: handleReset,
+                  tooltip:
+                      "Reset the Print Labels field to no for all items printed",
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: <Widget>[
+                    cancelBtn,
+                    const SizedBox(width: 15),
+                    fileBtn,
+                    const SizedBox(width: 15),
+                    submitBtn,
+                  ],
+                ),
               ],
             ),
-          ],
+          ),
         ),
-      ),
-    ),
+      );
+    },
   );
 
   return showDialog(
     context: context,
     builder: (context) {
-      dcontext = context;
-      return dlg;
+      return w;
     },
   );
 }
