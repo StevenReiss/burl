@@ -28,12 +28,6 @@ Future printLabelsDialog(BuildContext context, LibraryData lib) async {
 
   fileControl.text = "labels.rtf";
 
-  void cancel() {
-    if (dcontext.mounted) {
-      Navigator.of(dcontext).pop("CANCEL");
-    }
-  }
-
   void submit() async {
     Map<String, String?> data = {
       "library": lib.getLibraryId().toString(),
@@ -41,7 +35,11 @@ Future printLabelsDialog(BuildContext context, LibraryData lib) async {
     };
     await util.postJsonDownload("labels", fileControl.text, body: data);
     if (dcontext.mounted) {
-      Navigator.of(dcontext).pop("OK");
+      if (reset) {
+        Navigator.of(dcontext).pop("RESET");
+      } else {
+        Navigator.of(dcontext).pop("OK");
+      }
     }
   }
 
@@ -55,12 +53,9 @@ Future printLabelsDialog(BuildContext context, LibraryData lib) async {
     }
   }
 
-  Widget fileBtn = widgets.submitButton("Choose File", chooseFile);
-  Widget cancelBtn = widgets.submitButton("Cancel", cancel);
-  Widget submitBtn = widgets.submitButton("Get Labels", submit);
-
   Widget w = StatefulBuilder(
     builder: (context, setState) {
+      dcontext = context;
       void handleReset(bool? v) {
         if (v != null) {
           setState(() {
@@ -68,6 +63,18 @@ Future printLabelsDialog(BuildContext context, LibraryData lib) async {
           });
         }
       }
+
+      void cancel() {
+        if (dcontext.mounted) {
+          NavigatorState n = Navigator.of(dcontext);
+          n.pop("CANCEL");
+          // Navigator.of(dcontext).pop("CANCEL");
+        }
+      }
+
+      Widget fileBtn = widgets.submitButton("Choose File", chooseFile);
+      Widget cancelBtn = widgets.submitButton("Cancel", cancel);
+      Widget submitBtn = widgets.submitButton("Get Labels", submit);
 
       return Dialog(
         child: Padding(

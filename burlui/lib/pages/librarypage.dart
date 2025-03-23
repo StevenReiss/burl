@@ -406,7 +406,11 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
   }
 
   void _printLabels() async {
-    await printLabelsDialog(context, _libData);
+    dynamic val = await printLabelsDialog(context, _libData);
+    if (val != "OK" && val != "CANCEL") {
+      await _fetchInitialData(false);
+      setState(() {});
+    }
   }
 
   void _logout() async {
