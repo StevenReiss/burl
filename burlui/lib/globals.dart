@@ -22,4 +22,4 @@ String? burlSession;
 bool debugServer = false;
 FieldData fieldData = FieldData();
 
-int itemCount = 100;
+int itemCount = 1000000; // get everything -- avoids timing problems

@@ -30,6 +30,7 @@ import 'adduserdialog.dart';
 import 'printlabelsdialog.dart';
 import 'exportdialog.dart';
 import 'importdialog.dart';
+import 'dart:async';
 
 const String defaultSort = "Order Added";
 
@@ -508,9 +509,11 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     _numItems = 0;
     _maxRead = 0;
     _scrollext = 0;
-    if (resetscroll) {
+
+    if (resetscroll && _scrollController.hasClients) {
       _scrollController.jumpTo(0);
     }
+
     Map<String, String?> data = {
       "library": _libData.getLibraryId().toString(),
       "count": globals.itemCount.toString(),
@@ -529,6 +532,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
       "entries",
       body: data,
     );
+
     if (rslts["status"] == "OK") {
       List<dynamic> items = rslts["data"];
       for (Map<String, dynamic> item in items) {
@@ -544,7 +548,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
   }
 
   Future<List<ItemData>> _fetchMoreData() async {
-    if (_maxRead < _itemList.length) {
+    if (_maxRead < _itemList.length || _isDone) {
       if (_isDone && _itemList.length > _numItems) {
         _itemList.removeRange(_numItems, _itemList.length);
       }
