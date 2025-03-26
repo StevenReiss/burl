@@ -188,6 +188,10 @@ private class RowIterator implements Iterable<BurlRepoRow>, BurlRowIter {
       return object_iter.getRowCount();
     }
    
+   @Override public int getIndex() {
+      return object_iter.getIndex(); 
+    }
+   
 }       // end of inner class RowIterator
 
 

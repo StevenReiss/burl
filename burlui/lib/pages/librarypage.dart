@@ -69,6 +69,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
   );
   String? _sortOn;
   bool _sortInvert = false;
+  bool _doingFetch = false;
 
   _BurlLibraryPageState();
 
@@ -557,35 +558,41 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
       }
       return _itemList;
     }
-    while (_maxRead >= _itemList.length &&
-        _maxRead < _numItems &&
-        !_isDone) {
-      if (_iterId == null) break;
-      Map<String, String?> data = {
-        "library": _libData.getLibraryId().toString(),
-        "filterid": _iterId,
-        "count": globals.itemCount.toString(),
-      };
+    if (_doingFetch) return _itemList;
+    _doingFetch = true;
+    try {
+      while (_maxRead >= _itemList.length &&
+          _maxRead < _numItems &&
+          !_isDone) {
+        if (_iterId == null) break;
+        Map<String, String?> data = {
+          "library": _libData.getLibraryId().toString(),
+          "filterid": _iterId,
+          "count": globals.itemCount.toString(),
+        };
 
-      Map<String, dynamic> rslts = await util.postJson(
-        "entries",
-        body: data,
-      );
-      if (rslts["status"] == "OK") {
-        List<dynamic> items = rslts["data"];
-        _numItems = rslts["count"];
-        for (Map<String, dynamic> item in items) {
-          ItemData id = ItemData(item);
-          _itemList.add(id);
+        Map<String, dynamic> rslts = await util.postJson(
+          "entries",
+          body: data,
+        );
+        if (rslts["status"] == "OK") {
+          List<dynamic> items = rslts["data"];
+          _numItems = rslts["count"];
+          for (Map<String, dynamic> item in items) {
+            ItemData id = ItemData(item);
+            _itemList.add(id);
+          }
+          _iterId = rslts["filterid"];
+          _isDone = _iterId == null;
+          continue;
+        } else {
+          _iterId = null;
+          _isDone = true;
+          break;
         }
-        _iterId = rslts["filterid"];
-        _isDone = _iterId == null;
-        continue;
-      } else {
-        _iterId = null;
-        _isDone = true;
-        break;
       }
+    } finally {
+      _doingFetch = false;
     }
 
     return _itemList;

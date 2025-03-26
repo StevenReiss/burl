@@ -1172,17 +1172,24 @@ protected static class RowIter implements BurlRowIter {
    
    private Iterator<BurlRepoRow> row_iter;
    private int row_count;
+   private int row_index;
    
    protected RowIter(Collection<BurlRepoRow> data) {
       row_iter = data.iterator();
       row_count = data.size();
+      row_index = 0;
     }
    
    @Override public Iterator<BurlRepoRow> iterator()    { return this; }
    
    @Override public boolean hasNext()            { return row_iter.hasNext(); }
-   @Override public BurlRepoRow next()           { return row_iter.next(); }
-   @Override public int getRowCount()            { return row_count; }
+   @Override public BurlRepoRow next() { 
+      ++row_index;
+      return row_iter.next(); 
+    }
+   
+   @Override public int getRowCount()           { return row_count; }
+   @Override public int getIndex()              { return row_index; }
    
 }       // end of inner class BurlRowIter
 
@@ -1196,15 +1203,21 @@ private class FilterIterOld implements Iterable<BurlRepoRow>, BurlRowIter {
    private BurlRowIter base_iter;
    private BurlRepoRow next_item;
    private int  item_count;
+   private int item_index;
    
    FilterIterOld(BurlRowIter base,BurlFilter filter) {
       item_filter = filter;
       base_iter = base;
       next_item = null;
       item_count = base.getRowCount();
+      item_index = 0;
     }
    
    @Override public Iterator<BurlRepoRow> iterator()            { return this; }
+   
+   @Override public int getIndex() {
+      return item_index;
+    }
    
    @Override public int getRowCount() {    
       return item_count;
@@ -1235,6 +1248,7 @@ private class FilterIterOld implements Iterable<BurlRepoRow>, BurlRowIter {
       
       BurlRepoRow item = next_item;
       next_item = null;
+      ++item_index;
       
       return item;
     }
@@ -1246,6 +1260,7 @@ private class FilterIter implements Iterable<BurlRepoRow>, BurlRowIter {
    
    private List<BurlRepoRow> filtered_rows;
    private Iterator<BurlRepoRow> row_iter;
+   private int row_index;
    
    FilterIter(BurlRowIter base,BurlFilter filter) {
       filtered_rows = new ArrayList<>();
@@ -1256,6 +1271,7 @@ private class FilterIter implements Iterable<BurlRepoRow>, BurlRowIter {
           }
        }
       row_iter = filtered_rows.iterator();
+      row_index = 0;
     }
    
    @Override public Iterator<BurlRepoRow> iterator() {
@@ -1266,7 +1282,12 @@ private class FilterIter implements Iterable<BurlRepoRow>, BurlRowIter {
       return filtered_rows.size();
     }
    
+   @Override public int getIndex() {
+      return row_index;
+    }
+   
    @Override public boolean hasNext() {
+      ++row_index;
       return row_iter.hasNext();
     }
    

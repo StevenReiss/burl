@@ -145,6 +145,7 @@ BowerRouter<ControlSession> setupRouter()
    br.addRoute("ALL","/rest/forgotpassword",burl_auth::handleForgotPassword);
    
    br.addRoute("ALL","/rest/fielddata",this::handleFieldData);
+   br.addRoute("ALL","/rest/log",this::handleLog);
    
    br.addRoute("USE",burl_auth::handleAuthentication);
    
@@ -210,6 +211,16 @@ String handleError(HttpExchange he,ControlSession session)
    
    return BowerRouter.errorResponse(he,session,500,msg);
 }
+
+
+String handleLog(HttpExchange he,ControlSession session) 
+{
+   // enough logging is probably done using the Bower logger.
+   // otherwise can provide additional information here
+   
+   return BowerRouter.jsonOKResponse(session);
+}
+
 
 
 /********************************************************************************/

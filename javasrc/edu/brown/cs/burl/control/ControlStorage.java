@@ -685,11 +685,13 @@ private class ResultSetIterator implements BurlCountIter<JSONObject> {
    private ResultSet result_set;
    private boolean next_done;
    private int row_count;
+   private int row_index;
    
    ResultSetIterator(ResultSet rs,int ct) {
       result_set = rs;
       next_done = false;
       row_count = ct;
+      row_index = 0;
     }
    
    @Override public boolean hasNext() {
@@ -711,11 +713,15 @@ private class ResultSetIterator implements BurlCountIter<JSONObject> {
        }
       next_done = false;
       
+      ++row_index;
+      
       return sql_database.getJsonFromResultSet(result_set); 
     }
    
    
    @Override public int getRowCount()           { return row_count; }
+   
+   @Override public int getIndex()              { return row_index; }
    
 }       // end of inner class ResulSetIterator
 

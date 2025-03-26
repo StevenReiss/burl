@@ -189,11 +189,13 @@ String handleFindEntries(HttpExchange he,ControlSession session)
    
    JSONArray results = new JSONArray();
    int ct = 0;
+   int start = 0;
    
    if (filterid == null) {
       filterid = BurlUtil.randomString(12);
     }
    if (count >= 0 && iter != null) {
+      start = iter.getIndex();
       for (Iterator<BurlRepoRow> it = iter.iterator(); it.hasNext(); ) {
          BurlRepoRow br = it.next();
          results.put(br.toJson());
@@ -211,7 +213,7 @@ String handleFindEntries(HttpExchange he,ControlSession session)
    
    int itcnt = (iter == null ? 0 : iter.getRowCount());
    
-   return BowerRouter.jsonOKResponse(session,"count",itcnt,
+   return BowerRouter.jsonOKResponse(session,"count",itcnt,"start",start,
          "data",results,"filterid",filterid);
 }
 

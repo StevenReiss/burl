@@ -1,18 +1,18 @@
 /********************************************************************************/
-/*                                                                              */
-/*              lookandfeel.dart                                                */
-/*                                                                              */
-/*      Define the look and feel for the BURL user interface                    */
-/*                                                                              */
+/*										*/
+/*		lookandfeel.dart						*/
+/*										*/
+/*	Define the look and feel for the BURL user interface			*/
+/*										*/
 /********************************************************************************/
-/*      Copyright 2025 Brown University -- Steven P. Reiss                      */
+/*	Copyright 2025 Brown University -- Steven P. Reiss			*/
 /********************************************************************************/
 /*********************************************************************************
- *                                                                               *
- *  This work is licensed under Creative Commons Attribution-NonCommercial 4.0   *
- *  International.  To view a copy of this license, visit                        *
- *      https://creativecommons.org/licenses/by-nc/4.0/                          *
- *                                                                               *
+ *										 *
+ *  This work is licensed under Creative Commons Attribution-NonCommercial 4.0	 *
+ *  International.  To view a copy of this license, visit			 *
+ *	https://creativecommons.org/licenses/by-nc/4.0/ 			 *
+ *										 *
  ********************************************************************************/
 
 import 'package:flutter/material.dart';

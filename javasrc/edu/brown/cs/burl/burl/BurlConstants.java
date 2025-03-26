@@ -156,6 +156,7 @@ enum BurlSortType {
 interface BurlCountIter<T> extends Iterator<T> {
 
    int getRowCount();
+   int getIndex();
 
 }       // end of interface BurlCountIter
 
@@ -168,6 +169,7 @@ interface BurlCountIter<T> extends Iterator<T> {
 interface BurlRowIter extends BurlCountIter<BurlRepoRow>, Iterable<BurlRepoRow> {
    
    int getRowCount(); 
+   int getIndex();
    
 }       // end of interface BurlRowIter
 
