@@ -252,7 +252,13 @@ private void addHeader(String name)
 {
    if (name == null) return null;
    
-   return column_names.get(name);
+   RepoColumn rc = column_names.get(name);
+   if (rc == null) {
+      String n1 = field_data.getBaseName(name);
+      if (n1 != null) return column_names.get(n1);
+    }
+   
+   return null;
 }
 
 

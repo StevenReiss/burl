@@ -1,18 +1,18 @@
 /********************************************************************************/
-/*										*/
-/*		widgets.dart							*/
-/*										*/
-/*	Widget definitions							*/
-/*										*/
+/*                                                                              */
+/*              widgets.dart                                                    */
+/*                                                                              */
+/*      Widget definitions                                                      */
+/*                                                                              */
 /********************************************************************************/
-/*	Copyright 2025 Brown University -- Steven P. Reiss			*/
+/*      Copyright 2025 Brown University -- Steven P. Reiss                      */
 /********************************************************************************/
 /*********************************************************************************
- *										 *
- *  This work is licensed under Creative Commons Attribution-NonCommercial 4.0	 *
- *  International.  To view a copy of this license, visit			 *
- *	https://creativecommons.org/licenses/by-nc/4.0/ 			 *
- *										 *
+ *                                                                               *
+ *  This work is licensed under Creative Commons Attribution-NonCommercial 4.0   *
+ *  International.  To view a copy of this license, visit                        *
+ *      https://creativecommons.org/licenses/by-nc/4.0/                          *
+ *                                                                               *
  ********************************************************************************/
 
 import 'package:flutter/material.dart';
@@ -22,9 +22,9 @@ import 'package:duration_picker/duration_picker.dart';
 import 'package:flutter_spinbox/material.dart';
 
 /********************************************************************************/
-/*										*/
-/*    Text widgets								*/
-/*										*/
+/*                                                                              */
+/*    Text widgets                                                              */
+/*                                                                              */
 /********************************************************************************/
 
 Widget textFormField({
@@ -213,8 +213,13 @@ Widget itemWithMenu<T>(
     mainAxisAlignment: MainAxisAlignment.center,
     children: <Widget>[btn, Expanded(child: Text(lbl))],
   );
-  if (onTap == null && onDoubleTap == null) return w;
+
+  onDoubleTap ??= onTap;
   onLongPress ??= onDoubleTap;
+  if (onTap == null && onDoubleTap == null && onLongPress == null) {
+    return w;
+  }
+
   Widget w1 = GestureDetector(
     key: Key(lbl),
     onTap: onTap,
@@ -246,7 +251,7 @@ Widget tooltipWidget(String tooltip, Widget w) {
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(10),
       gradient: LinearGradient(
-	colors: <Color>[laf.toolTipLeftColor, laf.toolTipRightColor],
+        colors: <Color>[laf.toolTipLeftColor, laf.toolTipRightColor],
       ),
     ),
     height: laf.toolTipHeight,
@@ -264,9 +269,9 @@ Widget tooltipWidget(String tooltip, Widget w) {
 }
 
 /********************************************************************************/
-/*										*/
-/*    Buttons									*/
-/*										*/
+/*                                                                              */
+/*    Buttons                                                                   */
+/*                                                                              */
 /********************************************************************************/
 
 Widget submitButton(
@@ -279,7 +284,7 @@ Widget submitButton(
     backgroundColor: laf.submitBackgroundColor,
     foregroundColor: laf.submitForegroundColor,
     textStyle: const TextStyle(fontWeight: FontWeight.bold),
-    //	overlayColor: Colors.brown,
+    //  overlayColor: Colors.brown,
   );
   if (!enabled) action = null;
   ElevatedButton eb = ElevatedButton(
@@ -318,9 +323,9 @@ Widget textButton(
 }
 
 /********************************************************************************/
-/*										*/
-/*	Top menus								*/
-/*										*/
+/*                                                                              */
+/*      Top menus                                                               */
+/*                                                                              */
 /********************************************************************************/
 
 Widget topMenu(void Function(String)? handler, List labels) {
@@ -373,14 +378,14 @@ PopupMenuItem<String> _menuItem(dynamic val) {
       if (tt != null) tooltip = tt;
     } else {
       for (String k in val.keys) {
-	value = k;
-	if (val[k] is String) {
-	  label = val[k] as String;
-	} else if (val[k] is List<String>) {
-	  List<String> vals = val[k] as List<String>;
-	  label = vals[0];
-	  tooltip = vals[1];
-	}
+        value = k;
+        if (val[k] is String) {
+          label = val[k] as String;
+        } else if (val[k] is List<String>) {
+          List<String> vals = val[k] as List<String>;
+          label = vals[0];
+          tooltip = vals[1];
+        }
       }
     }
   }
@@ -398,9 +403,9 @@ class MenuAction {
 }
 
 /********************************************************************************/
-/*										*/
-/*	Field separator 							*/
-/*										*/
+/*                                                                              */
+/*      Field separator                                                         */
+/*                                                                              */
 /********************************************************************************/
 
 Widget fieldSeparator([double ht = 8]) {
@@ -417,9 +422,9 @@ Widget fieldDivider({
 }
 
 /********************************************************************************/
-/*										*/
-/*	Text fields								*/
-/*										*/
+/*                                                                              */
+/*      Text fields                                                             */
+/*                                                                              */
 /********************************************************************************/
 
 Widget largeText(
@@ -468,9 +473,9 @@ Widget largeBoldText(
 }
 
 /********************************************************************************/
-/*										*/
-/*	Drop down selectors							*/
-/*										*/
+/*                                                                              */
+/*      Drop down selectors                                                     */
+/*                                                                              */
 /********************************************************************************/
 
 Widget dropDown(
@@ -484,13 +489,12 @@ Widget dropDown(
   Widget w = DropdownButton<String>(
     value: value,
     onChanged: onChanged,
-    items:
-	items.map<DropdownMenuItem<String>>((String value) {
-	  return DropdownMenuItem<String>(
-	    value: value,
-	    child: Text(value, textAlign: textAlign),
-	  );
-	}).toList(),
+    items: items.map<DropdownMenuItem<String>>((String value) {
+      return DropdownMenuItem<String>(
+        value: value,
+        child: Text(value, textAlign: textAlign),
+      );
+    }).toList(),
   );
   w = tooltipWidget(tooltip, w);
   return w;
@@ -508,9 +512,9 @@ Widget dropDownMenu(
     requestFocusOnTap: true,
     onSelected: onChanged,
     dropdownMenuEntries:
-	items.map<DropdownMenuEntry<String>>((String value) {
-	  return DropdownMenuEntry<String>(value: value, label: value);
-	}).toList(),
+        items.map<DropdownMenuEntry<String>>((String value) {
+      return DropdownMenuEntry<String>(value: value, label: value);
+    }).toList(),
   );
 }
 
@@ -531,8 +535,8 @@ Widget dropDownWidget<T>(
   if (nullValue != null) {
     itmlst.add(
       DropdownMenuItem<T?>(
-	value: null,
-	child: Text(nullValue, textAlign: textAlign),
+        value: null,
+        child: Text(nullValue, textAlign: textAlign),
       ),
     );
   } else {
@@ -542,9 +546,9 @@ Widget dropDownWidget<T>(
   itmlst.addAll(
     items.map<DropdownMenuItem<T>>((T v) {
       return DropdownMenuItem<T>(
-	value: v,
-	enabled: true,
-	child: Text(lbl(v)),
+        value: v,
+        enabled: true,
+        child: Text(lbl(v)),
       );
     }).toList(),
   );
@@ -560,9 +564,9 @@ Widget dropDownWidget<T>(
 }
 
 /********************************************************************************/
-/*										*/
-/*	Boolean buttons 							*/
-/*										*/
+/*                                                                              */
+/*      Boolean buttons                                                         */
+/*                                                                              */
 /********************************************************************************/
 
 Widget booleanField({
@@ -591,9 +595,9 @@ Widget booleanField({
 }
 
 /********************************************************************************/
-/*										*/
-/*	Page navigation assistance						*/
-/*										*/
+/*                                                                              */
+/*      Page navigation assistance                                              */
+/*                                                                              */
 /********************************************************************************/
 
 void goto(BuildContext context, Widget w) {
@@ -625,9 +629,9 @@ dynamic gotoResult(BuildContext context, Widget w) async {
 }
 
 /********************************************************************************/
-/*										*/
-/*	Lists and list boxes							*/
-/*										*/
+/*                                                                              */
+/*      Lists and list boxes                                                    */
+/*                                                                              */
 /********************************************************************************/
 
 Widget listBox<T>(
@@ -642,42 +646,42 @@ Widget listBox<T>(
   Widget view = ListBody(children: widgets);
   view = tooltipWidget(tooltip, view);
   // ListView view = ListView.builder(
-  //	 padding: const EdgeInsets.all(2),
-  //	 itemCount: data.length,
-  //	 itemBuilder: (BuildContext context, int idx) {
-  //	   return itemBuilder(data[idx]);
-  //	 });
+  //     padding: const EdgeInsets.all(2),
+  //     itemCount: data.length,
+  //     itemBuilder: (BuildContext context, int idx) {
+  //       return itemBuilder(data[idx]);
+  //     });
   String label = "${what}s";
   return Column(
     mainAxisAlignment: MainAxisAlignment.start,
     mainAxisSize: MainAxisSize.min,
     children: <Widget>[
       Row(
-	mainAxisAlignment: MainAxisAlignment.start,
-	children: <Widget>[Text(label, style: getLabelStyle())],
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[Text(label, style: getLabelStyle())],
       ),
       view,
       Row(
-	mainAxisAlignment: MainAxisAlignment.end,
-	children: <Widget>[
-	  tooltipWidget(
-	    addToolTip,
-	    IconButton(
-	      icon: const Icon(Icons.add_box_outlined),
-	      tooltip: 'Add New $what',
-	      onPressed: add,
-	    ),
-	  ),
-	],
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: <Widget>[
+          tooltipWidget(
+            addToolTip,
+            IconButton(
+              icon: const Icon(Icons.add_box_outlined),
+              tooltip: 'Add New $what',
+              onPressed: add,
+            ),
+          ),
+        ],
       ),
     ],
   );
 }
 
 /********************************************************************************/
-/*										*/
-/*	Date and time fields							*/
-/*										*/
+/*                                                                              */
+/*      Date and time fields                                                    */
+/*                                                                              */
 /********************************************************************************/
 
 class DateFormField {
@@ -722,7 +726,7 @@ class DateFormField {
   void _handleTap() async {
     DateTime? newd = _decodeDate(_editControl.text);
     newd ??= _endDate;
-    //	newd ??= DateTime.now();
+    //  newd ??= DateTime.now();
     DateTime? nextd = await showDatePicker(
       context: context,
       initialDate: newd,
@@ -919,9 +923,9 @@ class DurationFormField {
 } // end of DurationFormField
 
 /********************************************************************************/
-/*										*/
-/*	Numeric fields								*/
-/*										*/
+/*                                                                              */
+/*      Numeric fields                                                          */
+/*                                                                              */
 /********************************************************************************/
 
 Widget integerField({
@@ -1018,9 +1022,9 @@ Widget numberField({
 }
 
 /********************************************************************************/
-/*										*/
-/*	Dialog setup								*/
-/*										*/
+/*                                                                              */
+/*      Dialog setup                                                            */
+/*                                                                              */
 /********************************************************************************/
 
 Future<void> displayDialog(
@@ -1032,19 +1036,18 @@ Future<void> displayDialog(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-	title: Text(title),
-	content:
-	    description.isNotEmpty
-		? Text(description, maxLines: 10)
-		: null,
-	actions: <Widget>[
-	  TextButton(
-	    child: const Text("OK"),
-	    onPressed: () {
-	      Navigator.of(context).pop();
-	    },
-	  ),
-	],
+        title: Text(title),
+        content: description.isNotEmpty
+            ? Text(description, maxLines: 10)
+            : null,
+        actions: <Widget>[
+          TextButton(
+            child: const Text("OK"),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
       );
     },
   );
@@ -1059,25 +1062,24 @@ Future<bool> getValidation(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-	title: Text(title),
-	content:
-	    description.isNotEmpty
-		? Text(description, maxLines: 10)
-		: null,
-	actions: <Widget>[
-	  TextButton(
-	    child: const Text("YES"),
-	    onPressed: () {
-	      Navigator.pop(context, true);
-	    },
-	  ),
-	  TextButton(
-	    child: const Text("NO"),
-	    onPressed: () {
-	      Navigator.pop(context, false);
-	    },
-	  ),
-	],
+        title: Text(title),
+        content: description.isNotEmpty
+            ? Text(description, maxLines: 10)
+            : null,
+        actions: <Widget>[
+          TextButton(
+            child: const Text("YES"),
+            onPressed: () {
+              Navigator.pop(context, true);
+            },
+          ),
+          TextButton(
+            child: const Text("NO"),
+            onPressed: () {
+              Navigator.pop(context, false);
+            },
+          ),
+        ],
       );
     },
   );
@@ -1092,21 +1094,21 @@ Future<bool> getValidationOld(
     context: context,
     builder: (BuildContext context) {
       return SimpleDialog(
-	title: Text(title),
-	children: <Widget>[
-	  SimpleDialogOption(
-	    onPressed: () {
-	      Navigator.pop(context, true);
-	    },
-	    child: const Text("Yes"),
-	  ),
-	  SimpleDialogOption(
-	    onPressed: () {
-	      Navigator.pop(context, false);
-	    },
-	    child: const Text("No"),
-	  ),
-	],
+        title: Text(title),
+        children: <Widget>[
+          SimpleDialogOption(
+            onPressed: () {
+              Navigator.pop(context, true);
+            },
+            child: const Text("Yes"),
+          ),
+          SimpleDialogOption(
+            onPressed: () {
+              Navigator.pop(context, false);
+            },
+            child: const Text("No"),
+          ),
+        ],
       );
     },
   );
@@ -1119,8 +1121,8 @@ PreferredSizeWidget appBar(String title) {
     title: Text(
       title,
       style: const TextStyle(
-	fontWeight: FontWeight.bold,
-	color: Colors.black,
+        fontWeight: FontWeight.bold,
+        color: Colors.black,
       ),
     ),
   );
@@ -1131,9 +1133,9 @@ Widget circularProgressIndicator() {
 }
 
 /********************************************************************************/
-/*										*/
-/*	Top level pages 							*/
-/*										*/
+/*                                                                              */
+/*      Top level pages                                                         */
+/*                                                                              */
 /********************************************************************************/
 
 Widget topLevelPage(
@@ -1166,9 +1168,9 @@ Widget _topLevelPageBuilder(
     decoration: BoxDecoration(
       border: Border.all(width: 8, color: laf.topLevelBackground),
       image: const DecorationImage(
-	image: AssetImage(laf.topLevelImage),
-	fit: BoxFit.fitWidth,
-	opacity: 0.05,
+        image: AssetImage(laf.topLevelImage),
+        fit: BoxFit.fitWidth,
+        opacity: 0.05,
       ),
     ),
     child: SingleChildScrollView(
@@ -1195,9 +1197,9 @@ Widget topLevelNSPage(BuildContext context, Widget child) {
     decoration: BoxDecoration(
       border: Border.all(width: 8, color: laf.topLevelBackground),
       image: const DecorationImage(
-	image: AssetImage(laf.topLevelImage),
-	fit: BoxFit.fitWidth,
-	opacity: 0.05,
+        image: AssetImage(laf.topLevelImage),
+        fit: BoxFit.fitWidth,
+        opacity: 0.05,
       ),
     ),
     child: child,
@@ -1205,9 +1207,9 @@ Widget topLevelNSPage(BuildContext context, Widget child) {
 }
 
 /********************************************************************************/
-/*										*/
-/*	Utility methods 							*/
-/*										*/
+/*                                                                              */
+/*      Utility methods                                                         */
+/*                                                                              */
 /********************************************************************************/
 
 ThemeData getTheme() {
@@ -1233,8 +1235,8 @@ InputDecoration getDecoration({
     hoverColor: laf.decorationHoverColor,
     focusedBorder: const OutlineInputBorder(
       borderSide: BorderSide(
-	width: 4,
-	color: laf.decorationBorderColor,
+        width: 4,
+        color: laf.decorationBorderColor,
       ),
     ),
     border: const OutlineInputBorder(
