@@ -620,18 +620,16 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     String date = id.getField("Date");
     String imprint = id.getField("Imprint");
     String ddn = id.getField("Dewey");
+    String shelf = id.getField("Shelf");
 
     String? other = imprint;
     String? son = _sortOn;
     if (son != null) {
-      switch (_sortOn) {
+      switch (son) {
         case "Imprint":
         case "Related Names":
         case "Subjects":
           other = id.getField(son);
-          break;
-        case "Shelf":
-          other = "SHELF ${id.getField(son)}";
           break;
       }
     }
@@ -643,6 +641,9 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     }
     if (ddn.isNotEmpty) {
       isbn = "$isbn      $ddn";
+    }
+    if (shelf.isNotEmpty) {
+      isbn = "$isbn      SHELF: $shelf";
     }
 
     String txt = "";
