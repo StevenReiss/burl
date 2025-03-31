@@ -101,6 +101,8 @@ Widget textField({
   ValueChanged<String>? onChanged,
   VoidCallback? onEditingComplete,
   ValueChanged<String>? onSubmitted,
+  TapRegionCallback? onTapOutside,
+  FocusNode? focusNode,
   bool? showCursor,
   int? maxLines,
   TextInputType? keyboardType,
@@ -136,8 +138,10 @@ Widget textField({
     onChanged: onChanged,
     onEditingComplete: onEditingComplete,
     onSubmitted: onSubmitted,
+    onTapOutside: onTapOutside,
     showCursor: showCursor,
     maxLines: maxLines,
+    focusNode: focusNode,
     keyboardType: keyboardType,
     textInputAction: textInputAction,
     enabled: enabled,
@@ -489,12 +493,13 @@ Widget dropDown(
   Widget w = DropdownButton<String>(
     value: value,
     onChanged: onChanged,
-    items: items.map<DropdownMenuItem<String>>((String value) {
-      return DropdownMenuItem<String>(
-        value: value,
-        child: Text(value, textAlign: textAlign),
-      );
-    }).toList(),
+    items:
+        items.map<DropdownMenuItem<String>>((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(value, textAlign: textAlign),
+          );
+        }).toList(),
   );
   w = tooltipWidget(tooltip, w);
   return w;
@@ -513,8 +518,8 @@ Widget dropDownMenu(
     onSelected: onChanged,
     dropdownMenuEntries:
         items.map<DropdownMenuEntry<String>>((String value) {
-      return DropdownMenuEntry<String>(value: value, label: value);
-    }).toList(),
+          return DropdownMenuEntry<String>(value: value, label: value);
+        }).toList(),
   );
 }
 
@@ -1037,9 +1042,10 @@ Future<void> displayDialog(
     builder: (BuildContext context) {
       return AlertDialog(
         title: Text(title),
-        content: description.isNotEmpty
-            ? Text(description, maxLines: 10)
-            : null,
+        content:
+            description.isNotEmpty
+                ? Text(description, maxLines: 10)
+                : null,
         actions: <Widget>[
           TextButton(
             child: const Text("OK"),
@@ -1063,9 +1069,10 @@ Future<bool> getValidation(
     builder: (BuildContext context) {
       return AlertDialog(
         title: Text(title),
-        content: description.isNotEmpty
-            ? Text(description, maxLines: 10)
-            : null,
+        content:
+            description.isNotEmpty
+                ? Text(description, maxLines: 10)
+                : null,
         actions: <Widget>[
           TextButton(
             child: const Text("YES"),

@@ -27,6 +27,10 @@ class ItemData {
     _jsonData = {};
   }
 
+  ItemData.clone(ItemData old) {
+    _jsonData = Map<String, dynamic>.from(old._jsonData);
+  }
+
   void reload(Map<String, dynamic> newdata) {
     _jsonData = newdata;
   }
