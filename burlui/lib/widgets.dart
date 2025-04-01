@@ -207,15 +207,22 @@ Widget itemWithMenu<T>(
   void Function()? onTap,
   void Function()? onDoubleTap,
   void Function()? onLongPress,
+  String tooltip = "",
 }) {
   Widget btn = PopupMenuButton(
-    icon: const Icon(Icons.menu_sharp),
+    icon: const Icon(Icons.menu_open_rounded),
     itemBuilder: (context) => _itemMenuBuilder(acts),
     onSelected: (MenuAction act) => act.action(),
   );
+  Widget wt = Text(lbl);
+  wt = tooltipWidget(tooltip, wt);
   Widget w = Row(
     mainAxisAlignment: MainAxisAlignment.center,
-    children: <Widget>[btn, Expanded(child: Text(lbl))],
+    children: <Widget>[
+      btn,
+      wt,
+      const Spacer(flex: 10),
+    ],
   );
 
   onDoubleTap ??= onTap;
@@ -493,13 +500,12 @@ Widget dropDown(
   Widget w = DropdownButton<String>(
     value: value,
     onChanged: onChanged,
-    items:
-        items.map<DropdownMenuItem<String>>((String value) {
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Text(value, textAlign: textAlign),
-          );
-        }).toList(),
+    items: items.map<DropdownMenuItem<String>>((String value) {
+      return DropdownMenuItem<String>(
+        value: value,
+        child: Text(value, textAlign: textAlign),
+      );
+    }).toList(),
   );
   w = tooltipWidget(tooltip, w);
   return w;
@@ -510,17 +516,20 @@ Widget dropDownMenu(
   String? value,
   Function(String?)? onChanged,
   textAlign = TextAlign.left,
+  String tooltip = "",
 }) {
   value ??= items[0];
-  return DropdownMenu<String>(
+  Widget w = DropdownMenu<String>(
     initialSelection: value,
     requestFocusOnTap: true,
     onSelected: onChanged,
     dropdownMenuEntries:
         items.map<DropdownMenuEntry<String>>((String value) {
-          return DropdownMenuEntry<String>(value: value, label: value);
-        }).toList(),
+      return DropdownMenuEntry<String>(value: value, label: value);
+    }).toList(),
   );
+  w = tooltipWidget(tooltip, w);
+  return w;
 }
 
 Widget dropDownWidget<T>(
@@ -1042,10 +1051,9 @@ Future<void> displayDialog(
     builder: (BuildContext context) {
       return AlertDialog(
         title: Text(title),
-        content:
-            description.isNotEmpty
-                ? Text(description, maxLines: 10)
-                : null,
+        content: description.isNotEmpty
+            ? Text(description, maxLines: 10)
+            : null,
         actions: <Widget>[
           TextButton(
             child: const Text("OK"),
@@ -1069,10 +1077,9 @@ Future<bool> getValidation(
     builder: (BuildContext context) {
       return AlertDialog(
         title: Text(title),
-        content:
-            description.isNotEmpty
-                ? Text(description, maxLines: 10)
-                : null,
+        content: description.isNotEmpty
+            ? Text(description, maxLines: 10)
+            : null,
         actions: <Widget>[
           TextButton(
             child: const Text("YES"),

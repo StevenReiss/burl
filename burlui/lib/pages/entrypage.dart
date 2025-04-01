@@ -130,8 +130,8 @@ class _BurlEntryPageState extends State<BurlEntryPage> {
       rows.add(spacer);
     }
     Map<int, TableColumnWidth> widths = {
-      0: IntrinsicColumnWidth(),
-      1: FlexColumnWidth(),
+      0: const IntrinsicColumnWidth(),
+      1: const FlexColumnWidth(),
     };
     Widget w1 = Table(
       children: rows,
