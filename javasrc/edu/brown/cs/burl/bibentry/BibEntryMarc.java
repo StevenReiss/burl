@@ -114,6 +114,7 @@ public String computeEntry(BurlRepoColumn brc)
             if (add == null) add = addall;
             if (val.isEmpty()) continue;
             if (!buf.isEmpty() && add != null) buf.append(add);
+            val = val.replace("\u208a","+");
             buf.append(val);
           }
          if (!buf.isEmpty()) items.add(buf.toString());

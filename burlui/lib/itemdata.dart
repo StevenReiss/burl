@@ -64,7 +64,12 @@ class ItemData {
       }
     }
     List<int> runes = v2.runes.toList();
-    String v3 = utf8.decode(runes);
+    List<int> xrunes = [];
+    for (int v in runes) {
+      if (v == 8330) v = 43; // convert to +
+      xrunes.add(v);
+    }
+    String v3 = utf8.decode(xrunes, allowMalformed: true);
     return v3;
   }
 

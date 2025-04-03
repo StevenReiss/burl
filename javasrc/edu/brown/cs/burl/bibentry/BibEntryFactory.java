@@ -203,6 +203,7 @@ private BibEntryBase openLibrarySearch(String isbn)
       if (bibentry != null) break;
     }
    if (bibentry == null) {
+      IvyLog.logD("BIBENTRY","Using openlib entry for " + isbn);
       bibentry = olitm.getBibEntry();  
     }
    
@@ -354,6 +355,7 @@ private BibEntryBase searchForMarcItemXml(String isbn,String url)
           }
          Element xml = IvyXml.convertStringToXml(body);
          if (IvyXml.isElement(xml,"error")) return null;
+         IvyLog.logD("BIBENTRY","Found marc entry for " + isbn + " " + url);
          return new BibEntryMarc(xml);
        } 
       catch (InterruptedException e) { 
