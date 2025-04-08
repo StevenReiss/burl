@@ -1,6 +1,6 @@
 /********************************************************************************/
 /*                                                                              */
-/*              itemdata. rt                                                    */
+/*              itemdata.dart                                                   */
 /*                                                                              */
 /*      Data for a specific library item                                        */
 /*                                                                              */
@@ -17,6 +17,21 @@
 
 import 'globals.dart' as globals;
 import 'dart:convert';
+
+Map<int, int> _charMap = {
+  8330: 43,
+  8331: 45,
+  8320: 48,
+  8321: 49,
+  8322: 50,
+  8323: 51,
+  8324: 52,
+  8325: 53,
+  8326: 54,
+  8327: 55,
+  8328: 56,
+  8329: 57,
+};
 
 class ItemData {
   late Map<String, dynamic> _jsonData;
@@ -66,7 +81,8 @@ class ItemData {
     List<int> runes = v2.runes.toList();
     List<int> xrunes = [];
     for (int v in runes) {
-      if (v == 8330) v = 43; // convert to +
+      int? v0 = _charMap[v];
+      if (v0 != null) v = v0;
       xrunes.add(v);
     }
     String v3 = utf8.decode(xrunes, allowMalformed: true);

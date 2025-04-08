@@ -147,7 +147,7 @@ private BibEntryLOCResult searchForLOCInfo(String isbn)
             String body = resp.body();
             int vcode = resp.statusCode();
             if (vcode == 429 || vcode == 503 || vcode == 524) {
-               IvyLog.logE("BIBENTRY","Waiting for LOC server " + vcode);
+               IvyLog.logD("BIBENTRY","Waiting for LOC server " + vcode);
                waitFor(60);
                continue;
              }
@@ -165,8 +165,11 @@ private BibEntryLOCResult searchForLOCInfo(String isbn)
             continue;
           }
          catch (IOException e) {
-            IvyLog.logE("BIBENTRY","HTTP Error searching Library of Congress",e); 
-            if (i >= 2) break;
+            if (i >= 2) {
+               IvyLog.logE("BIBENTRY","HTTP Error searching Library of Congress",e); 
+               break;
+             }
+            IvyLog.logD("BIBENTRY","HTTP Error searching Library of Congress"); 
             waitFor(10);
             continue;
           }
@@ -225,13 +228,14 @@ private BibEntryOpenLibItem searchInOpenLibrary(String isbn)
          String body = resp.body();
          int vcode = resp.statusCode();
          if (vcode >= 400) {
-            IvyLog.logE("BIBENTRY","Problem doing OpenLib search for " + req.uri() +
-                  ": " + vcode + " " + body);
             if (vcode == 503) {
                // retry on server unavailable
+               IvyLog.logD("BIBENTRY","Problem doing OpenLib search " + vcode);
                waitFor(20);
                continue;
              }
+            IvyLog.logE("BIBENTRY","Problem doing OpenLib search for " + req.uri() +
+                  ": " + vcode + " " + body);
             return null;
           }
 //    HttpHeaders hdrs = resp.headers();

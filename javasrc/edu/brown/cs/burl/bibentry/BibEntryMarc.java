@@ -42,6 +42,24 @@ class BibEntryMarc extends BibEntryBase
 /********************************************************************************/
 
 private Element         marc_xml;
+private static Map<String,String> char_map;
+
+static {
+   char_map = new HashMap<>();
+   char_map.put("\u2080","0");
+   char_map.put("\u2081","0"); 
+   char_map.put("\u2082","0"); 
+   char_map.put("\u2083","0"); 
+   char_map.put("\u2084","0"); 
+   char_map.put("\u2085","0"); 
+   char_map.put("\u2086","0"); 
+   char_map.put("\u2087","0"); 
+   char_map.put("\u2088","0"); 
+   char_map.put("\u2089","0");
+   char_map.put("\u208a","+");
+   char_map.put("\u208b","-");
+   
+}
 
 
 
@@ -114,7 +132,9 @@ public String computeEntry(BurlRepoColumn brc)
             if (add == null) add = addall;
             if (val.isEmpty()) continue;
             if (!buf.isEmpty() && add != null) buf.append(add);
-            val = val.replace("\u208a","+");
+            for (Map.Entry<String,String> ent : char_map.entrySet()) {
+               val = val.replace(ent.getKey(),ent.getValue());
+             }
             buf.append(val);
           }
          if (!buf.isEmpty()) items.add(buf.toString());
