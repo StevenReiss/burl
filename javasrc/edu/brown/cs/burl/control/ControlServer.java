@@ -282,7 +282,12 @@ String handleAddLibraryUser(HttpExchange he,ControlSession session)
          " by " + user.getEmail() + " as " + an + acc + ".\n" +
          "If you haven't already, please register with BURL (" + 
          host + ").\n";
-      BurlUtil.sendEmail(email,"BURL Library Invitation",body);
+      boolean fg = BurlUtil.sendEmail(email,"BURL Library Invitation",body);
+      if (!fg) {
+         
+         // try again -- gmail is fussy
+         BurlUtil.sendEmail(email,"BURL Library Invitation",body);
+       }
     }
       
    return BowerRouter.jsonOKResponse(session);

@@ -22,6 +22,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -53,7 +54,11 @@ public final class ControlMain implements ControlConstants, BurlControl
 public static void main(String [] args)
 {
    ControlMain mc = new ControlMain(args);
-
+   
+   BurlUtil.sendEmail("spr@cs.brown.edu",
+         "Burl Restarted","Burl was restarted at " +
+         new Date().toString());
+   
    mc.process();
 }
 
