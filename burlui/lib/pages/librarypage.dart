@@ -301,6 +301,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
   bool _canAddUsers() {
     switch (_libData.getUserAccess()) {
       case "OWNER":
+      case "LIBRARIAN":
         return true;
       default:
         return false;

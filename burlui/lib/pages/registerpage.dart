@@ -133,9 +133,7 @@ class _BurlRegisterWidgetState extends State<BurlRegisterWidget> {
   }
 
   void _handleRegister() async {
-    setState(() {
-      _registerError = '';
-    });
+    _clearRegisterError();
     if (_formKey.currentState!.validate()) {
       String? rslt = await _registerUser();
       if (rslt != null) {
@@ -156,6 +154,7 @@ class _BurlRegisterWidgetState extends State<BurlRegisterWidget> {
   }
 
   String? _validateConfirmPassword(String? value) {
+    _clearRegisterError();
     if (value != _curPassword) {
       return "Passwords must match";
     }
@@ -164,6 +163,7 @@ class _BurlRegisterWidgetState extends State<BurlRegisterWidget> {
 
   String? _validatePassword(String? value) {
     _curPassword = value;
+    _clearRegisterError();
     if (value == null || value.isEmpty) {
       return "Password must not be null";
     } else if (!util.validatePassword(value)) {
@@ -174,11 +174,20 @@ class _BurlRegisterWidgetState extends State<BurlRegisterWidget> {
 
   String? _validateEmail(String? value) {
     _curEmail = value;
+    _clearRegisterError();
     if (value == null || value.isEmpty) {
       return "Email must not be null";
     } else if (!util.validateEmail(value)) {
       return "Invalid email address";
     }
     return null;
+  }
+
+  void _clearRegisterError() {
+    if (_registerError.isNotEmpty) {
+      setState(() {
+        _registerError = "";
+      });
+    }
   }
 }

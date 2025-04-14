@@ -75,8 +75,8 @@ class BurlLoginWidget extends StatefulWidget {
 
 class _BurlLoginWidgetState extends State<BurlLoginWidget> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  String? _curUser;
-  String? _curPassword;
+  String _curUser = "";
+  String _curPassword = "";
   String _loginError = '';
   final TextEditingController _userController = TextEditingController();
   final TextEditingController _pwdController = TextEditingController();
@@ -138,6 +138,7 @@ class _BurlLoginWidgetState extends State<BurlLoginWidget> {
                       controller: _userController,
                       fraction: 0.8,
                       textInputAction: TextInputAction.next,
+                      keyboardType: TextInputType.emailAddress,
                     ),
                     widgets.fieldSeparator(),
                     widgets.loginTextField(
@@ -148,7 +149,9 @@ class _BurlLoginWidgetState extends State<BurlLoginWidget> {
                       controller: _pwdController,
                       fraction: 0.8,
                       obscureText: true,
-                      textInputAction: TextInputAction.go,
+                      textInputAction: TextInputAction.done,
+                      onEditingComplete: _tryLogin,
+                      onSubmitted: _tryLogin,
                     ),
                     widgets.errorField(_loginError),
                     Container(
@@ -193,17 +196,18 @@ class _BurlLoginWidgetState extends State<BurlLoginWidget> {
     );
   }
 
-  void _handleLogin() async {
+  Future<void> _tryLogin([String? v]) async {
+    if (_curUser.isNotEmpty && _curPassword.isNotEmpty) {
+      await _handleLogin();
+    }
+  }
+
+  Future<void> _handleLogin() async {
     _loginValid = false;
-    setState(() {
-      _loginError = '';
-    });
+    _clearLoginError();
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      _HandleLogin login = _HandleLogin(
-        _curUser as String,
-        _curPassword as String,
-      );
+      _HandleLogin login = _HandleLogin(_curUser, _curPassword);
       String? rslt = await login.authUser();
       if (rslt == 'TEMPORARY') {
         _loginValid = true;
@@ -221,18 +225,22 @@ class _BurlLoginWidgetState extends State<BurlLoginWidget> {
   }
 
   String? _validatePassword(String? value) {
+    value ??= "";
     _curPassword = value;
-    if (value == null || value.isEmpty) {
+    if (value.isEmpty) {
       return "Password must not be null";
     }
+    _clearLoginError();
     return null;
   }
 
   String? _validateUserName(String? value) {
+    value ??= "";
     _curUser = value;
-    if (value == null || value.isEmpty) {
+    if (value.isEmpty) {
       return "Username must not be null";
     }
+    _clearLoginError();
     return null;
   }
 
@@ -264,12 +272,22 @@ class _BurlLoginWidgetState extends State<BurlLoginWidget> {
           _rememberMe = true;
         });
         _userController.text = uid ?? "";
+        _curUser = _userController.text;
         _pwdController.text = pwd ?? "";
+        _curPassword = _pwdController.text;
       }
     } catch (e) {
       _rememberMe = false;
       _userController.text = "";
       _pwdController.text = "";
+    }
+  }
+
+  void _clearLoginError() {
+    if (_loginError.isNotEmpty) {
+      setState(() {
+        _loginError = "";
+      });
     }
   }
 }

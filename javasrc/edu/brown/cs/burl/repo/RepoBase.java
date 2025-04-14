@@ -915,7 +915,12 @@ private class ImportJsonEntry implements BurlBibEntry {
        }
       idx = author.indexOf(",");
       if (idx > 0) author = author.substring(0,idx);
-      if (author.length() > 12) author = author.substring(0,12);
+      if (author.length() > 12) {
+         author = author.substring(0,12);
+       }
+      author = author.replace("{","(");
+      author = author.replace("}",")");
+      author = author.replace("\\","/");
       author = fixUnicode(author);
       
       String year = findLabelData(lbldata,"YEAR",brr);
@@ -979,7 +984,6 @@ private String fixUnicode(String s)
 {
    if (s == null || s.isEmpty()) return s;
    StringBuffer buf = new StringBuffer();
-   
    s.codePoints().forEach((ch) -> {
       if (ch > 127) {
          buf.append("\\u" + ch + "?");
