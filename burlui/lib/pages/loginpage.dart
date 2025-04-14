@@ -139,6 +139,7 @@ class _BurlLoginWidgetState extends State<BurlLoginWidget> {
                       fraction: 0.8,
                       textInputAction: TextInputAction.next,
                       keyboardType: TextInputType.emailAddress,
+                      onChanged: _updateUserName,
                     ),
                     widgets.fieldSeparator(),
                     widgets.loginTextField(
@@ -152,6 +153,7 @@ class _BurlLoginWidgetState extends State<BurlLoginWidget> {
                       textInputAction: TextInputAction.done,
                       onEditingComplete: _tryLogin,
                       onSubmitted: _tryLogin,
+                      onChanged: _updatePassword,
                     ),
                     widgets.errorField(_loginError),
                     Container(
@@ -234,6 +236,11 @@ class _BurlLoginWidgetState extends State<BurlLoginWidget> {
     return null;
   }
 
+  void _updatePassword(String? value) {
+    _clearLoginError();
+    _curPassword = _pwdController.text;
+  }
+
   String? _validateUserName(String? value) {
     value ??= "";
     _curUser = value;
@@ -242,6 +249,11 @@ class _BurlLoginWidgetState extends State<BurlLoginWidget> {
     }
     _clearLoginError();
     return null;
+  }
+
+  void _updateUserName(String? value) {
+    _clearLoginError();
+    _curUser = _userController.text;
   }
 
   void _handleRememberMe(bool? fg) async {

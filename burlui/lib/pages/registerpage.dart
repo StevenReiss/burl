@@ -43,13 +43,15 @@ class BurlRegisterWidget extends StatefulWidget {
 
 class _BurlRegisterWidgetState extends State<BurlRegisterWidget> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  String? _curEmail;
-  String? _curPassword;
+  String _curEmail = "";
+  String _curPassword = "";
+  String _confirmPassword = "";
   late String _registerError;
 
   _BurlRegisterWidgetState() {
-    _curEmail = null;
-    _curPassword = null;
+    _curEmail = "";
+    _curPassword = "";
+    _confirmPassword = "";
     _registerError = '';
   }
 
@@ -60,8 +62,8 @@ class _BurlRegisterWidgetState extends State<BurlRegisterWidget> {
   }
 
   Future<String?> _registerUser() async {
-    String pwd = (_curPassword as String);
-    String em = _curEmail as String;
+    String pwd = _curPassword;
+    String em = _curEmail;
     String email = em.toLowerCase();
     String salt = await _preRegister();
     String p1 = util.hasher(pwd);
@@ -99,6 +101,7 @@ class _BurlRegisterWidgetState extends State<BurlRegisterWidget> {
                       label: "Email",
                       keyboardType: TextInputType.emailAddress,
                       validator: _validateEmail,
+                      onChanged: _updateEmail,
                     ),
                     widgets.fieldSeparator(),
                     widgets.loginTextField(
@@ -107,6 +110,7 @@ class _BurlRegisterWidgetState extends State<BurlRegisterWidget> {
                       label: "Password",
                       validator: _validatePassword,
                       obscureText: true,
+                      onChanged: _updatePassword,
                     ),
                     widgets.fieldSeparator(),
                     widgets.loginTextField(
@@ -115,6 +119,8 @@ class _BurlRegisterWidgetState extends State<BurlRegisterWidget> {
                       label: "Confirm Password",
                       validator: _validateConfirmPassword,
                       obscureText: true,
+                      onChanged: _updateConfirmPassword,
+                      onSubmitted: _tryRegister,
                     ),
                     widgets.errorField(_registerError),
                     widgets.fieldSeparator(),
@@ -130,6 +136,14 @@ class _BurlRegisterWidgetState extends State<BurlRegisterWidget> {
         ),
       ),
     );
+  }
+
+  void _tryRegister([String? val]) {
+    if (_curEmail.isNotEmpty &&
+        _curPassword.isNotEmpty &&
+        _confirmPassword.isNotEmpty) {
+      _handleRegister();
+    }
   }
 
   void _handleRegister() async {
@@ -161,8 +175,15 @@ class _BurlRegisterWidgetState extends State<BurlRegisterWidget> {
     return null;
   }
 
+  void _updateConfirmPassword(String? value) {
+    _clearRegisterError();
+    if (value != null) {
+      _confirmPassword = value;
+    }
+  }
+
   String? _validatePassword(String? value) {
-    _curPassword = value;
+    _curPassword = value ?? "";
     _clearRegisterError();
     if (value == null || value.isEmpty) {
       return "Password must not be null";
@@ -172,8 +193,15 @@ class _BurlRegisterWidgetState extends State<BurlRegisterWidget> {
     return null;
   }
 
+  void _updatePassword(String? value) {
+    _clearRegisterError();
+    if (value != null) {
+      _curPassword = value;
+    }
+  }
+
   String? _validateEmail(String? value) {
-    _curEmail = value;
+    _curEmail = value ?? "";
     _clearRegisterError();
     if (value == null || value.isEmpty) {
       return "Email must not be null";
@@ -181,6 +209,13 @@ class _BurlRegisterWidgetState extends State<BurlRegisterWidget> {
       return "Invalid email address";
     }
     return null;
+  }
+
+  void _updateEmail(String? value) {
+    _clearRegisterError();
+    if (value != null) {
+      _curEmail = value;
+    }
   }
 
   void _clearRegisterError() {
