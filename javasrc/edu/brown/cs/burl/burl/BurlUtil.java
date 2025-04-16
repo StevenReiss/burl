@@ -379,7 +379,9 @@ public static boolean sendEmail(String sendto,String subj,String body)
    String user = props.getProperty("email.user");
    String pwd = props.getProperty("email.password");
    String rply = props.getProperty("email.replyto");
+
 // IvyLog.logD("EMAIL " + from + " " + user + " " + pwd + " " + rply);
+
    mi.setSender(from,user,pwd);
    mi.setReplyTo(rply);
    boolean fg = mi.send();
