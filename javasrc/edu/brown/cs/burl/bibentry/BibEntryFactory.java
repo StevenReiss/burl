@@ -347,7 +347,16 @@ private BibEntryBase searchForMarcItemXml(String isbn,String url)
                HttpResponse.BodyHandlers.ofString());
          String body = resp.body();
          int rcode = resp.statusCode();
-         if (rcode >= 400) return null;
+         if (rcode == 429 || rcode == 503 || rcode == 524) {
+            IvyLog.logD("BIBENTRY","Waiting for MARC server " + rcode);
+            waitFor(60);
+            continue;
+          }
+         if (rcode >= 400) {
+            IvyLog.logE("BIBENTRY","Problem with MARC request " + rcode + " " + 
+                  url + " " + body);
+            return null;
+          }
          if (body.contains("<!DOCTYPE html>")) {
             IvyLog.logD("BIBENTRY","Waiting for MARC server");
             if (!body.contains("No Connections Available") &&
@@ -358,7 +367,10 @@ private BibEntryBase searchForMarcItemXml(String isbn,String url)
             continue;
           }
          Element xml = IvyXml.convertStringToXml(body);
-         if (IvyXml.isElement(xml,"error")) return null;
+         if (IvyXml.isElement(xml,"error")) {
+            IvyLog.logE("BIBENTRY","Error in MARCxml entry: " + body);
+            return null;
+          }
          IvyLog.logD("BIBENTRY","Found marc entry for " + isbn + " " + url);
          return new BibEntryMarc(xml);
        } 

@@ -208,12 +208,14 @@ class _BurlEntryPageState extends State<BurlEntryPage> {
         controller: ctrl,
         enabled: en,
         maxLines: 0,
+        textInputAction: TextInputAction.next,
         onChanged: (String s) {
           _fieldEdited(fld, s);
         },
         collapse: true,
       );
       Widget focw = Focus(
+        canRequestFocus: false,
         child: fldw,
         onFocusChange: (bool fg) {
           _fieldFocusChange(fg, fld, ctrl);
