@@ -326,7 +326,9 @@ class _BurlEntryPageState extends State<BurlEntryPage> {
     );
     if (rslt["status"] == "OK") {
       if (dcontext.mounted) {
-        Navigator.pop(dcontext, rslt["entry"]["burl_id"]);
+        var key = rslt["entry"]["burl_id"];
+
+        Navigator.pop(dcontext, key.toString());
         //   ItemData item = ItemData(rslt["entry"]);
         //   widgets.gotoDirect(dcontext, BurlEntryWidget(_libData, item));
       }

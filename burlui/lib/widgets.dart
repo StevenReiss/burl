@@ -625,7 +625,7 @@ void goto(BuildContext context, Widget w) {
 }
 
 Future<dynamic> gotoThen(BuildContext context, Widget w) async {
-  await Navigator.of(
+  return await Navigator.of(
     context,
   ).push(MaterialPageRoute(builder: (context) => w));
 }

@@ -737,11 +737,15 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
       context,
       BurlEntryWidget(_libData, item),
     );
+    bool havenew = false;
     if (v != null && v != "OK") {
       id = int.parse(v);
       index = _numItems;
       _numItems += 1;
       _isDone = false;
+      havenew = true;
+      _maxRead = index;
+      await _fetchMoreData();
     }
     Map<String, String?> data = {
       "library": _libData.getLibraryId().toString(),
@@ -758,10 +762,11 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
         _itemList[index] = newitem;
       } else if (index == _itemList.length) {
         _itemList.add(newitem);
-      }
+      } else {}
     } else {
       _itemList.removeAt(index);
     }
     setState(() {});
+    if (havenew) _handleSelect(index);
   }
 } // end of class _BurlPageState
