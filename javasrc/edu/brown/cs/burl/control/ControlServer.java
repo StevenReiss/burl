@@ -162,6 +162,7 @@ BowerRouter<ControlSession> setupRouter()
    br.addRoute("POST","/rest/entries",entry_manager::handleFindEntries); 
    br.addRoute("POST","/rest/editentry",entry_manager::handleEditEntry); 
    br.addRoute("POST","/rest/removeentry",entry_manager::handleRemoveEntry); 
+   br.addRoute("POST","/rest/duplicateentry",entry_manager::handleDuplicateEntry); 
    br.addRoute("POST","/rest/addentry",entry_manager::handleAddEntry); 
    br.addRoute("POST","/rest/exportlibrary",entry_manager::handleExportEntries); 
    br.addRoute("POST","/rest/fixfields",entry_manager::handleFixFields); 

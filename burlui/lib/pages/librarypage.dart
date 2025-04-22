@@ -733,7 +733,16 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
   Future<dynamic> _handleSelect(int index) async {
     ItemData item = _itemList[index];
     int id = item.getId();
-    await widgets.gotoThen(context, BurlEntryWidget(_libData, item));
+    String? v = await widgets.gotoThen(
+      context,
+      BurlEntryWidget(_libData, item),
+    );
+    if (v != null && v != "OK") {
+      id = int.parse(v);
+      index = _numItems;
+      _numItems += 1;
+      _isDone = false;
+    }
     Map<String, String?> data = {
       "library": _libData.getLibraryId().toString(),
       "entry": id.toString(),
@@ -745,7 +754,11 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     ItemData? newitem;
     if (itemrslt["status"] == "OK") {
       newitem = ItemData(itemrslt["entry"]);
-      _itemList[index] = newitem;
+      if (index < _itemList.length) {
+        _itemList[index] = newitem;
+      } else if (index == _itemList.length) {
+        _itemList.add(newitem);
+      }
     } else {
       _itemList.removeAt(index);
     }

@@ -149,6 +149,66 @@ String handleAddEntry(HttpExchange he,ControlSession session)
 
 /********************************************************************************/
 /*                                                                              */
+/*      Handle duplicate entry command to create a new entry from existing one  */
+/*                                                                              */
+/********************************************************************************/
+
+String handleDuplicateEntry(HttpExchange he,ControlSession session)
+{
+   BurlUser user = session.getUser();
+   Number libid = burl_server.getIdParameter(he,"library");
+   BurlLibrary lib = burl_store.findLibraryById(libid);
+   if (lib == null) {
+      return BowerRouter.errorResponse(he,session,402,"Bad library");
+    }
+   BurlRepo repo = lib.getRepository();
+   Number entid = burl_server.getIdParameter(he,"entry");
+   BurlRepoRow oldrow = repo.getRowForId(entid);
+   if (oldrow == null) {
+      return BowerRouter.errorResponse(he,session,400,"Bad entity");
+    }
+   if (user == null) {
+      return BowerRouter.errorResponse(he,session,400,"Bad user");
+    } 
+   
+   BurlUserAccess acc = burl_server.validateLibrary(session,libid);
+   switch (acc) {
+      case NONE :
+      case VIEWER :
+      case EDITOR :
+         return BowerRouter.errorResponse(he,session,400,"Not authorized");
+      case OWNER :
+      case LIBRARIAN :
+         break;
+    }
+   
+   BurlRepoRow row = repo.newRow();
+   if (row == null) {
+      return BowerRouter.errorResponse(he,session,402,"Problem adding row");
+    }
+   for (BurlRepoColumn brc : repo.getColumns()) {
+      String v = oldrow.getData(brc);
+      if (v != null) {
+         if (brc.getDefault() != null && brc.getDefault().equals("1")) {
+            try {
+               int v0 = Integer.parseInt(v);
+               v = Integer.toString(v0+1);
+             }
+            catch (NumberFormatException e) { }
+          }
+         row.setData(brc,v);
+       }
+    }
+   
+   JSONObject jobj = row.toJson();
+   return BowerRouter.jsonOKResponse(session,"entry",jobj);
+}
+
+
+
+
+/********************************************************************************/
+/*                                                                              */
 /*      Get entries command                                                     */
 /*                                                                              */
 /********************************************************************************/

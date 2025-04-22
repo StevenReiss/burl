@@ -476,6 +476,7 @@ private void processCommand(String cmd,List<String> args)
             lib_commands.handleAddIsbns(args);
           }
          break;
+    
       case "import" :
          if (checkLibrary(cmd)) {
             lib_commands.handleImport(args);
@@ -500,6 +501,12 @@ private void processCommand(String cmd,List<String> args)
       case "removeentry" :
          if (checkEntry(cmd)) {
             entry_commands.handleRemoveEntry(args);
+          }
+         break;
+      case "dup" :
+      case "duplicate" :
+         if (checkLibrary(cmd)) {
+            entry_commands.handleDuplicateEntry(args); 
           }
          break;
       case "fixfields" :
@@ -551,6 +558,7 @@ private void showValidCommands()
    IvyLog.logI("BURLCLI","   entry:         set current entry");
    IvyLog.logI("BURLCLI","   edit:          edit fields of the current entry"); 
    IvyLog.logI("BURLCLI","   removeentry:   remove the current entry");
+   IvyLog.logI("BURLCLI","   dup:           duplicate an existing entry");  
    IvyLog.logI("BURLCLI","   exit:          Exit from BURLCLI"); 
    IvyLog.logI("BURLCLI","   help:          Print this information"); 
 }

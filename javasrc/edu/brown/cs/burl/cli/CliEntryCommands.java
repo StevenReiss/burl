@@ -279,7 +279,7 @@ boolean setEntry(Number entid)
     }
    cli_main.setEntryId(entid);
    if (entid != null && !entid.equals(oldid)) {
-      IvyLog.logI("BURCLI","Entry set to " + entid);
+      IvyLog.logI("BURLCLI","Entry set to " + entid);
     }
    
    return (entid != null);
@@ -405,18 +405,83 @@ void handleRemoveEntry(List<String> args)
    if (entid == null) return;
    
    JSONObject data = BurlUtil.buildJson("library",libid,"entry",entid);
-   JSONObject rslt = cli_main.createHttpPost("editentry",data);
-   if (cli_main.checkResponse(rslt,"edit")) {
+   JSONObject rslt = cli_main.createHttpPost("removeentry",data);
+   if (cli_main.checkResponse(rslt,"removeentry")) {
       cli_main.setEntryId(null);
       IvyLog.logI("BURLCLI","Entry removed");
     } 
-}
-
+} 
 
 private void badRemoveEntryArgs()
 {
    IvyLog.logI("BURLCLI","removeentry [<id>]");
 }
+
+
+
+/********************************************************************************/
+/*                                                                              */
+/*      Handle duplicate entry                                                  */
+/*                                                                              */
+/********************************************************************************/
+
+void handleDuplicateEntry(List<String> args)
+{
+   Number entid = null;
+   for (String s : args) {
+      if (s.startsWith("-")) {
+         badDuplicateEntryArgs();
+         return;
+       }
+      else if (s.matches("[0-9]+") && entid == null) {
+         entid = Integer.parseInt(s);
+       }
+      else {
+         badDuplicateEntryArgs();
+         return;
+       }
+    }
+   
+   if (entid == null) {
+      entid = cli_main.getEntryId();
+      if (entid == null) {
+         badDuplicateEntryArgs();
+         return;
+       }
+    }
+   if (entid.intValue() == 0) entid = null;
+   
+   Number libid = cli_main.getLibraryId();
+   if (libid == null) {
+      badDuplicateEntryArgs();
+      return;
+    }
+   
+   
+   if (!setEntry(entid) && entid != null) {
+      IvyLog.logI("BURLCLI","Bad entry number");
+      return;
+    }
+   
+   if (entid == null) return;
+   
+   JSONObject data = BurlUtil.buildJson("library",libid,"entry",entid);
+   JSONObject rslt = cli_main.createHttpPost("duplicateentry",data);
+   if (cli_main.checkResponse(rslt,"dup")) {
+      JSONObject entry = rslt.getJSONObject("entry");
+      Number newid = entry.getNumber("burl_id");
+      setEntry(newid);
+      fullEntryDisplay(cur_entry);
+      System.out.println();
+    } 
+}
+
+
+private void badDuplicateEntryArgs()
+{
+   IvyLog.logI("BURLCLI","removeentry [<id>]");
+}
+
 
 
 

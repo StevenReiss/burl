@@ -112,6 +112,15 @@ class _BurlEntryPageState extends State<BurlEntryPage> {
         ),
       );
     }
+    if (_canAdd()) {
+      rslt.add(
+        widgets.MenuAction(
+          "Duplicate entry",
+          _duplicateEntry,
+          "Create a new entry by duplicating this one.",
+        ),
+      );
+    }
     rslt.add(widgets.MenuAction("Log out", _logout, "Log out of BURL"));
     return rslt;
   }
@@ -208,7 +217,7 @@ class _BurlEntryPageState extends State<BurlEntryPage> {
         controller: ctrl,
         enabled: en,
         maxLines: 0,
-        textInputAction: TextInputAction.next,
+        //   textInputAction: TextInputAction.next,
         onChanged: (String s) {
           _fieldEdited(fld, s);
         },
@@ -264,6 +273,16 @@ class _BurlEntryPageState extends State<BurlEntryPage> {
     }
   }
 
+  bool _canAdd() {
+    switch (_libData.getUserAccess()) {
+      case "LIBRARIAN":
+      case "OWNER":
+        return true;
+      default:
+        return false;
+    }
+  }
+
   void _logout() async {
     BuildContext dcontext = context;
     await util.postJsonOnly("logout");
@@ -295,12 +314,31 @@ class _BurlEntryPageState extends State<BurlEntryPage> {
     }
   }
 
+  Future<void> _duplicateEntry() async {
+    BuildContext dcontext = context;
+    Map<String, String?> data = {
+      "library": _libData.getLibraryId().toString(),
+      "entry": _itemData.getId().toString(),
+    };
+    Map<String, dynamic> rslt = await util.postJson(
+      "duplicateentry",
+      body: data,
+    );
+    if (rslt["status"] == "OK") {
+      if (dcontext.mounted) {
+        Navigator.pop(dcontext, rslt["entry"]["burl_id"]);
+        //   ItemData item = ItemData(rslt["entry"]);
+        //   widgets.gotoDirect(dcontext, BurlEntryWidget(_libData, item));
+      }
+    }
+  }
+
   Future<void> _doCancel() async {
     BuildContext dcontext = context;
     await _revertEdits();
     await _saveEdits();
     if (dcontext.mounted) {
-      Navigator.pop(dcontext);
+      Navigator.pop(dcontext, null);
     }
   }
 
