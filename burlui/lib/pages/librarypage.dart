@@ -101,9 +101,14 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
         title: widgets.largeBoldText(_libData.getName(), scaler: 1.25),
         leading:
             _selectModeField != null
-                ? IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: _endSelectionMode,
+                ? widgets.tooltipWidget(
+                  "Press to go back to library page.  Long press to "
+                  "clear selection and go back.",
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: _endSelectionMode,
+                    onLongPress: _endClearSelectionMode,
+                  ),
                 )
                 : const SizedBox(),
         actions: [widgets.topMenuAction(_getMenuActions())],
@@ -278,7 +283,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
           globals.fieldData.canEdit(acc, fld)) {
         rslt.add(
           widgets.MenuAction(
-            "Group Edit $fld",
+            "Group Edit '$fld' field",
             () => _startSelectionMode(fld),
             "Select a set of items and group change the value of $fld",
           ),
@@ -886,6 +891,11 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     });
   }
 
+  void _endClearSelectionMode() {
+    _selectNone();
+    _endSelectionMode();
+  }
+
   bool _isSelected(int index) {
     return _selectedItems.contains(_itemList[index].getId());
   }
@@ -962,6 +972,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
       "library": _libData.getLibraryId().toString(),
       "field": _selectModeField ?? "",
       "items": itms.toString(),
+      "value": _selectValueControl.text,
     };
     Map<String, dynamic> rslt = await util.postJson(
       "groupedit",
