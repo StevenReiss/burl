@@ -87,6 +87,14 @@ class FieldData {
     return false;
   }
 
+  bool isGroupEdit(String id) {
+    Map<String, dynamic>? fd = _fieldData[id];
+    String? v = fd?["GROUPEDIT"];
+    if (v == null) return false;
+    if ("tT1yY".contains(v.substring(0, 1))) return true;
+    return false;
+  }
+
   bool isViewMultiple(String id) {
     Map<String, dynamic>? fd = _fieldData[id];
     String? v = fd?["VIEWMULT"];

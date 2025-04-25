@@ -76,6 +76,7 @@ void handleFindEntries(List<String> args)
       String s = args.get(i);
       String key = null;
       String value = null;
+      String okey = null;
       
       if (s.startsWith("-")) {
          if (s.startsWith("-o") && i+1 < args.size()) {         // -o <sort field>
@@ -100,7 +101,8 @@ void handleFindEntries(List<String> args)
          else idx = Math.min(idx1,idx2);
                
          key = s.substring(0,idx).trim();
-         if (!field_data.isValidField(key)) { 
+         okey = key;
+         if (!field_data.isValidField(key) && !key.equals("all")) { 
             badFindEntriesArgs();
             return;
           }
@@ -116,10 +118,15 @@ void handleFindEntries(List<String> args)
          filters.put(key,value);
        }
       else if (prev instanceof String) {
-         JSONArray nval = new JSONArray();
-         nval.put(prev);
-         nval.put(value);
-         filters.put(key,nval);
+         if (okey == null) {
+            filters.put(key,prev + " " + value);
+          }
+         else {
+            JSONArray nval = new JSONArray();
+            nval.put(prev);
+            nval.put(value);
+            filters.put(key,nval);
+          }
        }
       else if (prev instanceof JSONArray) {
          JSONArray nval = (JSONArray) prev;

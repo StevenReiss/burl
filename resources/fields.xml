@@ -30,7 +30,7 @@
 		ALTNAMES='Dewey,ddn,deweyclassno' SORT='T' />
       <FIELD NAME="OCLC" MARC="035a" OPENLIB="oclc" GOOGLE="oclc" />
       <FIELD NAME="Copy" DEFAULT="1" FIX="DEFAULT" />
-      <FIELD NAME="Shelf" SORT='T' />
+      <FIELD NAME="Shelf" SORT='T' GROUPEDIT='T' />
       <FIELD NAME="Status" />
       <FIELD NAME="Print Labels" LABELED="T" FIX="YES_NO" DEFAULT="no"
 		ALTNAMES='printlabels' DISPLAY="YES_NO" />

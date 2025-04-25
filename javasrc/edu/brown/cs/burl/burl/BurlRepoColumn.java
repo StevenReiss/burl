@@ -78,6 +78,14 @@ String getDefault();
 boolean isMultiple();
 
 
+
+/**
+ *      Specify whether field can be group edited
+ **/
+
+boolean isGroupEdit();
+
+
 /**
  *      Get ISBN type of the field (how to interpret/set up for ISBN)
  **/

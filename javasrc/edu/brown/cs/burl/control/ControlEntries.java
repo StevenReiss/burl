@@ -328,22 +328,30 @@ private JSONObject buildFilterObject(BurlRepo repo,String filterstr)
          else idx = Math.min(idx1,idx2);
          key = s.substring(0,idx).trim();
          BurlRepoColumn brc = repo.getColumn(key);
-         if (brc == null) key = null;
+         if (brc == null) {
+            key = "all";
+          }
          value = s.substring(idx+1).trim();
        }
       else {
          value = s;
        }
+      String okey = key;
       if (key == null) key = "all";
       Object prev = filters.opt(key);
       if (prev == null) {
          filters.put(key,value);
        }
       else if (prev instanceof String) {
-         JSONArray nval = new JSONArray();
-         nval.put(prev);
-         nval.put(value);
-         filters.put(key,nval);
+         if (okey == null) {
+            filters.put(key,prev + " " + value);
+          }
+         else {
+            JSONArray nval = new JSONArray();
+            nval.put(prev);
+            nval.put(value);
+            filters.put(key,nval);
+          }
        }
       else if (prev instanceof JSONArray) {
          JSONArray nval = (JSONArray) prev;
@@ -407,6 +415,59 @@ String handleEditEntry(HttpExchange he,ControlSession session)
     }
    
    return BowerRouter.jsonOKResponse(session,"entry",row.toJson());
+}
+
+
+
+/********************************************************************************/
+/*                                                                              */
+/*      Handle batch edit of a field                                            */
+/*                                                                              */
+/********************************************************************************/
+
+String handleGroupEdit(HttpExchange he,ControlSession session)
+{
+   BurlUser user = session.getUser();
+   if (user == null) {
+      return BowerRouter.errorResponse(he,session,400,"Bad user");
+    }
+   Number libid = burl_server.getIdParameter(he,"library");
+   BurlLibrary lib = burl_store.findLibraryById(libid);
+   if (lib == null) {
+      return BowerRouter.errorResponse(he,session,400,"Bad library");
+    }
+   BurlRepo repo = lib.getRepository();
+   String fld = BowerRouter.getParameter(he,"field");
+   BurlRepoColumn brc = repo.getColumn(fld);
+   if (brc == null) {
+      return BowerRouter.errorResponse(he,session,400,"Bad field");
+    }
+   BurlUserAccess acc = burl_store.getUserAccess(user.getEmail(),libid);
+   if (!canEdit(acc,brc)) {
+      return BowerRouter.errorResponse(he,session,402,"Not authorized");
+    }
+   
+   List<String> ents = BowerRouter.getParameterList(he,"items");
+   if (ents == null || ents.isEmpty()) {
+      return BowerRouter.errorResponse(he,session,400,"Bad entry set");
+    }
+   String val = BowerRouter.getParameter(he,"value");
+   if (val == null) val = "";
+   
+   for (String ent : ents) {
+      Number n = null;
+      try {
+         n = Integer.parseInt(ent);
+       }
+      catch (NumberFormatException e) {
+         continue;
+       }
+      BurlRepoRow row = repo.getRowForId(n);
+      if (row == null) continue;
+      row.setData(brc,val);
+    }
+   
+   return BowerRouter.jsonOKResponse(session);
 }
 
 

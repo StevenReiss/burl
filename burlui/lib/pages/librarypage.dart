@@ -70,6 +70,12 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
   String? _sortOn;
   bool _sortInvert = false;
   bool _doingFetch = false;
+  String? _selectModeField;
+  Set<int> _selectedItems = {};
+  int _lastSelect = -1;
+  bool _lastSelectState = false;
+  final TextEditingController _selectValueControl =
+      TextEditingController();
 
   _BurlLibraryPageState();
 
@@ -78,6 +84,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     _libData = widget._libData;
     _scrollController.addListener(_loadMore);
     _getSortFields();
+    _initializeSelection();
     super.initState();
   }
 
@@ -92,6 +99,13 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     return Scaffold(
       appBar: AppBar(
         title: widgets.largeBoldText(_libData.getName(), scaler: 1.25),
+        leading:
+            _selectModeField != null
+                ? IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: _endSelectionMode,
+                )
+                : const SizedBox(),
         actions: [widgets.topMenuAction(_getMenuActions())],
       ),
       body: widgets.topLevelNSPage(
@@ -139,35 +153,66 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     }
     String count = "$_numItems Entries";
 
+    Widget toprow = Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: <Widget>[
+        const Text("Sort by: "),
+        widgets.dropDown(
+          _sortFields,
+          value: sorton,
+          onChanged: _changeSort,
+          tooltip: "Select the field to sort the results on",
+        ),
+        widgets.textButton(
+          (_sortInvert ? "Inverse Order" : "Normal Order"),
+          _changeSortOrder,
+          tooltip: "Push to invert the sort order",
+        ),
+        Expanded(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[Text(count)],
+          ),
+        ),
+      ],
+    );
+    Widget? editrow;
+    if (_selectModeField != null) {
+      editrow = Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          Text("New $_selectModeField Value:  "),
+          Expanded(
+            child: widgets.textField(
+              controller: _selectValueControl,
+              enabled: true,
+              maxLines: 0,
+              textInputAction: TextInputAction.next,
+              collapse: true,
+            ),
+          ),
+          widgets.submitButton(
+            "Update",
+            () {
+              _selectEdit(_selectModeField!);
+            },
+            enabled: _canSelectEdit(),
+            tooltip: "Change the value of select items",
+          ),
+          Expanded(child: SizedBox()),
+        ],
+      );
+      // add space for new value and set button
+    }
     Widget w = Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         widgets.fieldSeparator(),
         _getSearchBox(),
         widgets.fieldSeparator(),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            const Text("Sort by: "),
-            widgets.dropDown(
-              _sortFields,
-              value: sorton,
-              onChanged: _changeSort,
-              tooltip: "Select the field to sort the results on",
-            ),
-            widgets.textButton(
-              (_sortInvert ? "Inverse Order" : "Normal Order"),
-              _changeSortOrder,
-              tooltip: "Push to invert the sort order",
-            ),
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: <Widget>[Text(count)],
-              ),
-            ),
-          ],
-        ),
+        toprow,
+        if (editrow != null) widgets.fieldSeparator(),
+        if (editrow != null) editrow,
         widgets.fieldDivider(),
         widgets.fieldSeparator(),
         Expanded(child: list),
@@ -192,6 +237,23 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
 
   List<widgets.MenuAction> _getMenuActions() {
     List<widgets.MenuAction> rslt = [];
+    if (_selectModeField != null) {
+      rslt.add(
+        widgets.MenuAction(
+          "Select All",
+          _selectAll,
+          "Select all items",
+        ),
+      );
+      rslt.add(
+        widgets.MenuAction(
+          "Clear Selection",
+          _selectNone,
+          "Clear all selections",
+        ),
+      );
+      return rslt;
+    }
     if (_canAddToLibrary()) {
       rslt.add(
         widgets.MenuAction(
@@ -209,6 +271,29 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
         ),
       );
     }
+
+    String acc = _libData.getUserAccess();
+    for (String fld in globals.fieldData.getFieldNames()) {
+      if (globals.fieldData.isGroupEdit(fld) &&
+          globals.fieldData.canEdit(acc, fld)) {
+        rslt.add(
+          widgets.MenuAction(
+            "Group Edit $fld",
+            () => _startSelectionMode(fld),
+            "Select a set of items and group change the value of $fld",
+          ),
+        );
+      } else if (fld == "Shelf") {
+        rslt.add(
+          widgets.MenuAction(
+            "Group Edit $fld",
+            () => _startSelectionMode(fld),
+            "Select a set of items and group change the value of $fld",
+          ),
+        );
+      }
+    }
+
     rslt.add(
       widgets.MenuAction(
         "Refresh",
@@ -355,7 +440,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     }
   }
 
-  void _refreshList() async {
+  Future<void> _refreshList() async {
     await _fetchInitialData(true);
     setState(() {});
   }
@@ -622,6 +707,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     String imprint = id.getField("Imprint");
     String ddn = id.getField("Dewey");
     String shelf = id.getField("Shelf");
+    String bid = id.getId().toString();
 
     String? other = imprint;
     String? son = _sortOn;
@@ -653,10 +739,15 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     } else {
       txt = "$ttl\n$aut";
     }
-    txt = "$txt\n$isbn\n$other";
+    txt = "$txt\n$isbn\n$other [$bid]";
     Widget w = Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
+        if (_selectModeField != null)
+          Checkbox(
+            value: _isSelected(index),
+            onChanged: (bool? x) => _toggleSelection(index),
+          ),
         SizedBox(
           width: 100.0,
           child: Text(lcc, overflow: TextOverflow.visible),
@@ -667,6 +758,22 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
         Expanded(child: Text(txt, maxLines: 4)),
       ],
     );
+    if (_selectModeField != null) {
+      Widget w2 = GestureDetector(
+        key: Key("Item $idx"),
+        onTap: () {
+          _tapSelection(index, 0);
+        },
+        onSecondaryTap: () {
+          _tapSelection(index, 1);
+        },
+        onTertiaryTapDown: (dynamic) {
+          _tapSelection(index, 2);
+        },
+        child: w,
+      );
+      return w2;
+    }
     Widget w1 = GestureDetector(
       key: Key("Item $idx"),
       onTap: () {
@@ -768,5 +875,109 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     }
     setState(() {});
     if (havenew) _handleSelect(index);
+  }
+
+  void _initializeSelection() {
+    _selectedItems = {};
+  }
+
+  void _startSelectionMode(String fld) {
+    setState(() {
+      _selectModeField = fld;
+      _selectValueControl.text = '';
+    });
+  }
+
+  void _endSelectionMode() {
+    setState(() {
+      _selectModeField = null;
+    });
+  }
+
+  bool _isSelected(int index) {
+    return _selectedItems.contains(_itemList[index].getId());
+  }
+
+  void _toggleSelection(int index) {
+    int id = _itemList[index].getId();
+    bool fg = false;
+    if (!_selectedItems.remove(id)) {
+      _selectedItems.add(id);
+      _lastSelect = index;
+      fg = true;
+    }
+    _lastSelectState = fg;
+    setState(() {});
+  }
+
+  void _setSelection(int index, bool fg) {
+    int id = _itemList[index].getId();
+    if (fg) {
+      _selectedItems.add(id);
+    } else {
+      _selectedItems.remove(id);
+    }
+    _lastSelectState = fg;
+    _lastSelect = index;
+    setState(() {});
+  }
+
+  void _tapSelection(int index, int btn) {
+    if (btn == 0 || _lastSelect < 0) {
+      _toggleSelection(index);
+    } else if (_lastSelect < index) {
+      for (int i = _lastSelect + 1; i <= index; ++i) {
+        _setSelection(i, _lastSelectState);
+      }
+    } else {
+      int to = _lastSelect;
+      for (int i = index; i < to; ++i) {
+        _setSelection(i, _lastSelectState);
+      }
+    }
+  }
+
+  void _selectAll() async {
+    for (int i = 0; i < _numItems; ++i) {
+      _setSelection(i, true);
+    }
+    setState(() {});
+  }
+
+  void _selectNone() async {
+    for (int i = 0; i < _numItems; ++i) {
+      _setSelection(i, false);
+    }
+    setState(() {});
+  }
+
+  bool _canSelectEdit() {
+    if (_selectModeField == null) return false;
+    if (_selectedItems.isEmpty) return false;
+    return true;
+  }
+
+  void _selectEdit(String fld) async {
+    Set<int> shownitms = {};
+    for (ItemData id in _itemList) {
+      shownitms.add(id.getId());
+    }
+    shownitms = shownitms.intersection(_selectedItems);
+    List<int> itms = shownitms.toList();
+    // should ensure that all itms in the list actually correspond to items
+    // on display
+    Map<String, String?> data = {
+      "library": _libData.getLibraryId().toString(),
+      "field": _selectModeField ?? "",
+      "items": itms.toString(),
+    };
+    Map<String, dynamic> rslt = await util.postJson(
+      "groupedit",
+      body: data,
+    );
+    if (rslt["status"] == "OK") {
+      await _refreshList();
+      setState(() {});
+    }
   }
 } // end of class _BurlPageState

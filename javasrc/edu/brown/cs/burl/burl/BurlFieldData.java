@@ -154,6 +154,13 @@ public boolean isMultiple(String nm)
 }
 
 
+public boolean isGroupEdit(String nm)
+{
+   Element elt = field_map.get(nm);
+   return IvyXml.getAttrBool(elt,"GROUPEDIT");
+}
+
+
 public BurlIsbnType getIsbnType(String nm)
 {
    Element felt = field_map.get(nm);

@@ -126,6 +126,11 @@ RepoColumn(String name,int no,BurlFieldData fd)
    return field_data.isMultiple(column_name);
 }
 
+@Override public boolean isGroupEdit()
+{ 
+   return field_data.isGroupEdit(column_name);
+}
+
 @Override public String getOtherIsbn()
 {
    return field_data.getOtherIsbn(column_name);
