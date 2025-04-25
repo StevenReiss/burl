@@ -283,14 +283,6 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
             "Select a set of items and group change the value of $fld",
           ),
         );
-      } else if (fld == "Shelf") {
-        rslt.add(
-          widgets.MenuAction(
-            "Group Edit $fld",
-            () => _startSelectionMode(fld),
-            "Select a set of items and group change the value of $fld",
-          ),
-        );
       }
     }
 

@@ -448,8 +448,9 @@ String handleGroupEdit(HttpExchange he,ControlSession session)
       return BowerRouter.errorResponse(he,session,402,"Not authorized");
     }
    
+   String ents0 = BowerRouter.getParameter(he,"items");
    List<String> ents = BowerRouter.getParameterList(he,"items");
-   IvyLog.logD("CONTROL","Entities for edit: " + ents);
+   IvyLog.logD("CONTROL","Entities for edit: " + ents + " " + ents.size() + " " + ents0);
    if (ents == null || ents.isEmpty()) {
       return BowerRouter.errorResponse(he,session,400,"Bad entry set");
     }
@@ -457,6 +458,7 @@ String handleGroupEdit(HttpExchange he,ControlSession session)
    if (val == null) val = "";
    
    for (String ent : ents) {
+      IvyLog.logD("CONTROL","Look at entity " + ent);
       Number n = null;
       try {
          n = Integer.parseInt(ent);
