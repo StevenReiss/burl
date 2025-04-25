@@ -19,6 +19,7 @@ package edu.brown.cs.burl.control;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -449,7 +450,12 @@ String handleGroupEdit(HttpExchange he,ControlSession session)
     }
    
    String ents0 = BowerRouter.getParameter(he,"items");
-   List<String> ents = BowerRouter.getParameterList(he,"items");
+   List<String> ents = new ArrayList<>();
+   StringTokenizer tok = new StringTokenizer(ents0," ,[]");
+   while (tok.hasMoreTokens()) {
+      String s = tok.nextToken();
+      ents.add(s);
+    }
    IvyLog.logD("CONTROL","Entities for edit: " + ents + " " + ents.size() + " " + ents0);
    if (ents == null || ents.isEmpty()) {
       return BowerRouter.errorResponse(he,session,400,"Bad entry set");
