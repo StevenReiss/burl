@@ -38,6 +38,7 @@ import edu.brown.cs.burl.burl.BurlRepoRow;
 import edu.brown.cs.burl.burl.BurlUser;
 import edu.brown.cs.burl.burl.BurlUtil;
 import edu.brown.cs.ivy.bower.BowerRouter;
+import edu.brown.cs.ivy.file.IvyLog;
 
 class ControlEntries implements ControlConstants
 {
@@ -448,6 +449,7 @@ String handleGroupEdit(HttpExchange he,ControlSession session)
     }
    
    List<String> ents = BowerRouter.getParameterList(he,"items");
+   IvyLog.logD("CONTROL","Entities for edit: " + ents);
    if (ents == null || ents.isEmpty()) {
       return BowerRouter.errorResponse(he,session,400,"Bad entry set");
     }
