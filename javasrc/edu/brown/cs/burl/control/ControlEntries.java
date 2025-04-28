@@ -39,7 +39,6 @@ import edu.brown.cs.burl.burl.BurlRepoRow;
 import edu.brown.cs.burl.burl.BurlUser;
 import edu.brown.cs.burl.burl.BurlUtil;
 import edu.brown.cs.ivy.bower.BowerRouter;
-import edu.brown.cs.ivy.file.IvyLog;
 
 class ControlEntries implements ControlConstants
 {

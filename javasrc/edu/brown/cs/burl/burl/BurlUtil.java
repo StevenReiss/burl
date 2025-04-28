@@ -293,6 +293,7 @@ public static String computeAlternativeISBN(String isbn)
 public static String getValidLCCN(String lccn)
 {
    if (lccn == null) return null;
+   lccn = lccn.trim();
 
    String lccn1 = lccn.replace(" ","");
    int idx = lccn1.indexOf("-");

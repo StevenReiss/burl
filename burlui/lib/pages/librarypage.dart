@@ -33,6 +33,7 @@ import 'importdialog.dart';
 import 'dart:async';
 
 const String defaultSort = "Order Added";
+const bool selectClickAnywhere = false;
 
 class BurlLibraryWidget extends StatelessWidget {
   final LibraryData _libData;
@@ -74,6 +75,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
   Set<int> _selectedItems = {};
   int _lastSelect = -1;
   bool _lastSelectState = false;
+  bool _haveChanges = false;
   final TextEditingController _selectValueControl =
       TextEditingController();
 
@@ -106,7 +108,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
                   "clear selection and go back.",
                   IconButton(
                     icon: const Icon(Icons.close),
-                    onPressed: _endSelectionMode,
+                    onPressed: _checkEndSelectionMode,
                     onLongPress: _endClearSelectionMode,
                   ),
                 )
@@ -194,6 +196,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
               maxLines: 0,
               textInputAction: TextInputAction.next,
               collapse: true,
+              onChanged: _selectValueChanged,
             ),
           ),
           widgets.submitButton(
@@ -203,6 +206,13 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
             },
             enabled: _canSelectEdit(),
             tooltip: "Change the value of select items",
+          ),
+          SizedBox(),
+          widgets.submitButton(
+            "Clear Selections",
+            _selectNone,
+            enabled: _selectedItems.isNotEmpty,
+            tooltip: "Remove all selections",
           ),
           Expanded(child: SizedBox()),
         ],
@@ -257,6 +267,13 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
           "Clear all selections",
         ),
       );
+      rslt.add(
+        widgets.MenuAction(
+          "Exit '$_selectModeField' group edit",
+          _endSelectionMode,
+          "Exit Selection mode for $_selectModeField",
+        ),
+      );
       return rslt;
     }
     if (_canAddToLibrary()) {
@@ -276,21 +293,6 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
         ),
       );
     }
-
-    String acc = _libData.getUserAccess();
-    for (String fld in globals.fieldData.getFieldNames()) {
-      if (globals.fieldData.isGroupEdit(fld) &&
-          globals.fieldData.canEdit(acc, fld)) {
-        rslt.add(
-          widgets.MenuAction(
-            "Group Edit '$fld' field",
-            () => _startSelectionMode(fld),
-            "Select a set of items and group change the value of $fld",
-          ),
-        );
-      }
-    }
-
     rslt.add(
       widgets.MenuAction(
         "Refresh",
@@ -298,6 +300,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
         "Refresh this list of items",
       ),
     );
+
     if (_canPrintLabels()) {
       rslt.add(
         widgets.MenuAction(
@@ -332,6 +335,21 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
         ),
       );
     }
+
+    String acc = _libData.getUserAccess();
+    for (String fld in globals.fieldData.getFieldNames()) {
+      if (globals.fieldData.isGroupEdit(fld) &&
+          globals.fieldData.canEdit(acc, fld)) {
+        rslt.add(
+          widgets.MenuAction(
+            "Group Edit '$fld' field",
+            () => _startSelectionMode(fld),
+            "Select a set of items and group change the value of $fld",
+          ),
+        );
+      }
+    }
+
     if (_canAddUsers()) {
       rslt.add(
         widgets.MenuAction(
@@ -891,6 +909,18 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     });
   }
 
+  void _checkEndSelectionMode() async {
+    if (_haveChanges) {
+      bool fg = await widgets.getValidation(
+        context,
+        "Exit Group Edit",
+        "Are you sure you want to exit from group edit without updating?",
+      );
+      if (!fg) return;
+    }
+    _endSelectionMode();
+  }
+
   void _endClearSelectionMode() {
     _selectNone();
     _endSelectionMode();
@@ -901,6 +931,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
   }
 
   void _toggleSelection(int index) {
+    _haveChanges = true;
     int id = _itemList[index].getId();
     bool fg = false;
     if (!_selectedItems.remove(id)) {
@@ -913,6 +944,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
   }
 
   void _setSelection(int index, bool fg) {
+    _haveChanges = true;
     int id = _itemList[index].getId();
     if (fg) {
       _selectedItems.add(id);
@@ -959,6 +991,10 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     return true;
   }
 
+  void _selectValueChanged(String? v) {
+    _haveChanges = true;
+  }
+
   void _selectEdit(String fld) async {
     Set<int> shownitms = {};
     for (ItemData id in _itemList) {
@@ -979,7 +1015,8 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
       body: data,
     );
     if (rslt["status"] == "OK") {
-      await _refreshList();
+      _haveChanges = false;
+      await _fetchInitialData(false);
       setState(() {});
     }
   }

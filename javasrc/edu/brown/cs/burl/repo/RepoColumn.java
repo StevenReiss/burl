@@ -218,6 +218,7 @@ static String fixLccCode(String code)
    if (code == null) return null;
    if (!code.contains("00")) return code;
    
+   code = code.trim();
    code = code.replace("-","");
 
    for ( ; ; ) {
