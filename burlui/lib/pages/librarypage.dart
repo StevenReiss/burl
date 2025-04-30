@@ -76,6 +76,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
   int _lastSelect = -1;
   bool _lastSelectState = false;
   bool _haveChanges = false;
+  bool _selectChanges = false;
   final TextEditingController _selectValueControl =
       TextEditingController();
 
@@ -910,7 +911,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
   }
 
   void _checkEndSelectionMode() async {
-    if (_haveChanges) {
+    if (_haveChanges && _selectedItems.isNotEmpty) {
       bool fg = await widgets.getValidation(
         context,
         "Exit Group Edit",
@@ -951,6 +952,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     } else {
       _selectedItems.remove(id);
     }
+    _selectChanges = true;
     _lastSelectState = fg;
     _lastSelect = index;
     setState(() {});
@@ -979,9 +981,19 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
   }
 
   void _selectNone() async {
+    if (_selectChanges && _selectedItems.isNotEmpty) {
+      bool fg = await widgets.getValidation(
+        context,
+        "Clear Selections",
+        "Are you sure you want to clear your selection changes "
+            "without editing?",
+      );
+      if (!fg) return;
+    }
     for (int i = 0; i < _numItems; ++i) {
       _setSelection(i, false);
     }
+    _haveChanges = false;
     //  _selectValueControl.text = "";
     setState(() {});
   }
@@ -1017,6 +1029,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     );
     if (rslt["status"] == "OK") {
       _haveChanges = false;
+      _selectChanges = false;
       await _fetchInitialData(false);
       setState(() {});
     }
