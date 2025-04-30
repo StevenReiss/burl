@@ -270,7 +270,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
       rslt.add(
         widgets.MenuAction(
           "Exit '$_selectModeField' group edit",
-          _endSelectionMode,
+          _checkEndSelectionMode,
           "Exit Selection mode for $_selectModeField",
         ),
       );
