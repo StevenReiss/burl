@@ -899,7 +899,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
   void _startSelectionMode(String fld) {
     setState(() {
       _selectModeField = fld;
-      _selectValueControl.text = '';
+      // _selectValueControl.text = '';
     });
   }
 
@@ -982,6 +982,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     for (int i = 0; i < _numItems; ++i) {
       _setSelection(i, false);
     }
+    //  _selectValueControl.text = "";
     setState(() {});
   }
 

@@ -700,9 +700,9 @@ private class EntityFilter implements BurlFilter {
          String key = keyobj.toString().toLowerCase();
          for (StringTokenizer tok = new StringTokenizer(key); tok.hasMoreTokens(); ) {
             String t = tok.nextToken();
-            if (data.contains(t)) return true;
+            if (!data.contains(t)) return false;
           }
-         return false;
+         return true;
        }
       else if (keyobj instanceof JSONArray) {
          JSONArray arr = (JSONArray) keyobj;
