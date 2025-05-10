@@ -77,6 +77,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
   bool _lastSelectState = false;
   bool _haveChanges = false;
   bool _selectChanges = false;
+  bool _shortMode = false;
   final TextEditingController _selectValueControl =
       TextEditingController();
 
@@ -270,6 +271,13 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
       );
       rslt.add(
         widgets.MenuAction(
+          (_shortMode ? "Regular Display Mode" : "Short Display Mode"),
+          _toggleDisplayMode,
+          "Toggle the display mode",
+        ),
+      );
+      rslt.add(
+        widgets.MenuAction(
           "Exit '$_selectModeField' group edit",
           _checkEndSelectionMode,
           "Exit Selection mode for $_selectModeField",
@@ -311,6 +319,13 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
         ),
       );
     }
+    rslt.add(
+      widgets.MenuAction(
+        (_shortMode ? "Regular Display Mode" : "Short Display Mode"),
+        _toggleDisplayMode,
+        "Toggle the display mode",
+      ),
+    );
     if (_canExport()) {
       rslt.add(
         widgets.MenuAction(
@@ -552,6 +567,12 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     setState(() {});
   }
 
+  void _toggleDisplayMode() {
+    setState(() {
+      _shortMode = !_shortMode;
+    });
+  }
+
   void _exportAll() async {
     await exportDialog(context, _libData, "CSV");
   }
@@ -714,6 +735,19 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     }
 
     ItemData id = _itemList[index];
+
+    if (_shortMode) {
+      return _shortDisplay(id, index);
+    } else {
+      return _regularDisplay(id, index);
+    }
+  }
+
+  Widget? _shortDisplay(ItemData id, int index) {
+    return _regularDisplay(id, index);
+  }
+
+  Widget? _regularDisplay(ItemData id, int index) {
     int idx = id.getId();
     String lcc = id.getField("LCC");
     String ttl = id.getField("Title");

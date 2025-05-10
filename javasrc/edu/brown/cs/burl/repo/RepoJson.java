@@ -233,7 +233,10 @@ private class JsonRow extends RepoRowBase {
       
       if (v == null || v.isEmpty()) row_data.remove(rc);
       else row_data.put(rc,v);
-    }
+      
+      RepoColumn upd = getUpdateColumn(rc);  
+      if (upd != null) setData(upd,v);
+   }
    
    @Override public Number getRowId() {
       return row_index;

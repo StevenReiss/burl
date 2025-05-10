@@ -500,10 +500,20 @@ private void badDuplicateEntryArgs()
 
 void handleFixFields(List<String> args)
 {
+   String option = "all";
+   
    for (String s : args) {
       if (s.startsWith("-")) {
-         badFixFieldsArgs();
-         return;
+         if (s.startsWith("-a")) {                      // -all
+            option = "all";
+          }
+         else if (s.startsWith("-u")) {                 // -update
+            option = "update";
+          }
+         else {
+            badFixFieldsArgs();
+            return;
+          }   
        }
       else {
          badFixFieldsArgs();
@@ -517,7 +527,7 @@ void handleFixFields(List<String> args)
       return;
     }
    
-   JSONObject data = BurlUtil.buildJson("library",libid);
+   JSONObject data = BurlUtil.buildJson("library",libid,"option",option);
    JSONObject rslt = cli_main.createHttpPost("fixfields",data);
    if (cli_main.checkResponse(rslt,"fixfields")) {
       IvyLog.logI("BURLCLI","Fields normalized");
@@ -527,7 +537,7 @@ void handleFixFields(List<String> args)
 
 private void badFixFieldsArgs()
 {
-   IvyLog.logI("BURLCLI","fixfields");
+   IvyLog.logI("BURLCLI","fixfields [-all | -update]");
 }
 
 

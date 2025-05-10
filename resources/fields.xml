@@ -16,13 +16,14 @@
       <FIELD NAME="All ISBNs" ISBN='ALL' MARC="020a" OPENLIB="isbn" FIX="ISBN"
 	       GOOGLE="industryIdentifiers.identifier" MULTIPLE="T" ALTNAMES="ISBNs,allisbns" />
       <FIELD NAME="LC Classification" MARC="050 ab" OPENLIB="lcc" ALTNAMES="LCC,lcclassifaction"
-		FIX="LCC_CODE" SORT='T' />
+		FIX="LCC_CODE" SORT='F' UPDATE="lccsort" />
       <FIELD NAME="Volume" MARC="490v|440v" />
       <FIELD NAME="Related Names" MARC="700 aqbcde" OPENLIB="author_name" GOOGLE="authors" MULTIPLE="T"
 		ALTNAMES='Author,Authors,relatednames' SORT='T' />
       <FIELD NAME="Contents" MARC="505a" MULTIPLE='T' />
       <FIELD NAME="Subjects" MARC="630 -- axv+650 -- axv+651 -- aeg4vxyz"
-		OPENLIB="subject" GOOGLE="categories" MULTIPLE="T" ALTNAMES='Subject,subj' SORT='T' VIEWMULT='T' />
+		OPENLIB="subject" GOOGLE="categories" MULTIPLE="T" ALTNAMES='Subject,subj'
+		SORT='T' VIEWMULT='T' />
       <FIELD NAME="Notes" MARC="500a+504a" MULTIPLE="T" />
       <FIELD NAME="Series" MARC="440 anv+490 avx+830 anv" MULTIPLE="T" />
       <FIELD NAME="Version" MARC="251a" />
@@ -35,9 +36,12 @@
       <FIELD NAME="Print Labels" LABELED="T" FIX="YES_NO" DEFAULT="no"
 		ALTNAMES='printlabels' DISPLAY="YES_NO" />
       <FIELD NAME="Verified" FIX="YES_NO" DEFAULT="no" DISPLAY="YES_NO" />
+      <FIELD NAME="LCC Shelf Order" FIX="LCC_SORT" HIDDEN="TRUE" SORT="T" FIELDNAME="lccsort" />
    </FIELDS>
    <CSV QUOTE='"' SEPARATOR="," />
    <MULTIPLE TEXT=" | " />
    <LABEL CODE='LC Classification' AUTHOR='Personal Name,Related Names' YEAR='Date'
 		VOLUME='Volume' COPY='Copy' />
 </BURL>
+
+

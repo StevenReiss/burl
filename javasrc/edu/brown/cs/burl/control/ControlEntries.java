@@ -481,6 +481,7 @@ String handleGroupEdit(HttpExchange he,ControlSession session)
 private Boolean canEdit(BurlUserAccess acc,BurlRepoColumn brc)
 {
    if (acc == BurlUserAccess.NONE || acc == BurlUserAccess.VIEWER) return false;
+   if (brc.isHidden()) return false;
    
    return true;
 }
@@ -628,15 +629,29 @@ String handleFixFields(HttpExchange he,ControlSession session)
       return BowerRouter.errorResponse(he,session,402,"Unauthorized");
     }
    
+   boolean updonly = false;
+   String option = BowerRouter.getParameter(he,"option");
+   if (option.equals("update")) updonly = true;
+   
    for (BurlRepoRow row : repo.getRows()) {
-      for (BurlRepoColumn brc : repo.getColumns()) {
-         BurlFixType ftyp = brc.getFixType();
-         if (ftyp == BurlFixType.NONE) continue;
-         String oval = row.getData(brc);
-         String nval = brc.fixFieldValue(oval);
-         if ((oval == null || oval.isBlank()) && (nval == null || nval.isBlank())) continue;
-         if (oval != null && oval.equals(nval)) continue;
-         row.setData(brc,nval);
+      if (updonly) {
+         for (BurlRepoColumn brc : repo.getColumns()) {
+            if (brc.getUpdateFieldName() == null) continue;
+            String oval = row.getData(brc);
+            if (oval == null || oval.isBlank()) continue;
+            row.setData(brc,oval);
+          }
+       }
+      else {
+         for (BurlRepoColumn brc : repo.getColumns()) {
+            BurlFixType ftyp = brc.getFixType();
+            if (ftyp == BurlFixType.NONE) continue;
+            String oval = row.getData(brc);
+            String nval = brc.fixFieldValue(oval);
+            if ((oval == null || oval.isBlank()) && (nval == null || nval.isBlank())) continue;
+            if (oval != null && oval.equals(nval)) continue;
+            row.setData(brc,nval);
+          }
        }
     }
    

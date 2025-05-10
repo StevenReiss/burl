@@ -40,6 +40,8 @@ class RepoDatabase extends RepoBase implements RepoConstants
 
 private BurlStorage     burl_store;
 
+
+
 /********************************************************************************/
 /*                                                                              */
 /*      Constructors                                                            */
@@ -238,6 +240,9 @@ private class DatabaseRow extends RepoRowBase {
       if (row_data != null) {
          row_data.put(rc.getFieldName(),v);
        }
+      
+      RepoColumn upd = getUpdateColumn(rc);  
+      if (upd != null) setData(upd,v);
     }
    
    @Override public Number getRowId() {

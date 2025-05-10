@@ -129,6 +129,7 @@ class _BurlEntryPageState extends State<BurlEntryPage> {
     List<TableRow> rows = [];
     String acc = _libData.getUserAccess();
     for (String fld in globals.fieldData.getFieldNames()) {
+      if (globals.fieldData.isHidden(fld)) continue;
       Widget lbl = Text(globals.fieldData.getLabel(fld));
       Widget fldw = _getFieldWidget(fld, acc);
       TableRow row = TableRow(children: <Widget>[lbl, fldw]);

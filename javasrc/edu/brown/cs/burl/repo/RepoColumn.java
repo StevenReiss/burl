@@ -42,8 +42,14 @@ private static final Pattern PRE_ZERO = Pattern.compile("[A-Za-z](0+)[1-9]");
 private static final Pattern POST_ZERO = Pattern.compile("\\.[0-9]*[1-9](0+)[ .,A-Z]");
 private static final Pattern POST_ZERO_A = Pattern.compile("(\\.0+)[ .,A-Z]");
 private static final Pattern POST_ZERO_B = Pattern.compile("\\.[0-9]*[1-9](0+)$");
-private static final Pattern POST_ZERO_C =
-   Pattern.compile("(\\.0+)$");
+private static final Pattern POST_ZERO_C = Pattern.compile("(\\.0+)$");
+
+private static final Pattern LCC_NUMBER = Pattern.compile("[0-9]+(\\.[0-9]+)?");
+private static final Pattern LCC_SPACE = Pattern.compile("\\s+\\.");
+
+private static final int LCC_SORT_COUNT = 6;
+private static final String LCC_SORT_PREFIX = "0000000000";
+
 
 
 
@@ -126,15 +132,19 @@ RepoColumn(String name,int no,BurlFieldData fd)
    return field_data.isMultiple(column_name);
 }
 
+
+@Override public boolean isHidden()
+{
+   return field_data.isHidden(column_name);
+}
+
+
 @Override public boolean isGroupEdit()
 { 
    return field_data.isGroupEdit(column_name);
 }
 
-@Override public String getOtherIsbn()
-{
-   return field_data.getOtherIsbn(column_name);
-}
+
 
 @Override public String getMultipleSeparator() 
 {
@@ -152,8 +162,6 @@ RepoColumn(String name,int no,BurlFieldData fd)
 }
 
 
-
-
 @Override public BurlFixType getFixType()
 {
    return field_data.getFixType(column_name);
@@ -165,6 +173,13 @@ RepoColumn(String name,int no,BurlFieldData fd)
    return field_data.getSortType(column_name); 
 }
 
+
+@Override public String getUpdateFieldName()
+{
+   return field_data.getUpdateField(column_name);
+}
+
+ 
 
 /********************************************************************************/
 /*                                                                              */
@@ -195,6 +210,9 @@ RepoColumn(String name,int no,BurlFieldData fd)
       case LCC_CODE :
          nval = fixLccCode(val);
          break;
+      case LCC_SORT :
+         nval = fixLccSort(val);
+         break;
       case LAST_FIRST :
          nval = BurlUtil.fixFirstLast(val); 
          break;
@@ -213,12 +231,13 @@ RepoColumn(String name,int no,BurlFieldData fd)
 
 
 
-static String fixLccCode(String code)
+static String fixLccCode(String code0)
 {
-   if (code == null) return null;
-   if (!code.contains("00")) return code;
+   if (code0 == null) return null;
+   String code = code0.trim();
    
-   code = code.trim();
+   if (!code.contains("00") && code.equals(code0)) return code;
+   
    code = code.replace("-","");
 
    for ( ; ; ) {
@@ -257,6 +276,38 @@ static String fixLccCode(String code)
       int start = m.start(1);
       code = code.substring(0,start);
     }
+   
+   return code;
+}
+
+
+static String fixLccSort(String code)
+{
+   code = fixLccCode(code);
+   int start = 0;
+   for ( ; ; ) {
+      Matcher m = LCC_NUMBER.matcher(code);
+      if (!m.find(start)) break;
+      int p0 = m.start();
+      int p1 = m.end();
+      String n = m.group();
+      int idx = n.indexOf(".");
+      if (idx < 0) idx = n.length();
+      int ct = LCC_SORT_COUNT - idx;
+      String pfx = LCC_SORT_PREFIX.substring(0,ct);
+      n = pfx + n;
+      code = code.substring(0,p0) + n + code.substring(p1);
+      start = p1 + ct;
+    }
+   
+   for ( ; ; ) {
+      Matcher m = LCC_SPACE.matcher(code);
+      if (!m.find()) break;
+      int p0 = m.start();
+      int p1 = m.end();
+      code = code.substring(0,p0) + "." + code.substring(p1);
+    }
+   
    
    return code;
 }

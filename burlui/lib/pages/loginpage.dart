@@ -38,7 +38,7 @@ Future<bool> testLogin() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String? uid = prefs.getString('uid');
   String? pwd = prefs.getString('pwd');
-  if (uid != null && pwd != null) {
+  if (uid != null && uid.isNotEmpty && pwd != null && pwd.isNotEmpty) {
     _HandleLogin login = _HandleLogin(uid, pwd);
     String? rslt = await login.authUser();
     if (rslt == null) {
@@ -327,6 +327,9 @@ class _HandleLogin {
   }
 
   Future<String?> authUser() async {
+    if (_curUser.isEmpty) {
+      return "email must not be empty";
+    }
     if (_curPadding == null) {
       await _prelogin();
     }

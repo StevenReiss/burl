@@ -154,6 +154,13 @@ public boolean isMultiple(String nm)
 }
 
 
+public boolean isHidden(String nm)
+{
+   Element felt = field_map.get(nm);
+   return IvyXml.getAttrBool(felt,"HIDDEN");
+}
+
+
 public boolean isGroupEdit(String nm)
 {
    Element elt = field_map.get(nm);
@@ -167,10 +174,11 @@ public BurlIsbnType getIsbnType(String nm)
    return IvyXml.getAttrEnum(felt,"ISBN",BurlIsbnType.NONE);  
 }
 
-public String getOtherIsbn(String nm)
+
+public String getUpdateField(String nm)
 {
    Element felt = field_map.get(nm);
-   return IvyXml.getAttrString(felt,"ALTISBN");
+   return IvyXml.getAttrString(felt,"UPDATE");
 }
 
 

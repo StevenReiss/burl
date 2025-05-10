@@ -10,7 +10,8 @@ $run $host $db <<EOF
 
 $runcmd
 
-ALTER TABLE burlrepo_aitywpomcdqj ADD COLUMN volume text;
+ALTER TABLE burlrepo_aitywpomcdqj ADD COLUMN lccsort text;
+ALTER TABLE burlrepo_hbhulrcyfrmw ADD COLUMN lccsort text;
 
 
 

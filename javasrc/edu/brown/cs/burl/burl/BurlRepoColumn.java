@@ -77,6 +77,11 @@ String getDefault();
 
 boolean isMultiple();
 
+/**
+ *      Specify whether the field is hidden from the user
+ **/
+
+boolean isHidden();
 
 
 /**
@@ -94,17 +99,6 @@ BurlIsbnType getIsbnType();
 
 
 /**
- *      Get alternative ISBN field name (for 10/13 differentiation)
- **/
-
-String getOtherIsbn();
-
-
-
-
-
-
-/**
  *      Specify wheter this is the original ISBN field
  **/
 
@@ -116,6 +110,13 @@ boolean isOriginalIsbnField();
  **/
 
 boolean isLccnField();
+
+
+/**
+ *      Get field to update when this field is updated
+ **/
+
+String getUpdateFieldName();
 
 
 /**

@@ -229,7 +229,10 @@ private class CsvRow extends RepoRowBase {
       else {
          row_data.put(rc,v);
        }
-    }
+      
+      RepoColumn upd = getUpdateColumn(rc);  
+      if (upd != null) setData(upd,v);
+   }
    
    @Override public Number getRowId() {
       return row_index;

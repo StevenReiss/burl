@@ -72,32 +72,32 @@ class FieldData {
   }
 
   bool isSortable(String id) {
-    Map<String, dynamic>? fd = _fieldData[id];
-    String? v = fd?["SORT"];
-    if (v == null) return false;
-    if ("tT1yY".contains(v.substring(0, 1))) return true;
-    return false;
+    return _boolValue(id, "SORT");
   }
 
   bool isMultiple(String id) {
-    Map<String, dynamic>? fd = _fieldData[id];
-    String? v = fd?["MULTIPLE"];
-    if (v == null) return false;
-    if ("tT1yY".contains(v.substring(0, 1))) return true;
-    return false;
+    return _boolValue(id, "MULTIPLE");
   }
 
   bool isGroupEdit(String id) {
-    Map<String, dynamic>? fd = _fieldData[id];
-    String? v = fd?["GROUPEDIT"];
-    if (v == null) return false;
-    if ("tT1yY".contains(v.substring(0, 1))) return true;
-    return false;
+    return _boolValue(id, "GROUPEDIT");
   }
 
   bool isViewMultiple(String id) {
     Map<String, dynamic>? fd = _fieldData[id];
     String? v = fd?["VIEWMULT"];
+    if (v == null) return false;
+    if ("tT1yY".contains(v.substring(0, 1))) return true;
+    return false;
+  }
+
+  bool isHidden(String id) {
+    return _boolValue(id, "HIDDEN");
+  }
+
+  bool _boolValue(String id, String fld) {
+    Map<String, dynamic>? fd = _fieldData[id];
+    String? v = fd?[fld];
     if (v == null) return false;
     if ("tT1yY".contains(v.substring(0, 1))) return true;
     return false;
@@ -122,6 +122,7 @@ class FieldData {
   }
 
   bool canEdit(String useracc, String fld) {
+    if (isHidden(fld)) return false;
     switch (useracc) {
       case "NONE":
       case "VIEWER":

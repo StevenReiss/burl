@@ -307,6 +307,14 @@ protected static String getMultiplePattern()
 }
 
 
+protected RepoColumn getUpdateColumn(BurlRepoColumn rc)
+{
+   String fld = rc.getUpdateFieldName();
+   if (fld == null) return null;
+   return getColumn(fld);
+}
+
+
 /********************************************************************************/
 /*                                                                              */
 /*      Setup a new or updated entry                                            */
