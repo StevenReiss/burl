@@ -236,7 +236,7 @@ static String fixLccCode(String code0)
    if (code0 == null) return null;
    String code = code0.trim();
    
-   if (!code.contains("00") && code.equals(code0)) return code;
+   if (!code.contains("00")) return code;
    
    code = code.replace("-","");
 

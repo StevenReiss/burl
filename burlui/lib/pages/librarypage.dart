@@ -736,15 +736,88 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
 
     ItemData id = _itemList[index];
 
-    if (_shortMode) {
-      return _shortDisplay(id, index);
-    } else {
-      return _regularDisplay(id, index);
+    Widget? w =
+        (_shortMode
+            ? _shortDisplay(id, index)
+            : _regularDisplay(id, index));
+
+    if (_selectModeField != null) {
+      Widget w2 = GestureDetector(
+        key: Key("Item $index"),
+        onTap: () {
+          _tapSelection(index, 0);
+        },
+        onSecondaryTap: () {
+          _tapSelection(index, 1);
+        },
+        onTertiaryTapDown: (dynamic) {
+          _tapSelection(index, 2);
+        },
+        child: w,
+      );
+      return w2;
     }
+    Widget w1 = GestureDetector(
+      key: Key("Item $index"),
+      onTap: () {
+        _handleSelect(index);
+      },
+      child: w,
+    );
+
+    return w1;
   }
 
-  Widget? _shortDisplay(ItemData id, int index) {
-    return _regularDisplay(id, index);
+  Widget _shortDisplay(ItemData id, int index) {
+    int idx = id.getId();
+    String shelf = id.getField("Shelf");
+    String lcc = id.getField("LCC");
+    String aut = id.getField("Primary");
+    String ttl = id.getField("Title");
+    String bid = id.getId().toString();
+
+    shelf = util.setLength(shelf, 6);
+    lcc = util.setLength(lcc, 21);
+    aut = util.setLength(aut, 10);
+    ttl = util.setLength(ttl, 57);
+
+    Widget w2 = Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: <Widget>[
+        if (_selectModeField != null)
+          widgets.booleanField(
+            value: _isSelected(index),
+            onChanged: (bool? x) => _toggleSelection(index),
+            compact: true,
+          ),
+        SizedBox(
+          width: 50,
+          child: Text(shelf, overflow: TextOverflow.clip),
+        ),
+        SizedBox(
+          width: 140,
+          child: Text(lcc, overflow: TextOverflow.clip, maxLines: 1),
+        ),
+        SizedBox(
+          width: 100,
+          child: Text(aut, overflow: TextOverflow.ellipsis),
+        ),
+        Expanded(
+          child: Text(
+            ttl,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+          ),
+        ),
+        SizedBox(width: 10),
+        SizedBox(
+          width: 60,
+          child: Text(bid, overflow: TextOverflow.clip),
+        ),
+      ],
+    );
+
+    return w2;
   }
 
   Widget? _regularDisplay(ItemData id, int index) {
@@ -808,31 +881,8 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
         Expanded(child: Text(txt, maxLines: 4)),
       ],
     );
-    if (_selectModeField != null) {
-      Widget w2 = GestureDetector(
-        key: Key("Item $idx"),
-        onTap: () {
-          _tapSelection(index, 0);
-        },
-        onSecondaryTap: () {
-          _tapSelection(index, 1);
-        },
-        onTertiaryTapDown: (dynamic) {
-          _tapSelection(index, 2);
-        },
-        child: w,
-      );
-      return w2;
-    }
-    Widget w1 = GestureDetector(
-      key: Key("Item $idx"),
-      onTap: () {
-        _handleSelect(index);
-      },
-      child: w,
-    );
 
-    return w1;
+    return w;
   }
 
   Widget _getItemSeparator(BuildContext ctx, int index) {

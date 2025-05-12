@@ -559,6 +559,7 @@ private void showValidCommands()
    IvyLog.logI("BURLCLI","   edit:          edit fields of the current entry"); 
    IvyLog.logI("BURLCLI","   removeentry:   remove the current entry");
    IvyLog.logI("BURLCLI","   dup:           duplicate an existing entry");  
+   IvyLog.logI("BURLCLI","   fixfields:     fix values in some or all fields");
    IvyLog.logI("BURLCLI","   exit:          Exit from BURLCLI"); 
    IvyLog.logI("BURLCLI","   help:          Print this information"); 
 }

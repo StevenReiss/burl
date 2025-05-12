@@ -132,3 +132,13 @@ Uri _getServerUri(String path, [Map<String, dynamic>? query]) {
   }
   return Uri.https("sherpa.cs.brown.edu:6737", p1, query);
 }
+
+String setLength(String s, int length) {
+  while (s.length < length) {
+    s = "$s ";
+  }
+  if (s.length > length) {
+    s = s.substring(0, length);
+  }
+  return s;
+}
