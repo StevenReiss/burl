@@ -17,6 +17,7 @@
 	       GOOGLE="industryIdentifiers.identifier" MULTIPLE="T" ALTNAMES="ISBNs,allisbns" />
       <FIELD NAME="LC Classification" MARC="050 ab" OPENLIB="lcc" ALTNAMES="LCC,lcclassifaction"
 		FIX="LCC_CODE" SORT='F' UPDATE="lccsort" />
+      <FIELD NAME="LCC Shelf Order" FIX="LCC_SORT" HIDDEN="TRUE" SORT="T" FIELDNAME="lccsort" />
       <FIELD NAME="Volume" MARC="490v|440v" />
       <FIELD NAME="Related Names" MARC="700 aqbcde" OPENLIB="author_name" GOOGLE="authors" MULTIPLE="T"
 		ALTNAMES='Author,Authors,relatednames' SORT='T' />
@@ -36,7 +37,6 @@
       <FIELD NAME="Print Labels" LABELED="T" FIX="YES_NO" DEFAULT="no"
 		ALTNAMES='printlabels' DISPLAY="YES_NO" />
       <FIELD NAME="Verified" FIX="YES_NO" DEFAULT="no" DISPLAY="YES_NO" />
-      <FIELD NAME="LCC Shelf Order" FIX="LCC_SORT" HIDDEN="TRUE" SORT="T" FIELDNAME="lccsort" />
    </FIELDS>
    <CSV QUOTE='"' SEPARATOR="," />
    <MULTIPLE TEXT=" | " />
