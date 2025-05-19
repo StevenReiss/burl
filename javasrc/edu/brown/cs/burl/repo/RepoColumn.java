@@ -45,7 +45,7 @@ private static final Pattern POST_ZERO_B = Pattern.compile("\\.[0-9]*[1-9](0+)$"
 private static final Pattern POST_ZERO_C = Pattern.compile("(\\.0+)$");
 
 private static final Pattern LCC_NUMBER = Pattern.compile("[0-9]+(\\.[0-9]+)?");
-private static final Pattern LCC_SPACE = Pattern.compile("\\s+\\.");
+private static final Pattern LCC_SPACE = Pattern.compile("(\\s*\\.)[A-Z]");
 
 private static final int LCC_SORT_COUNT = 6;
 private static final String LCC_SORT_PREFIX = "0000000000";
@@ -281,10 +281,12 @@ static String fixLccCode(String code0)
 }
 
 
-static String fixLccSort(String code)
+static String fixLccSort(String code0)
 {
+   String code = code0;
    code = fixLccCode(code);
    int start = 0;
+   boolean havelc = false;
    for ( ; ; ) {
       Matcher m = LCC_NUMBER.matcher(code);
       if (!m.find(start)) break;
@@ -292,22 +294,38 @@ static String fixLccSort(String code)
       int p1 = m.end();
       String n = m.group();
       int idx = n.indexOf(".");
-      if (idx < 0) idx = n.length();
+      if (idx < 0) {
+         idx = n.length();
+       }
       int ct = LCC_SORT_COUNT - idx;
       String pfx = LCC_SORT_PREFIX.substring(0,ct);
       n = pfx + n;
-      code = code.substring(0,p0) + n + code.substring(p1);
+      String t = "";
+      if (!havelc) {
+         idx = n.indexOf(".");
+         int fln = 6;
+         String t1 = ".";
+         if (idx > 0) {
+            fln = LCC_SORT_COUNT - (n.length() - idx - 1);
+            t1 = "";
+          }
+         t = t1 + LCC_SORT_PREFIX.substring(0,fln);
+         ct += t.length();
+         havelc = true;
+       }
+      code = code.substring(0,p0) + n + t + code.substring(p1);
       start = p1 + ct;
     }
    
    for ( ; ; ) {
       Matcher m = LCC_SPACE.matcher(code);
       if (!m.find()) break;
-      int p0 = m.start();
-      int p1 = m.end();
-      code = code.substring(0,p0) + "." + code.substring(p1);
+      int p0 = m.start(1);
+      int p1 = m.end(1);
+      code = code.substring(0,p0) + " " + code.substring(p1);
     }
    
+   System.err.println("CONVERT " + code0 + " => " + code);
    
    return code;
 }
