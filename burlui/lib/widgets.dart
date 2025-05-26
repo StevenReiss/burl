@@ -1202,10 +1202,17 @@ Widget topLevelPage(
   BuildContext context,
   Widget child, [
   bool scrollable = false,
+  bool showScrollBar = false,
 ]) {
   return LayoutBuilder(
     builder: (BuildContext context, BoxConstraints cnst) {
-      return _topLevelPageBuilder(context, cnst, child, scrollable);
+      return _topLevelPageBuilder(
+        context,
+        cnst,
+        child,
+        scrollable,
+        showScrollBar,
+      );
     },
   );
 }
@@ -1215,6 +1222,7 @@ Widget _topLevelPageBuilder(
   BoxConstraints constraints,
   Widget child,
   bool scrollable,
+  bool showScrollBar,
 ) {
   BoxConstraints bc = BoxConstraints(minWidth: constraints.maxWidth);
   if (scrollable) {
@@ -1222,6 +1230,19 @@ Widget _topLevelPageBuilder(
       minWidth: constraints.maxWidth,
       maxHeight: MediaQuery.of(context).size.height * 0.8,
       // maxHeight: 400,
+    );
+  }
+  ScrollController sc = ScrollController();
+  Widget w1 = SingleChildScrollView(
+    controller: sc,
+    child: ConstrainedBox(constraints: bc, child: child),
+  );
+  if (showScrollBar) {
+    w1 = Scrollbar(
+      controller: sc,
+      trackVisibility: true,
+      thumbVisibility: true,
+      child: w1,
     );
   }
   return Container(
@@ -1233,9 +1254,7 @@ Widget _topLevelPageBuilder(
         opacity: 0.05,
       ),
     ),
-    child: SingleChildScrollView(
-      child: ConstrainedBox(constraints: bc, child: child),
-    ),
+    child: w1,
   );
 }
 

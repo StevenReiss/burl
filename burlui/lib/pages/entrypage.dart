@@ -97,7 +97,12 @@ class _BurlEntryPageState extends State<BurlEntryPage> {
         ),
         actions: [widgets.topMenuAction(_getMenuActions())],
       ),
-      body: widgets.topLevelPage(context, _getEntryWidget()),
+      body: widgets.topLevelPage(
+        context,
+        _getEntryWidget(),
+        false,
+        true,
+      ),
     );
   }
 

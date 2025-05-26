@@ -510,6 +510,9 @@ void handleFixFields(List<String> args)
          else if (s.startsWith("-u")) {                 // -update
             option = "update";
           }
+         else if (s.startsWith("-c")) {                 // -computed
+            option = "update";
+          }
          else {
             badFixFieldsArgs();
             return;
@@ -537,7 +540,7 @@ void handleFixFields(List<String> args)
 
 private void badFixFieldsArgs()
 {
-   IvyLog.logI("BURLCLI","fixfields [-all | -update]");
+   IvyLog.logI("BURLCLI","fixfields [-all | -computed]");
 }
 
 
