@@ -284,6 +284,9 @@ static String fixLccCode(String code0)
 static String fixLccSort(String code0)
 {
    String code = code0;
+   if (code == null) {
+      return null;
+    }
    code = fixLccCode(code);
    int start = 0;
    boolean havelc = false;
@@ -354,6 +357,18 @@ private String fixDate(String val)
    return m.group(0);
 }
 
+
+/********************************************************************************/
+/*                                                                              */
+/*      Ouptut Methods                                                          */
+/*                                                                              */
+/********************************************************************************/
+
+
+@Override public String toString()
+{
+   return column_name;
+}
 
 
 }       // end of class RepoColumn

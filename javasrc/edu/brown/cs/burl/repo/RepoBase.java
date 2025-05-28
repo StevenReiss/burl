@@ -327,6 +327,7 @@ protected RepoColumn getUpdateColumn(BurlRepoColumn rc)
    String visbn = BurlUtil.getValidISBN(isbn);
    
    for (BurlRepoColumn brc : repo_columns) {
+      if (brc.isHidden()) continue;
       String v = brr.getData(brc);
       BurlIsbnType isbntype = brc.getIsbnType();
       boolean islccn = brc.isLccnField();
