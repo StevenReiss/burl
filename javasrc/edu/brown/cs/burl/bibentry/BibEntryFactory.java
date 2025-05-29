@@ -348,7 +348,7 @@ private BibEntryBase searchForMarcItemXml(String isbn,String url)
          String body = resp.body();
          int rcode = resp.statusCode();
          if (rcode == 429 || rcode == 503 || rcode == 524) {
-            IvyLog.logD("BIBENTRY","Waiting for MARC server " + rcode);
+            IvyLog.logD("BIBENTRY","Waiting for MARC server " + rcode + " " + url);
             waitFor(60);
             continue;
           }
@@ -358,7 +358,8 @@ private BibEntryBase searchForMarcItemXml(String isbn,String url)
             return null;
           }
          if (body.contains("<!DOCTYPE html>")) {
-            IvyLog.logD("BIBENTRY","Waiting for MARC server");
+            if (body.contains("invalid LCCN")) return null;
+            IvyLog.logD("BIBENTRY","Waiting for MARC server with html page");
             if (!body.contains("No Connections Available") &&
                   !body.contains("Permalink Error")) {
                IvyLog.logD("RESULT:\n" + body);
