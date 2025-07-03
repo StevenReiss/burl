@@ -769,7 +769,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
   }
 
   Widget _shortDisplay(ItemData id, int index) {
-    int idx = id.getId();
+    //  int idx = id.getId();
     String shelf = id.getField("Shelf");
     String lcc = id.getField("LCC");
     String aut = id.getField("Primary");
@@ -821,7 +821,7 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
   }
 
   Widget? _regularDisplay(ItemData id, int index) {
-    int idx = id.getId();
+    //  int idx = id.getId();
     String lcc = id.getField("LCC");
     String ttl = id.getField("Title");
     String aut = id.getField("Primary");

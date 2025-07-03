@@ -206,8 +206,13 @@ private BibEntryBase openLibrarySearch(String isbn)
       if (bibentry != null) break;
     }
    if (bibentry == null) {
-      IvyLog.logD("BIBENTRY","Using openlib entry for " + isbn);
       bibentry = olitm.getBibEntry();  
+      if (bibentry != null) {
+         IvyLog.logD("BIBENTRY","Using openlib entry for " + isbn);
+       }
+      else {
+         IvyLog.logD("BIBENTRY","No results in open library search result");
+       }
     }
    
    return bibentry;
@@ -337,6 +342,9 @@ private BibEntryGoogleItem searchForGoogleItem(String isbn,boolean pfx)
 
 private BibEntryBase searchForMarcItemXml(String isbn,String url)
 {
+   int waitct = 0;
+   int errct = 0; 
+   
    for ( ; ; ) {
       HttpClient client = http_client;
       HttpRequest.Builder builder = createHttpBuilder(url);
@@ -350,6 +358,7 @@ private BibEntryBase searchForMarcItemXml(String isbn,String url)
          if (rcode == 429 || rcode == 503 || rcode == 524) {
             IvyLog.logD("BIBENTRY","Waiting for MARC server " + rcode + " " + url);
             waitFor(60);
+            waitct = 0;
             continue;
           }
          if (rcode >= 400) {
@@ -359,10 +368,15 @@ private BibEntryBase searchForMarcItemXml(String isbn,String url)
           }
          if (body.contains("<!DOCTYPE html>")) {
             if (body.contains("invalid LCCN")) return null;
-            IvyLog.logD("BIBENTRY","Waiting for MARC server with html page");
+            IvyLog.logD("BIBENTRY","Waiting for MARC server with html page " + url);
             if (!body.contains("No Connections Available") &&
                   !body.contains("Permalink Error")) {
                IvyLog.logD("RESULT:\n" + body);
+             }
+            ++waitct;
+            if (waitct > 100) {
+               IvyLog.logE("LOC MARC: REPEATED ERROR:\n" + body);
+               return null;
              }
             waitFor(110);
             continue;
@@ -380,6 +394,10 @@ private BibEntryBase searchForMarcItemXml(String isbn,String url)
        }
       catch (IOException e) {
          IvyLog.logE("BIBENTRY","HTTP error getting marc XML",e);
+         if (e.getMessage().contains("Internal error") && errct++ < 2) {
+            IvyLog.logD("BIBENTRY","Retry getting marc XML");
+            continue;
+          }
        }
       finally {
          waitFor(10);

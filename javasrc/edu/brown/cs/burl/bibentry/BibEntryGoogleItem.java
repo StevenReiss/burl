@@ -82,6 +82,7 @@ BibEntryBase getBibEntry()
    if (results_data == null || results_data.length() == 0) return null;
    if (results_data.length() > 1) {
       IvyLog.logE("BIBENTRY","Recieved " + results_data.length() + " results");
+      IvyLog.logD("BIBENTRY",results_data.toString(2));
     }
    
    JSONObject r1 = results_data.getJSONObject(0);

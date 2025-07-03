@@ -351,22 +351,27 @@ class _BurlEntryPageState extends State<BurlEntryPage> {
   }
 
   Future<void> _doRevert() async {
-    await _revertEdits();
+    bool chng = await _revertEdits();
     await _saveEdits();
     setState(() {
-      _hasChanged = false;
+      _hasChanged = chng;
     });
   }
 
-  Future<void> _revertEdits() async {
+  Future<bool> _revertEdits() async {
     ItemData id = ItemData.clone(_saveQueue.last);
+    bool chng = false;
     if (_saveQueue.length > 1) {
       _saveQueue.removeLast();
+      chng = true;
     }
     for (String fld in globals.fieldData.getFieldNames()) {
       TextEditingController? ctrl = _controllers[fld];
-      ctrl!.text = id.getField(fld);
+      String s = id.getField(fld);
+      ctrl!.text = s;
     }
+
+    return chng;
   }
 
   void _setupFields() {
