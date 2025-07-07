@@ -383,6 +383,13 @@ private BibEntryBase searchForMarcItemXml(String isbn,String url)
           }
          Element xml = IvyXml.convertStringToXml(body);
          if (IvyXml.isElement(xml,"error")) {
+            String txt = IvyXml.getText(xml);
+            if (txt.contains("Retry")) {
+               IvyLog.logD("BIBENTRY","MARC server asked us to retry");
+               waitFor(60);
+               waitct = 0;
+               continue;
+             }
             IvyLog.logE("BIBENTRY","Error in MARCxml entry: " + body);
             return null;
           }
