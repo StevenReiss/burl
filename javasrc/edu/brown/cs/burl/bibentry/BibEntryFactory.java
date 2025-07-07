@@ -385,6 +385,7 @@ private BibEntryBase searchForMarcItemXml(String isbn,String url)
          if (IvyXml.isElement(xml,"error")) {
             String txt = IvyXml.getText(xml);
             if (txt.contains("Retry")) {
+               IvyLog.logD("BIBENTRY","MARC sever asked us to retry " + body);
                waitFor(60);
                waitct = 0;
                continue;
