@@ -975,7 +975,7 @@ private class ImportJsonEntry implements BurlBibEntry {
       return false;
     }
    
-   IvyLog.logD("REPO","Labels updated");
+   IvyLog.logD("REPO","Labels updated " + reset + done.size());
   
    if (reset) {
       for (Number id : done) {
