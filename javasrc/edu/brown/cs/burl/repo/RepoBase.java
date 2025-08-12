@@ -569,6 +569,7 @@ String getCSVForRow(BurlRepoRow rr)
       if (sepneeded) buf.append(sep);
       String v = rr.getData(brc);
       if (v == null) v = "";
+      v = v.replace("\t"," ");
       if (v.contains(sep) || v.contains("\n") || v.contains("\r") ||
             (!v.isEmpty() && Character.isDigit(v.charAt(0)))) {
          if (v.matches("[0-9]+")) v = "\t"+v;
@@ -975,7 +976,7 @@ private class ImportJsonEntry implements BurlBibEntry {
       return false;
     }
    
-   IvyLog.logD("REPO","Labels updated " + reset + done.size());
+   IvyLog.logD("REPO","Labels updated " + reset + " " + done.size());
   
    if (reset) {
       for (Number id : done) {

@@ -46,6 +46,10 @@ BibEntryLOCResult(JSONObject jobj)
 {
    JSONArray jarr = jobj.getJSONArray("results");
    results_data = jarr;
+   if (jarr.length() == 0) {
+      IvyLog.logD("BIBENTRY","No results from LOC search: " +
+            jobj.toString(2));
+    }
 }
 
 
@@ -58,7 +62,9 @@ BibEntryLOCResult(JSONObject jobj)
 
 String getIdURL(String isbn)
 {
-   if (results_data.length() == 0) return null;
+   if (results_data.length() == 0) {
+      return null;
+    }
    int which = 0;
    if (results_data.length() > 1) {
       IvyLog.logD("BIBENTRY","Need to check which result is correct for LOC " + isbn);

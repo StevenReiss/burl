@@ -194,6 +194,9 @@ RepoColumn(String name,int no,BurlFieldData fd)
    
    switch (fixtype) {
       case NONE :
+         if (val != null) {
+            nval = val.replace("\t"," ");
+          }
          break;
       case DEFAULT :
          if (val == null || val.isEmpty()) {

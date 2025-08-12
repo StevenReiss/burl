@@ -224,7 +224,7 @@ public static String getValidISBN(String s0)
 
    s = s.toUpperCase();
 
-   if (s.length() == 9) s0 = "0" + s;
+   if (s.length() == 9) s = "0" + s;
 
    if (s.length() != 10 && s.length() != 13) return null;
 

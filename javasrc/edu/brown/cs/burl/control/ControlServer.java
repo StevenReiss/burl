@@ -540,6 +540,10 @@ String handleAddIsbns(HttpExchange he,ControlSession session)
       return BowerRouter.errorResponse(he,session,400,"Bad library");
     }
    
+   if (isbns == null) { // || isbns.isEmpty()
+      return BowerRouter.errorResponse(he,session,400,"Nothing to add");
+    }
+   
    work_thread.addTask(lid,session.getUserId(),isbns,upd,count); 
    
    return BowerRouter.jsonOKResponse(session);
