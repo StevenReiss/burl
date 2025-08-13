@@ -404,7 +404,7 @@ private BibEntryBase searchForMarcItemXml(String isbn,String url)
        }
       catch (IOException e) {
          IvyLog.logE("BIBENTRY","HTTP error getting marc XML",e);
-         if (e.getMessage().contains("Internal error") && errct++ < 2) {
+         if (e.getMessage() != null && e.getMessage().contains("Internal error") && errct++ < 2) {
             IvyLog.logD("BIBENTRY","Retry getting marc XML");
             continue;
           }
