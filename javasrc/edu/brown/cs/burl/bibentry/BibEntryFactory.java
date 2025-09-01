@@ -146,7 +146,7 @@ private BibEntryLOCResult searchForLOCInfo(String isbn)
                   HttpResponse.BodyHandlers.ofString());
             String body = resp.body();
             int vcode = resp.statusCode();
-            if (vcode == 429 || vcode == 503 || vcode == 524) {
+            if (vcode == 429 || vcode == 503 || vcode == 524 || vcode == 520) {
                IvyLog.logD("BIBENTRY","Waiting for LOC server " + vcode);
                waitFor(60);
                continue;

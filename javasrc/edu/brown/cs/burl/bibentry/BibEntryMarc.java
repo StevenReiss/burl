@@ -58,7 +58,8 @@ static {
    char_map.put("\u2089","0");
    char_map.put("\u208a","+");
    char_map.put("\u208b","-");
-   
+   char_map.put("\u0162","T");
+   char_map.put("\u0163","t");
 }
 
 
