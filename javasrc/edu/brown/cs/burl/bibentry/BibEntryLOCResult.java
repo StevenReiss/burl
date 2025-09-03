@@ -19,8 +19,10 @@ package edu.brown.cs.burl.bibentry;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.w3c.dom.Element;
 
 import edu.brown.cs.ivy.file.IvyLog;
+import edu.brown.cs.ivy.xml.IvyXml;
 
 class BibEntryLOCResult implements BibEntryConstants
 {
@@ -33,6 +35,7 @@ class BibEntryLOCResult implements BibEntryConstants
 /********************************************************************************/
 
 private JSONArray       results_data;
+private Element         xml_data;
 
 
 
@@ -46,11 +49,20 @@ BibEntryLOCResult(JSONObject jobj)
 {
    JSONArray jarr = jobj.getJSONArray("results");
    results_data = jarr;
+   xml_data = null;
    if (jarr.length() == 0) {
       IvyLog.logD("BIBENTRY","No results from LOC search: " +
             jobj.toString(2));
     }
 }
+
+
+BibEntryLOCResult(Element xml)
+{
+   xml_data = IvyXml.getChild(xml,"zs:records");
+   results_data = null;
+}
+
 
 
 
@@ -62,6 +74,10 @@ BibEntryLOCResult(JSONObject jobj)
 
 String getIdURL(String isbn)
 {
+   if (xml_data != null && results_data == null) {
+      return getXmlIdURL(isbn);
+    }
+   
    if (results_data.length() == 0) {
       return null;
     }
@@ -114,6 +130,70 @@ private boolean fieldContains(JSONObject obj,String fld,String what)
       if (v.equalsIgnoreCase(what)) return true;
     }
    return false;
+}
+
+
+
+/********************************************************************************/
+/*                                                                              */
+/*      Handle XML records from lx2                                             */
+/*                                                                              */
+/********************************************************************************/
+
+private String getXmlIdURL(String isbn)
+{
+   Element rec = findXmlBestResult(isbn);
+   if (rec == null) return null;
+   for (Element ident : IvyXml.children(rec,"identifier")) {
+      String typ = IvyXml.getAttrString(ident,"type");
+      if (typ != null && typ.equals("lccn")) {
+         String lccn = IvyXml.getText(ident);
+         String url = "http://lccn.loc.gov/" + lccn;
+         return url;
+       }
+    }
+   
+   return null;
+}
+
+
+
+private Element findXmlBestResult(String isbn)
+{
+   Element best = null;
+   Element bestx = null;
+   
+   // first check for exact match with given LCCN (if isbn given, this won't help)
+   for (Element rec : IvyXml.children(xml_data,"zs:record")) {
+      Element recd1 = IvyXml.getChild(rec,"zs:recordData");
+      Element recd = IvyXml.getChild(recd1,"mods");
+      if (recd == null) continue;
+      
+      boolean fnd = false;
+      for (Element ident : IvyXml.children(recd,"identifier")) {
+         String txt = IvyXml.getText(ident);
+         if (txt != null && txt.equals(isbn)) {
+            fnd = true;
+            break;
+          }
+       }
+      if (!fnd) continue;
+      
+      if (bestx == null) bestx = recd;
+      Element lang1 = IvyXml.getChild(recd,"language");
+      Element lang2 = IvyXml.getChild(lang1,"languageTerm");
+      String ltxt = IvyXml.getText(lang2);
+      if (ltxt != null) {
+         ltxt = ltxt.trim().toLowerCase();
+         if (ltxt.startsWith("eng")) {
+            best = recd;
+          }
+       }
+    }
+   
+   if (best == null) best = bestx;
+            
+   return best;
 }
 
 

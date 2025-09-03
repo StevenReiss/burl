@@ -47,10 +47,14 @@ public class BibEntryFactory implements BibEntryConstants
 private HttpClient      http_client;
 
 private static String LOC_API_BASE_URL = "https://www.loc.gov/search/?all=True&st=list&fo=json";
+private static String LX2_API_BASE_URL = "http://lx2.loc.gov:210/lcdb?version=1.1&operation=searchRetrieve" +
+      "&startRecord=1&maximumRecords=5&recordSchema=mods";
 private static String GOOGLE_API_BASE_URL = "https://www.googleapis.com/books/v1/volumes";
 // private static String PAPERPILE_URL = "https://api.paperpile.com/api/public/convert";
 private static String OPEN_LIBRARY_URL =
    "https://openlibrary.org/search.json?fields=*,lccn,subject,subtitle";
+
+private static boolean use_lx2 = true;
 
 
 /********************************************************************************/
@@ -118,7 +122,14 @@ congressSearch(String isbn)
    if (isbn == null) return null; 
    
    BibEntryBase marc = null;
-   BibEntryLOCResult search = searchForLOCInfo(isbn);
+   BibEntryLOCResult search = null;
+   if (use_lx2) {
+      search = searchForLX2info(isbn);
+    }
+   else {
+      search = searchForLOCInfo(isbn);
+    }
+   
    if (search == null)  return null;
    if (search != null) {
       String idurl = search.getIdURL(isbn);
@@ -152,8 +163,8 @@ private BibEntryLOCResult searchForLOCInfo(String isbn)
                continue;
              }
             else if (vcode == 403 && body.contains("Just a moment...")) {
-               IvyLog.logD("BIBENTRY","Waiting for LOC server " + vcode);
-               waitFor(60);
+               IvyLog.logD("BIBENTRY","Waiting for LOC server " + vcode + " " + req.uri());
+               waitFor(240);
                continue;
              }
             else if (vcode >= 400) {
@@ -186,6 +197,66 @@ private BibEntryLOCResult searchForLOCInfo(String isbn)
    
    return null; 
 }
+
+
+
+private BibEntryLOCResult searchForLX2info(String isbn)
+{
+   HttpClient client = http_client;
+   HttpRequest.Builder builder = createXmlBuilder(LX2_API_BASE_URL,"query",isbn);
+   builder.GET();
+   HttpRequest req = builder.build();
+   
+   try {
+      for (int i = 0; ; ++i) {
+         try {
+            HttpResponse<String> resp = client.send(req,
+                  HttpResponse.BodyHandlers.ofString());
+            String body = resp.body();
+            int vcode = resp.statusCode();
+            IvyLog.logD("BIBENTRY","Result of lx2 search " + vcode + " " + body);
+            if (vcode == 429 || vcode == 503 || vcode == 524 || vcode == 520) {
+               IvyLog.logD("BIBENTRY","Waiting for LOC server " + vcode);
+               waitFor(60);
+               continue;
+             }
+            else if (vcode >= 400) {
+               IvyLog.logE("BIBENTRY","Problem doing LX2 search for " + req.uri() +
+                     ": " + vcode + " " + body);
+               break;
+             }
+            Element rslt0 = IvyXml.convertStringToXml(body);
+            if (rslt0 == null) {
+               return null;
+             }
+            return new BibEntryLOCResult(rslt0);  
+          }
+         catch (InterruptedException e) { 
+            IvyLog.logE("BIBENTRY","HTTP interrupted searching Library of Congress",e);
+            waitFor(10);
+            continue;
+          }
+         catch (IOException e) {
+            if (i >= 2) {
+               IvyLog.logE("BIBENTRY","HTTP Error searching Library of Congress",e); 
+               break;
+             }
+            IvyLog.logD("BIBENTRY","HTTP Error searching Library of Congress"); 
+            waitFor(10);
+            continue;
+          }
+       }
+    }
+   finally {
+      waitFor(10);
+    }
+   
+   return null; 
+}
+
+
+
+
 
 
 
@@ -433,6 +504,18 @@ private BibEntryBase searchForMarcItemXml(String isbn,String url)
 
 private HttpRequest.Builder createHttpBuilder(String url,String... query)
 {
+   return createHttpBuilder1("json",url,query);
+}
+
+
+private HttpRequest.Builder createXmlBuilder(String url,String... query)
+{
+   return createHttpBuilder1("xml",url,query);
+}
+
+
+private HttpRequest.Builder createHttpBuilder1(String rslt,String url,String... query)
+{
    String sep = "?";
    if (url.contains("?")) sep = "&";
    if (query.length > 0) {
@@ -456,7 +539,7 @@ private HttpRequest.Builder createHttpBuilder(String url,String... query)
    
    HttpRequest.Builder bldr = HttpRequest.newBuilder();
    bldr.uri(uri);
-   bldr.header("Content-Type","application/json; charset=utf-8");
+   bldr.header("Content-Type","application/" + rslt + "; charset=utf-8");
    bldr.header("Accept","application/json,application/xml");    
    bldr.headers("User-Agent","BooksLibrary");
    
