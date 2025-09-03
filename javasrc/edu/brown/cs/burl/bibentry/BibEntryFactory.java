@@ -151,6 +151,11 @@ private BibEntryLOCResult searchForLOCInfo(String isbn)
                waitFor(60);
                continue;
              }
+            else if (vcode == 403 && body.contains("Just a moment...")) {
+               IvyLog.logD("BIBENTRY","Waiting for LOC server " + vcode);
+               waitFor(60);
+               continue;
+             }
             else if (vcode >= 400) {
                IvyLog.logE("BIBENTRY","Problem doing LOC search for " + req.uri() +
                      ": " + vcode + " " + body);
