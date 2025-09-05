@@ -232,17 +232,17 @@ private BibEntryLOCResult searchForLX2info(String isbn)
             return new BibEntryLOCResult(rslt0);  
           }
          catch (InterruptedException e) { 
-            IvyLog.logE("BIBENTRY","HTTP interrupted searching Library of Congress",e);
+            IvyLog.logE("BIBENTRY","HTTP interrupted searching LX2",e);
             waitFor(10);
             continue;
           }
          catch (IOException e) {
             if (i >= 2) {
-               IvyLog.logE("BIBENTRY","HTTP Error searching Library of Congress",e); 
+               IvyLog.logE("BIBENTRY","HTTP Error searching LX2 " + req.uri(),e); 
                break;
              }
-            IvyLog.logD("BIBENTRY","HTTP Error searching Library of Congress"); 
-            waitFor(10);
+            IvyLog.logD("BIBENTRY","HTTP Error searching LX2"); 
+            waitFor(30);
             continue;
           }
        }

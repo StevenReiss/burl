@@ -78,7 +78,7 @@ String getIdURL(String isbn)
       return getXmlIdURL(isbn);
     }
    
-   if (results_data.length() == 0) {
+   if (results_data == null || results_data.length() == 0) {
       return null;
     }
    int which = 0;
