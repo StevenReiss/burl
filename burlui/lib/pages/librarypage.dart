@@ -103,37 +103,43 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
     return Scaffold(
       appBar: AppBar(
         title: widgets.largeBoldText(_libData.getName(), scaler: 1.25),
-        leading:
-            _selectModeField != null
-                ? widgets.tooltipWidget(
-                  "Press to go back to library page.  Long press to "
-                  "clear selection and go back.",
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: _checkEndSelectionMode,
-                    onLongPress: _endClearSelectionMode,
-                  ),
-                )
-                : const SizedBox(),
+        leading: _selectModeField != null
+            ? widgets.tooltipWidget(
+                "Press to go back to library page.  Long press to "
+                "clear selection and go back.",
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: _checkEndSelectionMode,
+                  onLongPress: _endClearSelectionMode,
+                ),
+              )
+            : IconButton(
+                icon: const Icon(Icons.home),
+                onPressed: _backToHome,
+              ),
         actions: [widgets.topMenuAction(_getMenuActions())],
       ),
       body: widgets.topLevelNSPage(
         context,
         FutureBuilder<List<ItemData>>(
-          future:
-              (_numItems < 0 ? _fetchInitialData() : _fetchMoreData()),
-          builder: (
-            BuildContext ctx,
-            AsyncSnapshot<List<ItemData>> snapshot,
-          ) {
-            if (snapshot.hasError) {
-              return Center(child: Text("Error: ${snapshot.error}"));
-            } else if (!snapshot.hasData) {
-              return Center(child: CircularProgressIndicator());
-            } else {
-              return _getPageWidget();
-            }
-          },
+          future: (_numItems < 0
+              ? _fetchInitialData()
+              : _fetchMoreData()),
+          builder:
+              (
+                BuildContext ctx,
+                AsyncSnapshot<List<ItemData>> snapshot,
+              ) {
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Text("Error: ${snapshot.error}"),
+                  );
+                } else if (!snapshot.hasData) {
+                  return Center(child: CircularProgressIndicator());
+                } else {
+                  return _getPageWidget();
+                }
+              },
         ),
       ),
     );
@@ -736,10 +742,9 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
 
     ItemData id = _itemList[index];
 
-    Widget? w =
-        (_shortMode
-            ? _shortDisplay(id, index)
-            : _regularDisplay(id, index));
+    Widget? w = (_shortMode
+        ? _shortDisplay(id, index)
+        : _regularDisplay(id, index));
 
     if (_selectModeField != null) {
       Widget w2 = GestureDetector(
@@ -1009,6 +1014,10 @@ class _BurlLibraryPageState extends State<BurlLibraryPage> {
   void _endClearSelectionMode() {
     _selectNone();
     _endSelectionMode();
+  }
+
+  void _backToHome() {
+    Navigator.pop(context, "OK");
   }
 
   bool _isSelected(int index) {

@@ -120,8 +120,9 @@ Widget textField({
   } else {
     maxLines ??= 1;
   }
-  keyboardType ??=
-      (maxLines == 1 ? TextInputType.text : TextInputType.multiline);
+  keyboardType ??= (maxLines == 1
+      ? TextInputType.text
+      : TextInputType.multiline);
 
   InputDecoration deco = getDecoration(hint: hint, label: label);
   if (collapse) {
@@ -267,7 +268,8 @@ Widget tooltipWidget(String tooltip, Widget w) {
         colors: <Color>[laf.toolTipLeftColor, laf.toolTipRightColor],
       ),
     ),
-    height: laf.toolTipHeight,
+    constraints: BoxConstraints(minHeight: laf.toolTipHeight),
+    //  height: laf.toolTipHeight,
     padding: const EdgeInsets.all(8.0),
     preferBelow: true,
     textStyle: const TextStyle(
@@ -502,13 +504,12 @@ Widget dropDown(
   Widget w = DropdownButton<String>(
     value: value,
     onChanged: onChanged,
-    items:
-        items.map<DropdownMenuItem<String>>((String value) {
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Text(value, textAlign: textAlign),
-          );
-        }).toList(),
+    items: items.map<DropdownMenuItem<String>>((String value) {
+      return DropdownMenuItem<String>(
+        value: value,
+        child: Text(value, textAlign: textAlign),
+      );
+    }).toList(),
   );
   w = tooltipWidget(tooltip, w);
   return w;
@@ -526,10 +527,11 @@ Widget dropDownMenu(
     initialSelection: value,
     requestFocusOnTap: true,
     onSelected: onChanged,
-    dropdownMenuEntries:
-        items.map<DropdownMenuEntry<String>>((String value) {
-          return DropdownMenuEntry<String>(value: value, label: value);
-        }).toList(),
+    dropdownMenuEntries: items.map<DropdownMenuEntry<String>>((
+      String value,
+    ) {
+      return DropdownMenuEntry<String>(value: value, label: value);
+    }).toList(),
   );
   w = tooltipWidget(tooltip, w);
   return w;
@@ -571,7 +573,7 @@ Widget dropDownWidget<T>(
   );
 
   DropdownButtonFormField<T?> fld = DropdownButtonFormField<T?>(
-    value: value,
+    initialValue: value,
     onChanged: onChanged,
     items: itmlst,
     isDense: true,
@@ -1065,7 +1067,7 @@ Widget numberField({
     primaryColorLight: const Color.fromARGB(73, 121, 85, 72),
     valueIndicatorTextStyle: const TextStyle(color: Colors.white),
   );
-  sd = sd.copyWith(showValueIndicator: ShowValueIndicator.always);
+  sd = sd.copyWith(showValueIndicator: ShowValueIndicator.onDrag);
   Widget w3 = SliderTheme(data: sd, child: w2);
   Widget w4 = Row(
     children: <Widget>[
@@ -1095,10 +1097,9 @@ Future<void> displayDialog(
     builder: (BuildContext context) {
       return AlertDialog(
         title: Text(title),
-        content:
-            description.isNotEmpty
-                ? Text(description, maxLines: 10)
-                : null,
+        content: description.isNotEmpty
+            ? Text(description, maxLines: 10)
+            : null,
         actions: <Widget>[
           TextButton(
             child: const Text("OK"),
@@ -1122,10 +1123,9 @@ Future<bool> getValidation(
     builder: (BuildContext context) {
       return AlertDialog(
         title: Text(title),
-        content:
-            description.isNotEmpty
-                ? Text(description, maxLines: 10)
-                : null,
+        content: description.isNotEmpty
+            ? Text(description, maxLines: 10)
+            : null,
         actions: <Widget>[
           TextButton(
             child: const Text("YES"),
