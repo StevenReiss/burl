@@ -37,7 +37,7 @@ popd
 ssh sherpa.cs.brown.edu '(cd /vol/burl; ant)'
 if ($status > 0) exit;
 
-ssh sherpa.cs.brown.edu '(cd /vol/burl; startserver.csh)'
+# ssh sherpa.cs.brown.edu '(cd /vol/burl; startserver.csh)'
 
 pushd burlui
 buildweb.csh >&! buildweb.out
