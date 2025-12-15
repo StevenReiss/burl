@@ -223,7 +223,9 @@ private void setupProperties()
    try (FileInputStream fis = new FileInputStream(f6)) {
       base_properties.loadFromXML(fis);
     }
-   catch (IOException e) { } 
+   catch (IOException e) {
+      IvyLog.logE("BURL","Problem loading secret properties",e);
+    } 
    
    File f1 = new File(System.getProperty("user.home"));
    File f2 = new File(f1,".config");

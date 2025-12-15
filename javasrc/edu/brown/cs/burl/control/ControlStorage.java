@@ -188,9 +188,10 @@ ControlStorage(ControlMain ctrl)
    if (encoded1.equals(pwd)) return user;
    String tencoded = user.getTempPassword();
    if (tencoded != null && !tencoded.isEmpty()) {
-      tencoded = BurlUtil.secureHash(encoded + localsalt);
-      if (tencoded.equals(pwd)) {
+      String tencoded1 = BurlUtil.secureHash(tencoded + localsalt);
+      if (tencoded1.equals(pwd)) {
          sql_database.sqlUpdate(q1,user.getId()); 
+         user.noteTempUsed();
          return user;
        }
     }
