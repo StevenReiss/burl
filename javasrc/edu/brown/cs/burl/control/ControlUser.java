@@ -93,7 +93,9 @@ void noteTempUsed()
 
 boolean isTempUsed()
 {
-   return temp_used;
+   boolean fg = temp_used;
+   temp_used = false;
+   return fg;
 }
 
 boolean isValid()

@@ -290,6 +290,9 @@ String handleAuthentication(HttpExchange he,ControlSession session)
 String handleForgotPassword(HttpExchange he,ControlSession session) 
 {
    String email = BowerRouter.getParameter(he,"email");
+   if (email == null) {
+      return BowerRouter.errorResponse(he,session,400,"No email given");
+    }
    email = email.toLowerCase();
    if (!BowerUtil.validateEmail(email)) {
       return BowerRouter.errorResponse(he,session,400,"Bad email");

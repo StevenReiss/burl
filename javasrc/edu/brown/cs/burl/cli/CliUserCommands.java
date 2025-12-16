@@ -346,6 +346,7 @@ void handleForgotPassword(List<String> args)
     }
    if (email == null) {
       badForgotArgs();
+      return;
     }
    
    JSONObject cargs = BurlUtil.buildJson("email",email);

@@ -37,6 +37,8 @@ class BibEntryLOCResult implements BibEntryConstants
 private JSONArray       results_data;
 private Element         xml_data;
 
+private static String LCCN_LOC_URL = "https://lccn.loc.gov/";
+
 
 
 /********************************************************************************/
@@ -148,7 +150,7 @@ private String getXmlIdURL(String isbn)
       String typ = IvyXml.getAttrString(ident,"type");
       if (typ != null && typ.equals("lccn")) {
          String lccn = IvyXml.getText(ident);
-         String url = "http://lccn.loc.gov/" + lccn;
+         String url = LCCN_LOC_URL + lccn;
          return url;
        }
     }

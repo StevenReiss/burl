@@ -189,8 +189,12 @@ ControlStorage(ControlMain ctrl)
    String tencoded = user.getTempPassword();
    if (tencoded != null && !tencoded.isEmpty()) {
       String tencoded1 = BurlUtil.secureHash(tencoded + localsalt);
+      IvyLog.logD("BURL","Try temp password " + tencoded + " " +
+            tencoded1 + " " + pwd);
       if (tencoded1.equals(pwd)) {
+         // remove temp password in database
          sql_database.sqlUpdate(q1,user.getId()); 
+         // remove temp password in user data
          user.noteTempUsed();
          return user;
        }
