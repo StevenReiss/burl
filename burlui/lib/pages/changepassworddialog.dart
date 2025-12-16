@@ -48,7 +48,7 @@ Future changePasswordDialog(BuildContext context) async {
     }
     Map<String, dynamic> saltd = await util.getJson("changepassword");
     String? salt;
-    if (saltd["status"]) {
+    if (saltd["status"] == 'OK') {
       salt = saltd["salt"];
     }
     String p3 = util.hasher(p1);

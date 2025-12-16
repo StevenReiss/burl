@@ -28,7 +28,8 @@ class BurlForgotPasswordWidget extends StatefulWidget {
       _BurlForgotPasswordWidgetState();
 }
 
-class _BurlForgotPasswordWidgetState extends State<BurlForgotPasswordWidget> {
+class _BurlForgotPasswordWidgetState
+    extends State<BurlForgotPasswordWidget> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String? _emailGiven;
 
@@ -53,7 +54,7 @@ class _BurlForgotPasswordWidgetState extends State<BurlForgotPasswordWidget> {
                       width: MediaQuery.of(context).size.width * 0.4,
                       child: Center(
                         child: Image.asset(
-                          "assets/images/iqsignstlogo.png",
+                          "assets/images/burllogo.png",
                           fit: BoxFit.contain,
                         ),
                       ),
@@ -69,6 +70,8 @@ class _BurlForgotPasswordWidgetState extends State<BurlForgotPasswordWidget> {
                         hint: "Email",
                         label: "Email",
                         validator: _validateEmail,
+                        maxLines: 1,
+                        onSubmitted: _handleForgotPassword,
                       ),
                     ),
                     const Padding(padding: EdgeInsets.all(16.0)),
@@ -93,7 +96,7 @@ class _BurlForgotPasswordWidgetState extends State<BurlForgotPasswordWidget> {
     );
   }
 
-  void _handleForgotPassword() async {
+  void _handleForgotPassword([String? v]) async {
     final form = _formKey.currentState;
     if (form!.validate()) {
       form.save();
@@ -125,4 +128,3 @@ class _BurlForgotPasswordWidgetState extends State<BurlForgotPasswordWidget> {
     await util.postJsonOnly("forgotpassword", body: body);
   }
 }
-

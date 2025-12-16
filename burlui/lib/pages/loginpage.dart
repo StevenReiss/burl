@@ -23,6 +23,7 @@ import 'registerpage.dart';
 import 'homepage.dart' as home;
 import 'forgotpasswordpage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'changepassworddialog.dart';
 
 //
 //    Private Variables
@@ -101,6 +102,11 @@ class _BurlLoginWidgetState extends State<BurlLoginWidget> {
       context,
       MaterialPageRoute(builder: (context) => const BurlRegister()),
     );
+  }
+
+  void _gotoChangePassword() async {
+    await changePasswordDialog(context);
+    _gotoFirstPage();
   }
 
   void _gotoForgotPassword() {
@@ -213,7 +219,7 @@ class _BurlLoginWidgetState extends State<BurlLoginWidget> {
       String? rslt = await login.authUser();
       if (rslt == 'TEMPORARY') {
         _loginValid = true;
-        //   _gotoChangePassword();
+        _gotoChangePassword();
       } else if (rslt != null) {
         setState(() {
           _loginError = rslt;
