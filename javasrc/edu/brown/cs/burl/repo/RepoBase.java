@@ -79,11 +79,11 @@ private static final Pattern LCC_ELEMENT = Pattern.compile(
 private static final Pattern VOL_PATTERN = Pattern.compile(
       "v(ol)?(\\.)?\\s([-a-z0-9A-Z]+)"); 
 
-private static Set<String> VOL_PREFIX = Set.of(
+private static final Set<String> VOL_PREFIX = Set.of(
       "v","v.","vol","vol.","volume"
 );
 
-private static Pattern VOLNUM_PATTERN = Pattern.compile(
+private static final Pattern VOLNUM_PATTERN = Pattern.compile(
       "[0-9ivxl]+");
 
 private static BurlRepoColumn burlid_column;

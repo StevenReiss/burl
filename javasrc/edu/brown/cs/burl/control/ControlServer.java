@@ -521,6 +521,9 @@ String handleAddIsbns(HttpExchange he,ControlSession session)
             String s1 = BurlUtil.getValidISBN(s);
             if (s1 == null) s1 = BurlUtil.getValidLCCN(s);
             if (s1 != null) isbns.add(s1);
+            else {
+               return BowerRouter.errorResponse(he,session,400,"Invalid ISBN/LCCN: " + s);
+             }
           }
        }
     }

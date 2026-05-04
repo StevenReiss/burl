@@ -196,7 +196,8 @@ private int readStatus(Number dflt)
       if (ln == null) return -1;
       ln = ln.trim();
       if (ln.isEmpty()) return 0;
-      if (ln.startsWith("e") || ln.startsWith("x")) return -1;
+      ln = ln.toLowerCase();
+      if (ln.startsWith("e") || ln.startsWith("x") || ln.startsWith("q")) return -1;
       if (ln.matches("[0-9]+")) {
          int vl = Integer.parseInt(ln);
          return vl;

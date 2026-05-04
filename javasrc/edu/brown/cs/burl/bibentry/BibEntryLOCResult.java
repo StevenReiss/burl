@@ -37,7 +37,7 @@ class BibEntryLOCResult implements BibEntryConstants
 private JSONArray       results_data;
 private Element         xml_data;
 
-private static String LCCN_LOC_URL = "https://lccn.loc.gov/";
+private static final String LCCN_LOC_URL = "https://lccn.loc.gov/";
 
 
 

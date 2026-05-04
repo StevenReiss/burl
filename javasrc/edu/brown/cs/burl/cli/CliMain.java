@@ -377,6 +377,7 @@ private void process()
              }
             ln = ln.trim();
             ln = ln.replace("&quot;","\"");
+            ln = ln.replace("&apos;","'");
             if (ln.isEmpty()) continue;
             if (ln.startsWith("#")) continue;
             List<String> cmdlist = BurlUtil.tokenize(ln); 

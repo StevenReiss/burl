@@ -361,7 +361,6 @@ private JSONObject buildFilterObject(BurlRepo repo,String filterstr)
     }
    
    return filters;
-// return BurlUtil.buildJson("all",filterstr);
 }
 
 

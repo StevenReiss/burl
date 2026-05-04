@@ -26,30 +26,7 @@ Future addEntriesDialog(BuildContext context, LibraryData lib) async {
   TextEditingController isbncontroller = TextEditingController();
   BuildContext dcontext = context;
   String mode = "NEW";
-
-  void cancel() {
-    if (dcontext.mounted) {
-      Navigator.of(dcontext).pop("CANCEL");
-    }
-  }
-
-  void submit() async {
-    Map<String, String?> data = {
-      "library": lib.getLibraryId().toString(),
-      "mode": mode,
-      "count": "TRUE",
-      "isbnstr": isbncontroller.text,
-    };
-    Map<String, dynamic> rslt = await util.postJson(
-      "addisbns",
-      body: data,
-    );
-    if (rslt["status"] == "OK") {
-      if (dcontext.mounted) {
-        Navigator.of(dcontext).pop("OK");
-      }
-    }
-  }
+  String submitError = '';
 
   void addFile() async {
     FilePickerResult? rslt = await FilePicker.platform.pickFiles(
@@ -69,70 +46,117 @@ Future addEntriesDialog(BuildContext context, LibraryData lib) async {
     if (md != null) mode = md;
   }
 
-  Widget cancelBtn = widgets.submitButton("Cancel", cancel);
-  Widget submitBtn = widgets.submitButton("Submit", submit);
-  Widget fileBtn = widgets.submitButton("Add From File", addFile);
-  List<String> modes = ["NEW", "SKIP", "AUGMENT", "REPLACE", "FORCE"];
+  //   Widget cancelBtn = widgets.submitButton("Cancel", cancel);
+  //   Widget submitBtn = widgets.submitButton("Submit", submit);
+  //   Widget fileBtn = widgets.submitButton("Add From File", addFile);
+  //   List<String> modes = ["NEW", "SKIP", "AUGMENT", "REPLACE", "FORCE"];
 
-  Dialog dlg = Dialog(
-    child: Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: SizedBox(
-        width: MediaQuery.of(context).size.width * 0.8,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            widgets.largeBoldText(
-              "Add Items to Library by ISBN/LCCN",
-              scaler: 1.25,
-            ),
-            widgets.fieldSeparator(15),
-            widgets.dropDownWidget<String>(
-              modes,
-              value: mode,
-              onChanged: setMode,
-              label: "Update Mode",
-              tooltip:
-                  "Select update mode when item already exists in library",
-            ),
-            widgets.fieldSeparator(),
-            Expanded(
-              child: widgets.tooltipWidget(
-                "Enter ISBN or LCCN numbers.  There can be one or more per line "
-                "and multiple lines.  A line starting with a @ will cause an "
-                "email to be sent to you with the remainder of the line to "
-                "indicate the status of the upload.",
-                widgets.textField(
-                  label: "Entry IDs",
-                  hint: "Enter ISBNs or LCCNs",
-                  controller: isbncontroller,
-                  maxLines: 0,
-                ),
-              ),
-            ),
-            widgets.fieldSeparator(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+  Widget w = StatefulBuilder(
+    builder: (context, setState) {
+      dcontext = context;
+      void cancel() {
+        if (dcontext.mounted) {
+          Navigator.of(dcontext).pop("CANCEL");
+        }
+      }
+
+      void submit() async {
+        Map<String, String?> data = {
+          "library": lib.getLibraryId().toString(),
+          "mode": mode,
+          "count": "TRUE",
+          "isbnstr": isbncontroller.text,
+        };
+        Map<String, dynamic> rslt = await util.postJson(
+          "addisbns",
+          body: data,
+        );
+        if (rslt["status"] == "OK") {
+          if (dcontext.mounted) {
+            submitError = '';
+            Navigator.of(dcontext).pop("OK");
+          }
+        } else {
+          setState(() {
+            submitError = rslt['message'];
+          });
+        }
+      }
+
+      Widget cancelBtn = widgets.submitButton("Cancel", cancel);
+      Widget submitBtn = widgets.submitButton("Submit", submit);
+      Widget fileBtn = widgets.submitButton("Add From File", addFile);
+      List<String> modes = [
+        "NEW",
+        "SKIP",
+        "AUGMENT",
+        "REPLACE",
+        "FORCE",
+      ];
+
+      return Dialog(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width * 0.8,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                cancelBtn,
-                const SizedBox(width: 15),
-                fileBtn,
-                const SizedBox(width: 15),
-                submitBtn,
+                widgets.largeBoldText(
+                  "Add Items to Library by ISBN/LCCN",
+                  scaler: 1.25,
+                ),
+                widgets.fieldSeparator(15),
+                widgets.dropDownWidget<String>(
+                  modes,
+                  value: mode,
+                  onChanged: setMode,
+                  label: "Update Mode",
+                  tooltip:
+                      "Select update mode when item already exists in library",
+                ),
+                widgets.fieldSeparator(),
+                Expanded(
+                  child: widgets.tooltipWidget(
+                    "Enter ISBN or LCCN numbers.  There can be one or more per line "
+                    "and multiple lines.  A line starting with a @ will cause an "
+                    "email to be sent to you with the remainder of the line to "
+                    "indicate the status of the upload.",
+                    widgets.textField(
+                      label: "Entry IDs",
+                      hint: "Enter ISBNs or LCCNs",
+                      controller: isbncontroller,
+                      maxLines: 0,
+                    ),
+                  ),
+                ),
+                widgets.errorField(submitError),
+                widgets.fieldSeparator(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: <Widget>[
+                    cancelBtn,
+                    const SizedBox(width: 15),
+                    fileBtn,
+                    const SizedBox(width: 15),
+                    submitBtn,
+                  ],
+                ),
               ],
             ),
-          ],
+          ),
         ),
-      ),
-    ),
+      );
+    },
   );
 
   return showDialog(
     context: context,
     builder: (context) {
-      dcontext = context;
-      return dlg;
+      return w;
+      // dcontext = context;
+      // return dlg;
     },
   );
 }

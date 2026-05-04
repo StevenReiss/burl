@@ -46,15 +46,15 @@ public class BibEntryFactory implements BibEntryConstants
 
 private HttpClient      http_client;
 
-private static String LOC_API_BASE_URL = "https://www.loc.gov/search/?all=True&st=list&fo=json";
+private static final String LOC_API_BASE_URL = "https://www.loc.gov/search/?all=True&st=list&fo=json";
 // private static String LX2_API_BASE_URL_OLD = "http://lx2.loc.gov:210/lcdb?version=1.1&operation=searchRetrieve" +
 //    "&startRecord=1&maximumRecords=5&recordSchema=mods";
-private static String LX2_API_BASE_URL = "http://lx2.loc.gov:210/lcdb?version=1.1&operation=searchRetrieve" +
+private static final String LX2_API_BASE_URL = "http://lx2.loc.gov:210/lcdb?version=1.1&operation=searchRetrieve" +
             "&startRecord=1&maximumRecords=5&recordSchema=mods";
 
-private static String GOOGLE_API_BASE_URL = "https://www.googleapis.com/books/v1/volumes";
+private static final String GOOGLE_API_BASE_URL = "https://www.googleapis.com/books/v1/volumes";
 // private static String PAPERPILE_URL = "https://api.paperpile.com/api/public/convert";
-private static String OPEN_LIBRARY_URL =
+private static final String OPEN_LIBRARY_URL =
    "https://openlibrary.org/search.json?fields=*,lccn,subject,subtitle";
 
 private static boolean use_lx2 = true;

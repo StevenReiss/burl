@@ -40,7 +40,7 @@ private ControlStorage  burl_store;
 private ControlMain     burl_main;
 private ControlSessionStore session_store;
 
-private static boolean EMAIL_VALIDATION = false;
+private static boolean email_validation = false;
 
 
 
@@ -163,7 +163,7 @@ String handleRegister(HttpExchange he,ControlSession session)
    // validate password?
    
    String checkcode = null;
-   if (EMAIL_VALIDATION) {
+   if (email_validation) {
       checkcode = BurlUtil.randomString(EMAIIL_CODE_LENGTH); 
     }
    

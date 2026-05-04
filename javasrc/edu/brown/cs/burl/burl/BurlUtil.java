@@ -51,7 +51,7 @@ public abstract class BurlUtil implements BurlConstants
 private static File base_directory = null;
 private static Random rand_gen = new Random();
 private static final String RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-private static Pattern LCCN_PATTERN = Pattern.compile("[a-z]{0,2}[0-9]{8,10}");
+private static final Pattern LCCN_PATTERN = Pattern.compile("[a-z]{0,2}[0-9]{8,10}");
 
 
 
@@ -405,24 +405,42 @@ public static List<String> tokenize(String cmd)
    if (cmd == null) return argv;
 
    char quote = 0;
+   char last = ' ';
    StringBuffer buf = new StringBuffer();
    for (int i = 0; i < cmd.length(); ++i) {
       char c = cmd.charAt(i);
-      if (quote != 0 && c == quote) {
+      if (quote != 0 && c == quote && quote != '\\') {
 	 quote = 0;
+         last = ' ';
 	 continue;
        }
-      else if (quote == 0 && (c == '"' || c == '\'')) {
+      else if (quote == 0 && c == '"') {
 	 quote = c;
+         last = ' ';
 	 continue;
+       }
+      else if (quote == 0 && c == '\'' && !Character.isAlphabetic(last)) {
+         quote = c;
+         last = ' ';
+	 continue;
+       }
+      else if (quote == 0 && c == '\\') {
+         quote = c;
+         last = ' ';
+         continue;
        }
       else if (quote == 0 && (c == ' ' || c == '\n')) {
 	 if (buf.length() > 0) {
 	    argv.add(buf.toString());
 	    buf = new StringBuffer();
 	  }
+         last = c;
        }
-      else buf.append(c);
+      else {
+         buf.append(c);
+         if (quote == '\\') quote = 0;
+         last = c;
+       }     
     }
    if (buf.length() > 0) {
       argv.add(buf.toString());
