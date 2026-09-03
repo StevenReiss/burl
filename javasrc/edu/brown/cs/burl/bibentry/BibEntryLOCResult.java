@@ -24,6 +24,7 @@ import org.w3c.dom.Element;
 import edu.brown.cs.ivy.file.IvyLog;
 import edu.brown.cs.ivy.xml.IvyXml;
 
+
 class BibEntryLOCResult implements BibEntryConstants
 {
 
@@ -164,12 +165,16 @@ private Element findXmlBestResult(String isbn)
 {
    Element best = null;
    Element bestx = null;
+   Element first = null;
+   int ct = 0;
    
    // first check for exact match with given LCCN (if isbn given, this won't help)
    for (Element rec : IvyXml.children(xml_data,"zs:record")) {
       Element recd1 = IvyXml.getChild(rec,"zs:recordData");
       Element recd = IvyXml.getChild(recd1,"mods");
       if (recd == null) continue;
+      if (first == null) first = recd;
+      ++ct;
       
       boolean fnd = false;
       for (Element ident : IvyXml.children(recd,"identifier")) {
@@ -194,6 +199,7 @@ private Element findXmlBestResult(String isbn)
     }
    
    if (best == null) best = bestx;
+   if (best == null && ct == 1) best = first;
             
    return best;
 }

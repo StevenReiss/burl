@@ -69,6 +69,26 @@ String getIdURL(String isbn,int ct)
 }
 
 
+String getTitleSearch() 
+{
+   if (results_data == null || results_data.length() == 0) return null;
+   else if (results_data.length() >= 1) {
+      JSONObject r1 = results_data.getJSONObject(0);
+      String s1 = r1.optString("title");
+      JSONArray aa = r1.optJSONArray("author_name");
+      String s2 = null;
+      if (aa != null && aa.length() >= 1) s2 = aa.getString(0);
+      if (s1 != null && s1.isBlank()) s1 = null;
+      if (s2 != null && s2.isBlank()) s2 = null;
+      if (s1 == null) return s2;
+      if (s2 == null) return s1;
+      return s1 + " " + s2;
+    }
+   
+   return null;
+}
+
+
 
 BibEntryBase getBibEntry()
 {

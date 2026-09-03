@@ -38,6 +38,19 @@ abstract class BibEntryBase implements BurlBibEntry, BibEntryConstants
 /*                                                                              */
 /********************************************************************************/
 
+protected BibEntryBase()
+{
+}
+
+
+
+/********************************************************************************/
+/*                                                                              */
+/*      Abstract methods                                                        */
+/*                                                                              */
+/********************************************************************************/
+
+
 public abstract String computeEntry(BurlRepoColumn brc);
 
 

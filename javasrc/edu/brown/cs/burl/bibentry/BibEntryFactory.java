@@ -203,10 +203,10 @@ private BibEntryLOCResult searchForLOCInfo(String isbn)
 
 
 
-private BibEntryLOCResult searchForLX2info(String isbn)
+private BibEntryLOCResult searchForLX2info(String query)
 {
    HttpClient client = http_client;
-   HttpRequest.Builder builder = createXmlBuilder(LX2_API_BASE_URL,"query",isbn);
+   HttpRequest.Builder builder = createXmlBuilder(LX2_API_BASE_URL,"query",query);
    builder.GET();
    HttpRequest req = builder.build();
    
@@ -260,10 +260,6 @@ private BibEntryLOCResult searchForLX2info(String isbn)
 
 
 
-
-
-
-
 /********************************************************************************/
 /*                                                                              */
 /*      Open Library search methods                                             */
@@ -283,6 +279,10 @@ private BibEntryBase openLibrarySearch(String isbn)
       String marcurl = idurl + "/marcxml";
       bibentry = searchForMarcItemXml(isbn,marcurl);
       if (bibentry != null) break;
+    }
+   if (bibentry == null) {
+      String srch = olitm.getTitleSearch();
+      bibentry = congressSearch(srch);
     }
    if (bibentry == null) {
       bibentry = olitm.getBibEntry();  
@@ -475,7 +475,8 @@ private BibEntryBase searchForMarcItemXml(String isbn,String url)
             IvyLog.logE("BIBENTRY","Error in MARCxml entry: " + body);
             return null;
           }
-         IvyLog.logD("BIBENTRY","Found marc entry for " + isbn + " " + url);
+         IvyLog.logD("BIBENTRY","Found marc entry for " + isbn + " " + url + "\n" +
+               IvyXml.convertXmlToString(xml));
          return new BibEntryMarc(xml);
        } 
       catch (InterruptedException e) { 
